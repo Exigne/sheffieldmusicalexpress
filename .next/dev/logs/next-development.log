@@ -1,0 +1,9 @@
+[00:00:01.088] Server  LOG     ✓ Ready in 810ms
+[00:00:05.168] Server  ERROR   ⨯ Error: DATABASE_URL environment variable is not set
+[00:00:05.421] Server  ERROR   ⨯ Error: DATABASE_URL environment variable is not set
+[00:00:06.126] Server  ERROR   ⨯ Error: DATABASE_URL environment variable is not set
+[00:00:06.348] Server  ERROR   ⨯ Error: DATABASE_URL environment variable is not set
+[00:00:07.809] Browser ERROR   uncaughtError: Error: DATABASE_URL environment variable is not set
+[00:02:37.412] Server  ERROR   ⨯ Error: DATABASE_URL environment variable is not set
+[00:02:37.681] Server  ERROR   ⨯ Error: DATABASE_URL environment variable is not set
+[00:02:38.345] Browser ERROR   uncaughtError: Error: DATABASE_URL environment variable is not set
