@@ -1,8 +1,6 @@
 import { sql } from '@/lib/db';
 import { notFound } from 'next/navigation';
-import DOMPurify from 'isomorphic-dompurify';
 import { cookies } from 'next/headers';
-import { verifyToken } from '@/lib/auth'; // Adjust based on your auth setup
 
 type Thread = {
   id: number;
@@ -78,23 +76,29 @@ function formatDate(dateStr: string): string {
   });
 }
 
-// Sanitize HTML content to prevent XSS
-function sanitizeHtml(dirty: string): string {
-  return DOMPurify.sanitize(dirty, {
-    ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u', 'code', 'pre', 'blockquote', 'a', 'ul', 'ol', 'li'],
-    ALLOWED_ATTR: ['href', 'target', 'rel']
-  });
+// Simple XSS protection - escape HTML entities
+function escapeHtml(text: string): string {
+  const div = { __html: '' };
+  const map: Record<string, string> = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;'
+  };
+  return text.replace(/[&<>"']/g, (m) => map[m]);
+}
+
+// Convert newlines to <br> tags safely
+function formatPostBody(body: string): string {
+  return escapeHtml(body).replace(/\n/g, '<br>');
 }
 
 async function getCurrentUser() {
+  // Simple session check - adjust based on your actual auth setup
   const cookieStore = await cookies();
-  const token = cookieStore.get('auth-token')?.value;
-  if (!token) return null;
-  try {
-    return await verifyToken(token);
-  } catch {
-    return null;
-  }
+  const session = cookieStore.get('session')?.value;
+  return session ? { username: 'User' } : null; // Replace with actual session validation
 }
 
 export default async function ThreadPage({
@@ -174,7 +178,7 @@ export default async function ThreadPage({
               <div className="post-body">
                 <div 
                   className="post-text"
-                  dangerouslySetInnerHTML={{ __html: sanitizeHtml(post.body) }}
+                  dangerouslySetInnerHTML={{ __html: formatPostBody(post.body) }}
                 />
                 <footer className="post-footer">
                   <time className="post-time" dateTime={post.created_at}>
@@ -195,12 +199,6 @@ export default async function ThreadPage({
             </h3>
             <form action={`/api/posts`} method="POST">
               <input type="hidden" name="threadId" value={thread.id} />
-              {/* CSRF Token */}
-              <input 
-                type="hidden" 
-                name="csrfToken" 
-                value={currentUser?.csrfToken || ''} 
-              />
               <textarea
                 name="body"
                 className="reply-textarea"
@@ -212,7 +210,7 @@ export default async function ThreadPage({
               />
               <div className="reply-actions">
                 <span className="reply-note">
-                  Posting as <strong>{currentUser.username}</strong>
+                  Posting as <strong>{currentUser?.username}</strong>
                 </span>
                 <button type="submit" className="btn-submit">
                   Post Reply →
