@@ -445,3 +445,210 @@ body {
   color: var(--paper);
   font-weight: 600;
 }
+/* ── Add these to the bottom of globals.css ── */
+
+/* BREADCRUMB */
+.breadcrumb {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.7rem;
+  color: var(--muted);
+  letter-spacing: 0.06em;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.breadcrumb a {
+  color: var(--rust);
+  text-decoration: none;
+}
+
+.breadcrumb a:hover { text-decoration: underline; }
+.breadcrumb-sep { color: var(--aged); }
+
+/* THREAD HEADER */
+.thread-header {
+  background: #fff;
+  border: 1px solid var(--aged);
+  border-top: 4px solid var(--rust);
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.thread-header-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.7rem;
+  font-weight: 700;
+  line-height: 1.3;
+  margin-bottom: 10px;
+  color: var(--ink);
+}
+
+.thread-header-meta {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+/* POSTS */
+.post-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.post-card {
+  display: grid;
+  grid-template-columns: 100px 1fr;
+  background: #fff;
+  border: 1px solid var(--aged);
+  overflow: hidden;
+}
+
+.post-card.first-post {
+  border-top: 4px solid var(--rust);
+}
+
+.post-author {
+  background: var(--paper);
+  border-right: 1px solid var(--aged);
+  padding: 20px 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.post-avatar {
+  width: 52px;
+  height: 52px;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--aged);
+}
+
+.post-card.first-post .post-avatar {
+  background: var(--rust);
+}
+
+.post-author-name {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--ink);
+  word-break: break-all;
+}
+
+.post-number {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--muted);
+}
+
+.post-body {
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 100px;
+}
+
+.post-text {
+  font-size: 0.92rem;
+  line-height: 1.7;
+  color: #333;
+  white-space: pre-wrap;
+  flex: 1;
+}
+
+.post-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--aged);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.62rem;
+  color: var(--muted);
+}
+
+.post-ago { color: var(--steel); }
+
+/* REPLY BOX */
+.reply-box {
+  background: #fff;
+  border: 1px solid var(--aged);
+  border-top: 4px solid var(--ink);
+  padding: 24px;
+  margin-bottom: 20px;
+}
+
+.reply-textarea {
+  width: 100%;
+  background: var(--paper);
+  border: 1px solid var(--aged);
+  padding: 14px;
+  font-family: 'Barlow', sans-serif;
+  font-size: 0.9rem;
+  color: var(--ink);
+  resize: vertical;
+  line-height: 1.6;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.reply-textarea:focus {
+  border-color: var(--rust);
+}
+
+.reply-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+}
+
+.reply-note {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.68rem;
+  color: var(--muted);
+}
+
+.btn-submit {
+  background: var(--rust);
+  color: #fff;
+  border: 2px solid var(--ink);
+  box-shadow: 3px 3px 0 var(--ink);
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.1rem;
+  letter-spacing: 0.12em;
+  padding: 10px 24px;
+  cursor: pointer;
+  transition: box-shadow 0.12s, transform 0.12s;
+}
+
+.btn-submit:hover {
+  box-shadow: none;
+  transform: translate(3px, 3px);
+}
+
+/* BACK TO BOARD */
+.back-to-board {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--rust);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.back-to-board:hover { text-decoration: underline; }
