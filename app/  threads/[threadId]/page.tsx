@@ -37,7 +37,7 @@ async function getThread(id: number): Promise<Thread | null> {
 }
 
 async function getPosts(threadId: number): Promise<Post[]> {
-  return await sql`
+  const rows = await sql`
     SELECT
       p.id, p.body, p.created_at, p.user_id,
       u.username
@@ -46,6 +46,13 @@ async function getPosts(threadId: number): Promise<Post[]> {
     WHERE p.thread_id = ${threadId}
     ORDER BY p.created_at ASC
   `;
+  return rows.map((r: any) => ({
+    id: r.id,
+    body: r.body,
+    created_at: r.created_at,
+    username: r.username,
+    user_id: r.user_id,
+  }));
 }
 
 function timeAgo(dateStr: string): string {
