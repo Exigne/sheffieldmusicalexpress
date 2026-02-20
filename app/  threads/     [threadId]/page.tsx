@@ -33,7 +33,7 @@ async function getThread(id: number): Promise<Thread | null> {
     WHERE t.id = ${id}
     LIMIT 1
   `;
-  return (rows[0] as Thread) ?? null;
+  return rows[0] ?? null;
 }
 
 async function getPosts(threadId: number): Promise<Post[]> {
