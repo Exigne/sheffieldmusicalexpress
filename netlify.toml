@@ -1,6 +1,17 @@
 [build]
   command = "npm run build"
-  publish = ".next"
+  publish = "dist"
 
-[[plugins]]
-  package = "@netlify/plugin-nextjs"
+[build.environment]
+  NODE_VERSION = "20"
+  NEON_DATABASE_URL = "postgresql://neondb_owner:npg_gjKT3ipUMle9@ep-small-dew-a91hxoui-pooler.gwc.azure.neon.tech/neondb?sslmode=require&channel_binding=require"
+
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
