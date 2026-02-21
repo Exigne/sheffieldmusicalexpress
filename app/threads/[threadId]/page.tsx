@@ -34,7 +34,7 @@ async function getThread(id: number): Promise<Thread | null> {
       WHERE t.id = ${id}
       LIMIT 1
     `;
-    return rows[0] ?? null;
+    return (rows[0] as Thread | undefined) ?? null;
   } catch (error) {
     console.error('Error fetching thread:', error);
     return null;
@@ -43,7 +43,7 @@ async function getThread(id: number): Promise<Thread | null> {
 
 async function getPosts(threadId: number): Promise<Post[]> {
   try {
-    return await sql`
+    const rows = await sql`
       SELECT
         p.id, p.body, p.created_at, p.user_id,
         u.username
@@ -52,6 +52,7 @@ async function getPosts(threadId: number): Promise<Post[]> {
       WHERE p.thread_id = ${threadId}
       ORDER BY p.created_at ASC
     `;
+    return (rows as Post[]) ?? [];
   } catch (error) {
     console.error('Error fetching posts:', error);
     return [];
