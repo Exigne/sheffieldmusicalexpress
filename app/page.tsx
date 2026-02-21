@@ -1,5 +1,7 @@
 import { sql } from '@/lib/db';
+import Link from 'next/link';
 
+// 1. Types for our Hub
 type Board = {
   id: number;
   slug: string;
@@ -16,16 +18,16 @@ type Thread = {
   reply_count: number;
   created_at: string;
   board_name: string;
-  board_slug: string;
   username: string;
 };
 
+// 2. Data Fetching
 async function getBoards(): Promise<Board[]> {
   try {
     const rows = await sql`SELECT * FROM boards ORDER BY id`;
     return (rows as Board[]) ?? [];
   } catch (error) {
-    console.error('Error fetching boards:', error);
+    console.error('Board Fetch Error:', error);
     return [];
   }
 }
@@ -33,27 +35,21 @@ async function getBoards(): Promise<Board[]> {
 async function getRecentThreads(): Promise<Thread[]> {
   try {
     const rows = await sql`
-      SELECT
-        t.id,
-        t.title,
-        t.reply_count,
-        t.created_at,
-        b.name AS board_name,
-        b.slug AS board_slug,
-        u.username
+      SELECT t.id, t.title, t.reply_count, t.created_at, b.name AS board_name, u.username
       FROM threads t
       LEFT JOIN boards b ON t.board_id = b.id
       LEFT JOIN users u ON t.user_id = u.id
-      ORDER BY t.last_reply_at DESC
+      ORDER BY t.created_at DESC
       LIMIT 10
     `;
     return (rows as Thread[]) ?? [];
   } catch (error) {
-    console.error('Error fetching threads:', error);
+    console.error('Thread Fetch Error:', error);
     return [];
   }
 }
 
+// 3. Helper for Newspaper-style dates
 function timeAgo(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diff / 60000);
@@ -63,62 +59,47 @@ function timeAgo(dateStr: string): string {
   return `${Math.floor(hrs / 24)}d ago`;
 }
 
-const boardColors: Record<string, string> = {
-  gear: 'rust',
-  'band-wanted': 'gold',
-  gigs: 'ink',
-  production: 'steel',
-  technique: 'ink',
-  records: 'gold',
-};
-
 export default async function HomePage() {
   const [boards, threads] = await Promise.all([getBoards(), getRecentThreads()]);
 
   return (
     <div className="page-wrapper">
       <div className="content-area">
-
-        {/* BOARDS */}
+        
+        {/* BOARDS GRID */}
         <div className="section-label">Forum Boards</div>
         <div className="boards-grid">
           {boards.map((board) => (
-            <a
-              key={board.id}
-              href={`/boards/${board.slug}`}
-              className={`board-card ${boardColors[board.slug] || 'ink'}`}
+            <Link 
+              key={board.id} 
+              href={`/boards/${board.slug}`} 
+              className="board-card rust"
             >
               <span className="board-icon">{board.icon}</span>
               <div className="board-name">{board.name}</div>
               <div className="board-desc">{board.description}</div>
               <div className="board-meta">
-                <span><strong>{board.post_count.toLocaleString()}</strong> posts</span>
-                <span><strong>{board.thread_count.toLocaleString()}</strong> threads</span>
+                <span><strong>{board.post_count}</strong> posts</span>
+                <span><strong>{board.thread_count}</strong> threads</span>
               </div>
-            </a>
+            </Link>
           ))}
         </div>
 
-        {/* RECENT THREADS */}
-        <div className="section-label">Latest Threads</div>
+        {/* LATEST THREADS */}
+        <div className="section-label">Latest Activity</div>
         {threads.length === 0 ? (
-          <div className="no-threads">
-            No threads yet — <a href="/new-thread">be the first to post!</a>
-          </div>
+          <div className="no-threads">The archive is empty. Be the first to start a thread.</div>
         ) : (
           <ul className="thread-list">
             {threads.map((thread) => (
               <li key={thread.id} className="thread-item">
-                <div className="thread-avatar">
-                  {thread.username ? thread.username.slice(0, 2).toUpperCase() : '??'}
-                </div>
-                <div className="thread-info">
-                  <a href={`/threads/${thread.id}`} className="thread-title">
-                    {thread.title}
-                  </a>
+                <div className="thread-avatar">{thread.username?.slice(0, 2).toUpperCase() || '??'}</div>
+                <div className="thread-main">
+                  <Link href={`/threads/${thread.id}`} className="thread-title">{thread.title}</Link>
                   <div className="thread-sub">
                     <span className="board-tag">{thread.board_name}</span>
-                    by <strong>{thread.username || 'Unknown'}</strong> · {timeAgo(thread.created_at)}
+                    by <strong>{thread.username}</strong> · {timeAgo(thread.created_at)}
                   </div>
                 </div>
                 <div className="thread-replies">
@@ -128,40 +109,19 @@ export default async function HomePage() {
             ))}
           </ul>
         )}
-
       </div>
 
       {/* SIDEBAR */}
       <aside className="sidebar">
-        <a href="/new-thread" className="btn-post">+ Start a New Thread</a>
-
+        <Link href="/boards/gear/new-thread" className="btn-post">+ Start a New Thread</Link>
+        
         <div className="sidebar-widget">
-          <div className="widget-header">Forum Stats</div>
+          <div className="widget-header">Join the community</div>
           <div className="widget-body">
-            <div className="stats-grid">
-              <div className="stat-box">
-                <span className="stat-number">
-                  {boards.reduce((sum, b) => sum + b.post_count, 0).toLocaleString()}
-                </span>
-                <span className="stat-label">Posts</span>
-              </div>
-              <div className="stat-box">
-                <span className="stat-number">
-                  {boards.reduce((sum, b) => sum + b.thread_count, 0).toLocaleString()}
-                </span>
-                <span className="stat-label">Threads</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="sidebar-widget">
-          <div className="widget-header">Join the Community</div>
-          <div className="widget-body" style={{ textAlign: 'center' }}>
-            <p style={{ fontSize: '0.82rem', color: '#666', marginBottom: '14px', lineHeight: '1.5' }}>
-              Free membership. Connect with Sheffield musicians, post gigs, swap gear, and find your band.
+            <p style={{fontSize: '0.8rem', lineHeight: '1.4', marginBottom: '15px'}}>
+              Free membership for Sheffield musicians. Connect, collab, and swap gear.
             </p>
-            <a href="/register" className="btn-register">Register Free →</a>
+            <Link href="/register" className="btn-register">Register Free →</Link>
           </div>
         </div>
       </aside>
