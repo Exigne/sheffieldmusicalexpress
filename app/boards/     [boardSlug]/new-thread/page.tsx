@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, use } from "react";  // ← Add 'use' from React
 import { useRouter } from "next/navigation";
 
 const BOARDS = [
@@ -15,10 +15,12 @@ const BOARDS = [
 export default function NewThreadPage({
   params,
 }: {
-  params: { boardSlug: string };
+  params: Promise<{ boardSlug: string }>;  // ← Still Promise in type
 }) {
+  const { boardSlug } = use(params);  // ← Use React.use() to unwrap in Client Component
   const router = useRouter();
-  const board = BOARDS.find((b) => b.slug === params.boardSlug) ?? BOARDS[0];
+  
+  const board = BOARDS.find((b) => b.slug === boardSlug) ?? BOARDS[0];
 
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
