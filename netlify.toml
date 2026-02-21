@@ -1,20 +1,13 @@
 [build]
   command = "npm run build"
-  publish = ".next"
-
-[[plugins]]
-  package = "@netlify/plugin-nextjs"
+  publish = "dist"
 
 [build.environment]
   NODE_VERSION = "20"
-  NEON_DATABASE_URL = "postgresql://neondb_owner:npg_OmCHvVNRb52o@ep-proud-flower-abnzqsa2-pooler.eu-west-2.aws.neon.tech/sheffieldmusicalexpress?sslmode=require&channel_binding=require"
 
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/:splat"
   status = 200
 
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
+# NO catch-all redirect - let Next.js static files serve directly
