@@ -22,25 +22,35 @@ type Thread = {
 };
 
 async function getBoard(slug: string): Promise<Board | null> {
-  const rows = await sql`SELECT * FROM boards WHERE slug = ${slug} LIMIT 1`;
-  return rows[0] ?? null;
+  try {
+    const rows = await sql`SELECT * FROM boards WHERE slug = ${slug} LIMIT 1`;
+    return rows[0] ?? null;
+  } catch (error) {
+    console.error('Error fetching board:', error);
+    return null;
+  }
 }
 
 async function getThreads(boardId: number): Promise<Thread[]> {
-  return await sql`
-    SELECT
-      t.id,
-      t.title,
-      t.reply_count,
-      t.created_at,
-      t.last_reply_at,
-      t.is_pinned,
-      u.username
-    FROM threads t
-    LEFT JOIN users u ON t.user_id = u.id
-    WHERE t.board_id = ${boardId}
-    ORDER BY t.is_pinned DESC, t.last_reply_at DESC
-  `;
+  try {
+    return await sql`
+      SELECT
+        t.id,
+        t.title,
+        t.reply_count,
+        t.created_at,
+        t.last_reply_at,
+        t.is_pinned,
+        u.username
+      FROM threads t
+      LEFT JOIN users u ON t.user_id = u.id
+      WHERE t.board_id = ${boardId}
+      ORDER BY t.is_pinned DESC, t.last_reply_at DESC
+    `;
+  } catch (error) {
+    console.error('Error fetching threads:', error);
+    return [];
+  }
 }
 
 function timeAgo(dateStr: string): string {
@@ -55,10 +65,14 @@ function timeAgo(dateStr: string): string {
 export default async function BoardPage({
   params,
 }: {
-  params: { boardSlug: string };
+  params: Promise<{ boardSlug: string }>;
 }) {
-  const board = await getBoard(params.boardSlug);
-  if (!board) notFound();
+  const { boardSlug } = await params;
+  const board = await getBoard(boardSlug);
+  
+  if (!board) {
+    notFound();
+  }
 
   const threads = await getThreads(board.id);
 
