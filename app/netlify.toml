@@ -1,6 +1,21 @@
 [build]
   command = "npm run build"
+  # For Next.js on Netlify, leave the publish directory to the default 
+  # OR use '.next' but ONLY if the plugin is installed.
   publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "20"
+  # This helps the builder know to use the modern App Router integration
+  NETLIFY_NEXT_PLUGIN_SKIP_INSTALL = "false" 
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
+
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+
+# IMPORTANT: Ensure there are NO redirects pointing to index.html here.
+# Next.js 15+ App Router will fail if you force a redirect to index.html.
