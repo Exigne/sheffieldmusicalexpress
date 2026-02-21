@@ -1,11 +1,6 @@
 [build]
   command = "npm run build"
-  publish = ".next"  # Change from 'dist' to '.next'
+  publish = ".next"
 
 [build.environment]
   NODE_VERSION = "20"
-
-[[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/:splat"
-  status = 200
