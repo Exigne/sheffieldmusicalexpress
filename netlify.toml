@@ -1,6 +1,6 @@
 [build]
   command = "npm run build"
-  publish = "dist"
+  publish = ".next"  # Change from 'dist' to '.next'
 
 [build.environment]
   NODE_VERSION = "20"
@@ -9,6 +9,3 @@
   from = "/api/*"
   to = "/.netlify/functions/:splat"
   status = 200
-
-# REMOVE the extensions block completely
-# REMOVE the catch-all redirect to index.html (Next.js handles routing)
