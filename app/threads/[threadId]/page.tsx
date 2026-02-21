@@ -22,30 +22,40 @@ type Post = {
 };
 
 async function getThread(id: number): Promise<Thread | null> {
-  const rows = await sql`
-    SELECT
-      t.id, t.title, t.reply_count, t.created_at, t.is_pinned,
-      b.name AS board_name, b.slug AS board_slug, b.icon AS board_icon,
-      u.username
-    FROM threads t
-    LEFT JOIN boards b ON t.board_id = b.id
-    LEFT JOIN users u ON t.user_id = u.id
-    WHERE t.id = ${id}
-    LIMIT 1
-  `;
-  return rows[0] ?? null;
+  try {
+    const rows = await sql`
+      SELECT
+        t.id, t.title, t.reply_count, t.created_at, t.is_pinned,
+        b.name AS board_name, b.slug AS board_slug, b.icon AS board_icon,
+        u.username
+      FROM threads t
+      LEFT JOIN boards b ON t.board_id = b.id
+      LEFT JOIN users u ON t.user_id = u.id
+      WHERE t.id = ${id}
+      LIMIT 1
+    `;
+    return rows[0] ?? null;
+  } catch (error) {
+    console.error('Error fetching thread:', error);
+    return null;
+  }
 }
 
 async function getPosts(threadId: number): Promise<Post[]> {
-  return await sql`
-    SELECT
-      p.id, p.body, p.created_at, p.user_id,
-      u.username
-    FROM posts p
-    LEFT JOIN users u ON p.user_id = u.id
-    WHERE p.thread_id = ${threadId}
-    ORDER BY p.created_at ASC
-  `;
+  try {
+    return await sql`
+      SELECT
+        p.id, p.body, p.created_at, p.user_id,
+        u.username
+      FROM posts p
+      LEFT JOIN users u ON p.user_id = u.id
+      WHERE p.thread_id = ${threadId}
+      ORDER BY p.created_at ASC
+    `;
+  } catch (error) {
+    console.error('Error fetching posts:', error);
+    return [];
+  }
 }
 
 function timeAgo(dateStr: string): string {
@@ -68,13 +78,20 @@ function formatDate(dateStr: string): string {
 export default async function ThreadPage({
   params,
 }: {
-  params: { threadId: string };
+  params: Promise<{ threadId: string }>;
 }) {
-  const id = parseInt(params.threadId);
-  if (isNaN(id)) notFound();
+  const { threadId } = await params;
+  const id = parseInt(threadId);
+  
+  if (isNaN(id)) {
+    notFound();
+  }
 
   const [thread, posts] = await Promise.all([getThread(id), getPosts(id)]);
-  if (!thread) notFound();
+  
+  if (!thread) {
+    notFound();
+  }
 
   return (
     <div className="page-wrapper">
