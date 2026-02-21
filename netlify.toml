@@ -4,9 +4,13 @@
 
 [build.environment]
   NODE_VERSION = "20"
-  NEON_DATABASE_URL = "postgresql://neondb_owner:npg_7bDdokNHCS8p@ep-proud-flower-abnzqsa2-pooler.eu-west-2.aws.neon.tech/sheffieldmusicalexpress?sslmode=require&channel_binding=require"
+  # This tells the Netlify Next.js plugin to handle the App Router properly
+  NEXT_USE_NETLIFY_EDGE = "true" 
 
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/:splat"
   status = 200
+
+# DO NOT add the /* to /index.html redirect here. 
+# Next.js handles its own routing.
