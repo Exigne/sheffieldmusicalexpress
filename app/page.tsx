@@ -21,25 +21,37 @@ type Thread = {
 };
 
 async function getBoards(): Promise<Board[]> {
-  return await sql`SELECT * FROM boards ORDER BY id`;
+  try {
+    const rows = await sql`SELECT * FROM boards ORDER BY id`;
+    return (rows as Board[]) ?? [];
+  } catch (error) {
+    console.error('Error fetching boards:', error);
+    return [];
+  }
 }
 
 async function getRecentThreads(): Promise<Thread[]> {
-  return await sql`
-    SELECT
-      t.id,
-      t.title,
-      t.reply_count,
-      t.created_at,
-      b.name AS board_name,
-      b.slug AS board_slug,
-      u.username
-    FROM threads t
-    LEFT JOIN boards b ON t.board_id = b.id
-    LEFT JOIN users u ON t.user_id = u.id
-    ORDER BY t.last_reply_at DESC
-    LIMIT 10
-  `;
+  try {
+    const rows = await sql`
+      SELECT
+        t.id,
+        t.title,
+        t.reply_count,
+        t.created_at,
+        b.name AS board_name,
+        b.slug AS board_slug,
+        u.username
+      FROM threads t
+      LEFT JOIN boards b ON t.board_id = b.id
+      LEFT JOIN users u ON t.user_id = u.id
+      ORDER BY t.last_reply_at DESC
+      LIMIT 10
+    `;
+    return (rows as Thread[]) ?? [];
+  } catch (error) {
+    console.error('Error fetching threads:', error);
+    return [];
+  }
 }
 
 function timeAgo(dateStr: string): string {
