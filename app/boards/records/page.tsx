@@ -4,7 +4,7 @@ import { sql } from '@/lib/db';
 import Link from 'next/link';
 
 export default async function RecordsBoardPage() {
-  // Fetch threads specifically for the 'records' board using its slug
+  // Fetch threads specifically for the 'records' board
   const threads = await sql`
     SELECT t.*, u.username, u.avatar_initials 
     FROM threads t 
