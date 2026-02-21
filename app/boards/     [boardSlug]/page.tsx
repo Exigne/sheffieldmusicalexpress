@@ -24,7 +24,7 @@ type Thread = {
 async function getBoard(slug: string): Promise<Board | null> {
   try {
     const rows = await sql`SELECT * FROM boards WHERE slug = ${slug} LIMIT 1`;
-    return rows[0] ?? null;
+    return (rows[0] as Board | undefined) ?? null;
   } catch (error) {
     console.error('Error fetching board:', error);
     return null;
@@ -33,7 +33,7 @@ async function getBoard(slug: string): Promise<Board | null> {
 
 async function getThreads(boardId: number): Promise<Thread[]> {
   try {
-    return await sql`
+    const rows = await sql`
       SELECT
         t.id,
         t.title,
@@ -47,6 +47,7 @@ async function getThreads(boardId: number): Promise<Thread[]> {
       WHERE t.board_id = ${boardId}
       ORDER BY t.is_pinned DESC, t.last_reply_at DESC
     `;
+    return (rows as Thread[]) ?? [];
   } catch (error) {
     console.error('Error fetching threads:', error);
     return [];
