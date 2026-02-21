@@ -1,4 +1,4 @@
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic'; // Keeps it live
 
 import { sql } from '@/lib/db';
 import Link from 'next/link';
@@ -27,14 +27,14 @@ export default async function HomePage() {
 
       <aside className="sidebar">
         <div className="sidebar-widget">
-          <div className="widget-header">Welcome to SME</div>
+          <div className="widget-header">Join the Community</div>
           <div className="widget-body">
-            <p style={{ fontSize: '0.8rem', lineHeight: '1.5' }}>
-              The Sheffield Musical Express is live. Select a board to join the conversation.
+            <p style={{ fontSize: '0.85rem', marginBottom: '15px' }}>
+              Connect with musicians, post gigs, and find your band.
             </p>
+            <Link href="/register" className="btn-register">Register Free →</Link>
           </div>
         </div>
-        <Link href="/register" className="btn-register">Register Free →</Link>
       </aside>
     </div>
   );
