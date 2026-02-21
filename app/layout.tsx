@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import './globals.css'; // This MUST be here to provide the styling
+import './globals.css';
 
 export const metadata: Metadata = {
   title: 'Sheffield Musical Express',
@@ -15,29 +15,70 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <head>
-        {/* We need the fonts to make it look authentic */}
         <link
           href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;600&family=Playfair+Display:ital,wght@0,700;1,400&family=Barlow:wght@300;400;600&display=swap"
           rel="stylesheet"
         />
       </head>
       <body>
+        {/* MASTHEAD */}
         <header className="masthead">
           <div className="masthead-top">
-            <span>Est. 2024 — Steel City</span>
+            <span>Est. 2024 — Steel City, South Yorkshire</span>
             <span className="masthead-date">{today}</span>
-            <Link href="/admin" className="mod-link">🛡️ MOD PANEL</Link>
+            <div style={{ display: 'flex', gap: '15px' }}>
+              <Link href="/admin" style={{ color: 'var(--rust)', fontSize: '0.65rem', textDecoration: 'none' }}>🛡️ MOD PANEL</Link>
+              <span>Free to join · Open to all</span>
+            </div>
           </div>
           <div className="masthead-main">
-            <h1 className="site-title">Sheffield Musical <span className="express">Express</span></h1>
+            <div className="masthead-eyebrow">The Voice of Sheffield&apos;s Music Community</div>
+            <Link href="/" style={{ textDecoration: 'none' }}>
+              <h1 className="site-title">
+                Sheffield Musical <span className="express">Express</span>
+              </h1>
+            </Link>
+            <p className="tagline">Where Steel City Musicians Connect, Create &amp; Collaborate</p>
           </div>
         </header>
 
-        {/* This "children" part is where your dashboard/home page actually sits */}
+        {/* RED NAVIGATION BAR (Restored!) */}
+        <nav className="main-nav">
+          <ul>
+            <li><Link href="/">🏠 Home</Link></li>
+            <li><Link href="/boards/gear">🎸 Gear &amp; Kit</Link></li>
+            <li><Link href="/boards/technique">🎵 Technique</Link></li>
+            <li><Link href="/boards/gigs">🎤 Gigs &amp; Venues</Link></li>
+            <li><Link href="/boards/band-wanted">🤝 Band Wanted</Link></li>
+            <li><Link href="/boards/production">🎧 Production</Link></li>
+            <li><Link href="/boards/records">📻 Record Fair</Link></li>
+            <li className="nav-auth-split">
+              <Link href="/register" style={{ background: 'var(--ink)', color: 'var(--bright-gold)' }}>🗞️ Join</Link>
+            </li>
+            <li><Link href="/sign-in">✍️ Sign In</Link></li>
+          </ul>
+        </nav>
+
+        {/* PAGE CONTENT */}
         <main>{children}</main>
 
+        {/* FOOTER (Restored!) */}
         <footer className="site-footer">
-          <div>© 2026 Sheffield Musical Express · South Yorkshire</div>
+          <div>
+            <div className="footer-title">
+              Sheffield Musical <span className="express">Express</span>
+            </div>
+            <div style={{ marginTop: '6px' }}>
+              © {new Date().getFullYear()} SME Community Forum · Sheffield, South Yorkshire
+            </div>
+          </div>
+          <div style={{ textAlign: 'right', lineHeight: '1.9' }}>
+            <Link href="/rules">Rules &amp; Guidelines</Link> ·{' '}
+            <Link href="/contact">Contact Mods</Link> ·{' '}
+            <Link href="/privacy">Privacy Policy</Link>
+            <br />
+            Powered by steel, passion &amp; too much reverb.
+          </div>
         </footer>
       </body>
     </html>
