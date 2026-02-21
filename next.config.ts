@@ -1,13 +1,13 @@
 import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
-  // We remove output: 'export' because this is a dynamic forum
+  // Ensure 'output: export' is NOT here
   typescript: {
-    ignoreBuildErrors: true, // Useful for getting past the last few type hurdles
+    ignoreBuildErrors: true, 
   },
   images: {
     unoptimized: true,
-  },
+  }
 }
 
 export default nextConfig
