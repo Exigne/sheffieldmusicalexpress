@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -25,13 +26,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <div className="masthead-top">
             <span>Est. 2024 — Steel City, South Yorkshire</span>
             <span className="masthead-date">{today}</span>
-            <span>Free to join · Open to all</span>
+            <div style={{ display: 'flex', gap: '15px' }}>
+              <Link href="/admin" style={{ color: 'var(--rust)', fontSize: '0.65rem', textDecoration: 'none' }}>🛡️ MOD PANEL</Link>
+              <span>Free to join · Open to all</span>
+            </div>
           </div>
           <div className="masthead-main">
             <div className="masthead-eyebrow">The Voice of Sheffield&apos;s Music Community</div>
-            <h1 className="site-title">
-              Sheffield Musical <span className="express">Express</span>
-            </h1>
+            <Link href="/" style={{ textDecoration: 'none' }}>
+              <h1 className="site-title">
+                Sheffield Musical <span className="express">Express</span>
+              </h1>
+            </Link>
             <p className="tagline">Where Steel City Musicians Connect, Create &amp; Collaborate</p>
           </div>
         </header>
@@ -39,14 +45,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* NAV */}
         <nav className="main-nav">
           <ul>
-            <li><a href="/">🏠 Home</a></li>
-            <li><a href="/boards/gear">🎸 Gear &amp; Kit</a></li>
-            <li><a href="/boards/technique">🎵 Technique</a></li>
-            <li><a href="/boards/gigs">🎤 Gigs &amp; Venues</a></li>
-            <li><a href="/boards/band-wanted">🤝 Band Wanted</a></li>
-            <li><a href="/boards/production">🎧 Production</a></li>
-            <li><a href="/boards/records">📻 Record Fair</a></li>
-            <li><a href="/sign-in">✍️ Sign In</a></li>
+            <li><Link href="/">🏠 Home</Link></li>
+            <li><Link href="/boards/gear">🎸 Gear &amp; Kit</Link></li>
+            <li><Link href="/boards/technique">🎵 Technique</Link></li>
+            <li><Link href="/boards/gigs">🎤 Gigs &amp; Venues</Link></li>
+            <li><Link href="/boards/band-wanted">🤝 Band Wanted</Link></li>
+            <li><Link href="/boards/production">🎧 Production</Link></li>
+            <li><Link href="/boards/records">📻 Record Fair</Link></li>
+            <li className="nav-auth-split">
+              <Link href="/register" style={{ background: 'var(--ink)', color: 'var(--bright-gold)' }}>🗞️ Join</Link>
+            </li>
+            <li><Link href="/sign-in">✍️ Sign In</Link></li>
           </ul>
         </nav>
 
@@ -64,9 +73,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </div>
           </div>
           <div style={{ textAlign: 'right', lineHeight: '1.9' }}>
-            <a href="/rules">Rules &amp; Guidelines</a> ·{' '}
-            <a href="/contact">Contact Mods</a> ·{' '}
-            <a href="/privacy">Privacy Policy</a>
+            <Link href="/rules">Rules &amp; Guidelines</Link> ·{' '}
+            <Link href="/contact">Contact Mods</Link> ·{' '}
+            <Link href="/privacy">Privacy Policy</Link>
             <br />
             Powered by steel, passion &amp; too much reverb.
           </div>
