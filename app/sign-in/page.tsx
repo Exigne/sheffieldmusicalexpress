@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from 'next/link';
 
 export default function SignInPage() {
   const [username, setUsername] = useState("");
@@ -15,24 +16,38 @@ export default function SignInPage() {
     setLoading(true);
     setError("");
 
-    // Placeholder for authentication logic
-    // In a real app, you would fetch('/api/auth/signin')
-    setTimeout(() => {
-      if (username && password) {
+    try {
+      // 1. Request verification from your API
+      const res = await fetch("/api/auth/sign-in", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        // 2. SUCCESS: Save the username so the Layout knows we are logged in
+        localStorage.setItem("sme_user", username);
+        
+        // 3. Redirect and force a hard refresh to update the Navigation Bar
         router.push("/");
-        router.refresh();
+        setTimeout(() => window.location.reload(), 100); 
       } else {
-        setError("Invalid username or password.");
-        setLoading(false);
+        setError(data.error || "Invalid Sheffield credentials.");
       }
-    }, 1200);
+    } catch (err) {
+      setError("Connection error. Is the server running?");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="page-wrapper" style={{ gridTemplateColumns: "1fr" }}>
       <div className="content-area" style={{ maxWidth: "500px", margin: "0 auto" }}>
         <nav className="breadcrumb">
-          <a href="/">Home</a>
+          <Link href="/">Home</Link>
           <span className="breadcrumb-sep">›</span>
           <span>Member Sign In</span>
         </nav>
@@ -75,9 +90,9 @@ export default function SignInPage() {
               <button type="submit" className="btn-submit" disabled={loading} style={{ width: '100%' }}>
                 {loading ? "Verifying..." : "Sign In →"}
               </button>
-              <a href="/register" style={{ fontSize: '0.8rem', color: 'var(--rust)' }}>
+              <Link href="/register" style={{ fontSize: '0.8rem', color: 'var(--rust)', textDecoration: 'none' }}>
                 Don't have an account? Register for free.
-              </a>
+              </Link>
             </div>
           </form>
         </div>
