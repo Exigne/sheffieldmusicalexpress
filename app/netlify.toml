@@ -1,13 +1,13 @@
 [build]
   command = "npm run build"
-  # For Next.js on Netlify, leave the publish directory to the default 
-  # OR use '.next' but ONLY if the plugin is installed.
+  # Next.js Runtime plugin handles the mapping, 
+  # but we point to .next as the base.
   publish = ".next"
 
 [build.environment]
   NODE_VERSION = "20"
-  # This helps the builder know to use the modern App Router integration
-  NETLIFY_NEXT_PLUGIN_SKIP_INSTALL = "false" 
+  # Crucial: This tells Netlify to use the modern Bridge for Next.js
+  NEXT_USE_NETLIFY_EDGE = "true"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
@@ -17,5 +17,5 @@
   to = "/.netlify/functions/:splat"
   status = 200
 
-# IMPORTANT: Ensure there are NO redirects pointing to index.html here.
-# Next.js 15+ App Router will fail if you force a redirect to index.html.
+# NOTE: We have removed the /* to /index.html redirect. 
+# That redirect is for React SPAs, not Next.js App Router.
