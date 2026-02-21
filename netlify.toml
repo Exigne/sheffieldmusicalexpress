@@ -4,15 +4,9 @@
 
 [build.environment]
   NODE_VERSION = "20"
-  NEON_DATABASE_URL = "postgresql://neondb_owner:npg_gjKT3ipUMle9@ep-small-dew-a91hxoui-pooler.gwc.azure.neon.tech/neondb?sslmode=require&channel_binding=require"
+  NEON_DATABASE_URL = "postgresql://neondb_owner:npg_7bDdokNHCS8p@ep-proud-flower-abnzqsa2-pooler.eu-west-2.aws.neon.tech/sheffieldmusicalexpress?sslmode=require&channel_binding=require"
 
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/:splat"
   status = 200
-
-# REMOVE this - it breaks Next.js routing:
-# [[redirects]]
-#   from = "/*"
-#   to = "/index.html"
-#   status = 200
