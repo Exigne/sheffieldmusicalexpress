@@ -1,16 +1,21 @@
 [build]
   command = "npm run build"
+  # Next.js Runtime plugin handles the mapping, 
+  # but we point to .next as the base.
   publish = ".next"
 
 [build.environment]
   NODE_VERSION = "20"
-  # This tells the Netlify Next.js plugin to handle the App Router properly
-  NEXT_USE_NETLIFY_EDGE = "true" 
+  # Crucial: This tells Netlify to use the modern Bridge for Next.js
+  NEXT_USE_NETLIFY_EDGE = "true"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
 
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/:splat"
   status = 200
 
-# DO NOT add the /* to /index.html redirect here. 
-# Next.js handles its own routing.
+# NOTE: We have removed the /* to /index.html redirect. 
+# That redirect is for React SPAs, not Next.js App Router.
