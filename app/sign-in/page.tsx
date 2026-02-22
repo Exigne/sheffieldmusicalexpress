@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from 'next/link';
 
 export default function SignInPage() {
@@ -9,7 +8,6 @@ export default function SignInPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -17,7 +15,6 @@ export default function SignInPage() {
     setError("");
 
     try {
-      // 1. Request verification from your API
       const res = await fetch("/api/auth/sign-in", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -27,18 +24,17 @@ export default function SignInPage() {
       const data = await res.json();
 
       if (res.ok) {
-        // 2. SUCCESS: Save the username so the Layout knows we are logged in
+        // 1. Save the username so the Smart Navbar sees it
         localStorage.setItem("sme_user", username);
         
-        // 3. Redirect and force a hard refresh to update the Navigation Bar
-        router.push("/");
-        setTimeout(() => window.location.reload(), 100); 
+        // 2. HARD REDIRECT to the home page (Fixes the stuck screen issue)
+        window.location.href = "/"; 
       } else {
         setError(data.error || "Invalid Sheffield credentials.");
+        setLoading(false); // Only turn off loading if there's an error
       }
     } catch (err) {
       setError("Connection error. Is the server running?");
-    } finally {
       setLoading(false);
     }
   };
