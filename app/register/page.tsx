@@ -1,16 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function RegisterPage() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState(""); // Added password
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [isError, setIsError] = useState(false);
-  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,16 +28,22 @@ export default function RegisterPage() {
 
       if (res.ok) {
         setMessage("Success! Welcome to the SME community.");
-        // Redirect to home or login after 2 seconds
-        setTimeout(() => router.push("/"), 2000);
+        
+        // 1. Automatically log the user in so they don't have to type it again
+        localStorage.setItem("sme_user", username);
+        
+        // 2. Hard redirect to the dashboard after a tiny delay so they see the success message
+        setTimeout(() => {
+          window.location.href = "/";
+        }, 800);
       } else {
         setIsError(true);
         setMessage(data.error || "Registration failed.");
+        setLoading(false);
       }
     } catch (err) {
       setIsError(true);
       setMessage("Connection error. Is the server running?");
-    } finally {
       setLoading(false);
     }
   };
@@ -46,6 +51,12 @@ export default function RegisterPage() {
   return (
     <div className="page-wrapper" style={{ gridTemplateColumns: "1fr" }}>
       <div className="content-area" style={{ maxWidth: "600px", margin: "0 auto" }}>
+        <nav className="breadcrumb">
+          <Link href="/">Home</Link>
+          <span className="breadcrumb-sep">›</span>
+          <span>Register Free</span>
+        </nav>
+
         <div className="form-card">
           <div className="form-card-header">
             <div className="form-card-icon">🗞️</div>
@@ -61,10 +72,12 @@ export default function RegisterPage() {
               <input
                 type="text"
                 className="form-input"
+                placeholder="e.g., LeadLungs_S1"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
               />
+              <span className="form-hint">This is how you'll appear on boards and articles.</span>
             </div>
 
             <div className="form-group">
@@ -72,6 +85,7 @@ export default function RegisterPage() {
               <input
                 type="email"
                 className="form-input"
+                placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -99,10 +113,13 @@ export default function RegisterPage() {
               </div>
             )}
 
-            <div className="form-actions">
-              <button type="submit" className="btn-submit" disabled={loading}>
+            <div className="form-actions" style={{ flexDirection: 'column', gap: '15px', alignItems: 'flex-start' }}>
+              <button type="submit" className="btn-submit" disabled={loading} style={{ width: '100%' }}>
                 {loading ? "Registering..." : "Join the Community →"}
               </button>
+              <Link href="/sign-in" style={{ fontSize: '0.8rem', color: 'var(--rust)', textDecoration: 'none' }}>
+                Already have an account? Sign in here.
+              </Link>
             </div>
           </form>
         </div>
