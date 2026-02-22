@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import Navbar from './Navbar'; // <-- We import the smart nav here
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -42,27 +43,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </div>
         </header>
 
-        {/* RED NAVIGATION BAR (Restored!) */}
-        <nav className="main-nav">
-          <ul>
-            <li><Link href="/">🏠 Home</Link></li>
-            <li><Link href="/boards/gear">🎸 Gear &amp; Kit</Link></li>
-            <li><Link href="/boards/technique">🎵 Technique</Link></li>
-            <li><Link href="/boards/gigs">🎤 Gigs &amp; Venues</Link></li>
-            <li><Link href="/boards/band-wanted">🤝 Band Wanted</Link></li>
-            <li><Link href="/boards/production">🎧 Production</Link></li>
-            <li><Link href="/boards/records">📻 Record Fair</Link></li>
-            <li className="nav-auth-split">
-              <Link href="/register" style={{ background: 'var(--ink)', color: 'var(--bright-gold)' }}>🗞️ Join</Link>
-            </li>
-            <li><Link href="/sign-in">✍️ Sign In</Link></li>
-          </ul>
-        </nav>
+        {/* SMART NAVIGATION BAR */}
+        <Navbar />
 
         {/* PAGE CONTENT */}
         <main>{children}</main>
 
-        {/* FOOTER (Restored!) */}
+        {/* FOOTER */}
         <footer className="site-footer">
           <div>
             <div className="footer-title">
