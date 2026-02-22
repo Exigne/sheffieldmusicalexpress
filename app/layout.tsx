@@ -8,7 +8,14 @@ export const metadata: Metadata = {
   description: 'Where Steel City Musicians Connect, Create & Collaborate',
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+// 1. We added the 'modal' prop here to accept the pop-out window
+export default function RootLayout({ 
+  children,
+  modal 
+}: { 
+  children: React.ReactNode;
+  modal: React.ReactNode; 
+}) {
   const today = new Date().toLocaleDateString('en-GB', {
     weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
   });
@@ -46,8 +53,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* SMART NAVIGATION BAR */}
         <Navbar />
 
-        {/* PAGE CONTENT */}
-        <main>{children}</main>
+        {/* PAGE CONTENT & MODAL SLOT */}
+        {/* 2. We put the modal right next to the children */}
+        <main>
+          {children}
+          {modal} 
+        </main>
 
         {/* FOOTER */}
         <footer className="site-footer">
