@@ -2,12 +2,10 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-
-import { useState, useEffect } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation"; // Added router for cache refreshing
 
 export default function BoardInteractive({ board, initialThreads }: any) {
+  const router = useRouter(); // Initialize the router
   const [threads, setThreads] = useState(initialThreads);
   const [isComposing, setIsComposing] = useState(false);
   const [user, setUser] = useState<string | null>(null);
@@ -35,7 +33,7 @@ export default function BoardInteractive({ board, initialThreads }: any) {
       if (res.ok) {
         const { threadId } = await res.json();
         
-        // Instantly add the new thread to the top of the pop-out list!
+        // 1. Instantly add the new thread to the top of the pop-out list
         const newThread = {
           id: threadId,
           title,
@@ -49,6 +47,9 @@ export default function BoardInteractive({ board, initialThreads }: any) {
         setIsComposing(false); // Close the form
         setTitle(""); // Clear the inputs
         setBody("");
+        
+        // 2. THE CACHE BREAKER: Silently refresh the server data in the background
+        router.refresh(); 
       } else {
         alert("Failed to post. Please try again.");
       }
