@@ -28,7 +28,7 @@ export default function ReplyForm({ threadId }: { threadId: number }) {
 
       if (res.ok) {
         setBody(""); // Clear the text box
-        router.refresh(); // Tell Next.js to load the new post instantly
+        router.refresh(); // Instantly load the new post
       } else {
         alert("Failed to post reply.");
       }
