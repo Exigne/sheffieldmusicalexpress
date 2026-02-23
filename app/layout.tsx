@@ -47,7 +47,7 @@ export default function RootLayout({
             <div className="masthead-eyebrow">The Voice of Sheffield&apos;s Music Community</div>
             <Link href="/" style={{ textDecoration: 'none' }}>
               <h1 className="site-title">
-                Sheffield Musical <span className="express">Express</span>
+                Sheffield Music <span className="express">Express</span>
               </h1>
             </Link>
             <p className="tagline">Where Steel City Musicians Connect, Create &amp; Collaborate</p>
