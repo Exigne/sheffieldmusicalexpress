@@ -2,16 +2,22 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation"; // Added router for cache refreshing
+import { useRouter } from "next/navigation";
 
 export default function BoardInteractive({ board, initialThreads }: any) {
-  const router = useRouter(); // Initialize the router
+  const router = useRouter(); 
   const [threads, setThreads] = useState(initialThreads);
   const [isComposing, setIsComposing] = useState(false);
   const [user, setUser] = useState<string | null>(null);
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // THE FIX: This forces the pop-out to update if the database sends fresh posts
+  // Without this, React ignores the new data when you close and reopen the window!
+  useEffect(() => {
+    setThreads(initialThreads);
+  }, [initialThreads]);
 
   // Check if the user is logged in when the pop-out opens
   useEffect(() => {
@@ -48,7 +54,7 @@ export default function BoardInteractive({ board, initialThreads }: any) {
         setTitle(""); // Clear the inputs
         setBody("");
         
-        // 2. THE CACHE BREAKER: Silently refresh the server data in the background
+        // 2. Refresh the server data in the background
         router.refresh(); 
       } else {
         alert("Failed to post. Please try again.");
