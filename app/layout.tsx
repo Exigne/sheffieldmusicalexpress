@@ -1,10 +1,11 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import Navbar from './Navbar'; // <-- We import the smart nav here
+import AdminLink from '@/components/AdminLink'; // <-- We import the smart Admin Link here
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Sheffield Musical Express',
+  title: 'Sheffield Music Express',
   description: 'Where Steel City Musicians Connect, Create & Collaborate',
 };
 
@@ -32,10 +33,13 @@ export default function RootLayout({
         {/* MASTHEAD */}
         <header className="masthead">
           <div className="masthead-top">
-            <span>Est. 2024 — Steel City, South Yorkshire</span>
+            <span>Est. 2026 — Steel City, South Yorkshire</span>
             <span className="masthead-date">{today}</span>
             <div style={{ display: 'flex', gap: '15px' }}>
-              <Link href="/admin" style={{ color: 'var(--rust)', fontSize: '0.65rem', textDecoration: 'none' }}>🛡️ MOD PANEL</Link>
+              
+              {/* <-- SMART ADMIN LINK GOES HERE --> */}
+              <AdminLink /> 
+              
               <span>Free to join · Open to all</span>
             </div>
           </div>
@@ -64,7 +68,7 @@ export default function RootLayout({
         <footer className="site-footer">
           <div>
             <div className="footer-title">
-              Sheffield Musical <span className="express">Express</span>
+              Sheffield Music <span className="express">Express</span>
             </div>
             <div style={{ marginTop: '6px' }}>
               © {new Date().getFullYear()} SME Community Forum · Sheffield, South Yorkshire
