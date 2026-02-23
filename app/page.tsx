@@ -7,7 +7,12 @@ async function getRecentThreads() {
   try {
     const rows = await sql`
       SELECT 
-        t.id, t.title, t.reply_count, b.name AS board_name, u.username, MAX(p.created_at) as last_interaction
+        t.id, 
+        t.title, 
+        t.reply_count, 
+        b.name AS board_name, 
+        u.username,
+        MAX(p.created_at) as last_interaction
       FROM threads t
       JOIN boards b ON t.board_id = b.id
       JOIN users u ON t.user_id = u.id
@@ -35,6 +40,18 @@ function timeAgo(dateInput: string | Date): string {
 
 export default async function HomePage() {
   const threads = await getRecentThreads();
+  
+  // FETCH ARTICLES AND BAND FROM DB
+  let articles: any[] = [];
+  let band: any = null;
+  try {
+    articles = await sql`SELECT * FROM articles ORDER BY created_at DESC LIMIT 3`;
+    const bandsRes = await sql`SELECT * FROM featured_bands ORDER BY created_at DESC LIMIT 1`;
+    band = bandsRes[0] || null;
+  } catch (e) { console.error("DB Error"); }
+
+  const featuredArticle = articles[0];
+  const subArticles = articles.slice(1, 3);
 
   return (
     <div className="page-wrapper">
@@ -42,38 +59,36 @@ export default async function HomePage() {
         
         <div className="section-label">The Steel City Wire</div>
         
-        {/* Featured Headline Article - NOW CLICKABLE */}
-        <Link href="/articles/leadmill-legacy" style={{ display: 'block', textDecoration: 'none', color: 'inherit' }}>
-          <div style={{ background: 'var(--paper)', border: '1px solid var(--ink)', padding: '20px', marginBottom: '20px', borderBottom: '4px solid var(--rust)', cursor: 'pointer' }}>
-            <div style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--rust)', marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '1px' }}>
-              Exclusive Interview
+        {featuredArticle ? (
+          <Link href={`/articles/${featuredArticle.slug}`} style={{ display: 'block', textDecoration: 'none', color: 'inherit' }}>
+            <div style={{ background: 'var(--paper)', border: '1px solid var(--ink)', padding: '20px', marginBottom: '20px', borderBottom: '4px solid var(--rust)', cursor: 'pointer' }}>
+              <div style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--rust)', marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                {featuredArticle.category}
+              </div>
+              <h2 style={{ fontFamily: 'Playfair Display', fontSize: '2.2rem', margin: '0 0 10px 0', lineHeight: '1.1' }}>
+                {featuredArticle.title}
+              </h2>
+              <p style={{ fontFamily: 'Barlow', color: '#444', lineHeight: '1.6', fontSize: '1.05rem', marginBottom: '15px' }}>
+                {featuredArticle.excerpt}
+              </p>
+              <div style={{ fontSize: '0.8rem', fontFamily: 'IBM Plex Mono' }}>By {featuredArticle.author || 'The Editor'}</div>
             </div>
-            <h2 style={{ fontFamily: 'Playfair Display', fontSize: '2.2rem', margin: '0 0 10px 0', lineHeight: '1.1' }}>
-              The Leadmill Legacy: 40 Years of Sweat, Steel, and Sound
-            </h2>
-            <p style={{ fontFamily: 'Barlow', color: '#444', lineHeight: '1.6', fontSize: '1.05rem', marginBottom: '15px' }}>
-              From Pulp's first gigs to the modern indie revival, we sit down with the sound engineers who have kept Sheffield's most iconic venue ringing in our ears.
-            </p>
-            <div style={{ fontSize: '0.8rem', fontFamily: 'IBM Plex Mono' }}>By The Editor · 5 min read</div>
-          </div>
-        </Link>
+          </Link>
+        ) : (
+          <p style={{marginBottom: '20px', color: '#666', fontSize: '0.9rem'}}>Publish your first article in the Mod Panel!</p>
+        )}
 
-        {/* Secondary Articles Grid - NOW CLICKABLE */}
+        {/* Secondary Articles Grid */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '40px' }}>
-          <Link href="/articles/forgemaster-fuzz" style={{ textDecoration: 'none', color: 'inherit' }}>
-            <div style={{ borderTop: '2px solid var(--ink)', paddingTop: '10px', cursor: 'pointer' }}>
-              <div style={{ fontSize: '0.7rem', color: '#666', marginBottom: '5px' }}>GEAR REVIEW</div>
-              <h3 style={{ fontFamily: 'Playfair Display', fontSize: '1.2rem', margin: '0 0 5px 0' }}>Testing the new 'Forgemaster' Fuzz Pedal</h3>
-              <p style={{ fontSize: '0.85rem', color: '#555' }}>Built right here in Kelham Island, does it actually cut through the mix?</p>
-            </div>
-          </Link>
-          <Link href="/articles/basement-practice" style={{ textDecoration: 'none', color: 'inherit' }}>
-            <div style={{ borderTop: '2px solid var(--ink)', paddingTop: '10px', cursor: 'pointer' }}>
-              <div style={{ fontSize: '0.7rem', color: '#666', marginBottom: '5px' }}>SCENE REPORT</div>
-              <h3 style={{ fontFamily: 'Playfair Display', fontSize: '1.2rem', margin: '0 0 5px 0' }}>5 Basement Practice Rooms You Haven't Tried</h3>
-              <p style={{ fontSize: '0.85rem', color: '#555' }}>Stop fighting for the prime slots at Pirate Studios and look underground.</p>
-            </div>
-          </Link>
+          {subArticles.map((article: any) => (
+            <Link key={article.id} href={`/articles/${article.slug}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+              <div style={{ borderTop: '2px solid var(--ink)', paddingTop: '10px', cursor: 'pointer' }}>
+                <div style={{ fontSize: '0.7rem', color: '#666', marginBottom: '5px' }}>{article.category}</div>
+                <h3 style={{ fontFamily: 'Playfair Display', fontSize: '1.2rem', margin: '0 0 5px 0' }}>{article.title}</h3>
+                <p style={{ fontSize: '0.85rem', color: '#555' }}>{article.excerpt.slice(0, 80)}...</p>
+              </div>
+            </Link>
+          ))}
         </div>
 
         {/* TRENDING FORUM ACTIVITY */}
@@ -104,21 +119,25 @@ export default async function HomePage() {
       {/* SIDEBAR */}
       <aside className="sidebar">
         
-        {/* Band of the MONTH - NOW CLICKABLE */}
-        <Link href="/features/band-of-the-month" style={{ textDecoration: 'none', color: 'inherit' }}>
-          <div className="sidebar-widget" style={{ cursor: 'pointer' }}>
-            <div className="widget-header">🎸 Band of the Month</div>
-            <div className="widget-body">
-              <h4 style={{ margin: '0 0 5px 0', fontFamily: 'Playfair Display', fontSize: '1.2rem' }}>The Lead Lungs</h4>
-              <p style={{ fontSize: '0.8rem', lineHeight: '1.4', marginBottom: '10px' }}>
-                Heavy alt-rock trio making waves in S1. Catch their EP release party at Sidney & Matilda this Friday.
-              </p>
-              <span style={{ fontSize: '0.8rem', color: 'var(--rust)', fontWeight: 'bold' }}>Read Feature →</span>
+        {/* Band Spotlight */}
+        {band ? (
+          <Link href="/features/band-of-the-month" style={{ textDecoration: 'none', color: 'inherit' }}>
+            <div className="sidebar-widget" style={{ cursor: 'pointer' }}>
+              <div className="widget-header">🎸 Band of the Month</div>
+              <div className="widget-body">
+                <h4 style={{ margin: '0 0 5px 0', fontFamily: 'Playfair Display', fontSize: '1.2rem' }}>{band.name}</h4>
+                <p style={{ fontSize: '0.8rem', lineHeight: '1.4', marginBottom: '10px' }}>
+                  {band.description.slice(0, 100)}...
+                </p>
+                <span style={{ fontSize: '0.8rem', color: 'var(--rust)', fontWeight: 'bold' }}>Read Feature →</span>
+              </div>
             </div>
-          </div>
-        </Link>
+          </Link>
+        ) : (
+          <p style={{fontSize: '0.8rem', marginBottom: '20px'}}>Set a Band of the Month in the Mod Panel.</p>
+        )}
 
-        {/* Gig Guide - NOW CLICKABLE */}
+        {/* Gig Guide */}
         <Link href="/features/gig-guide" style={{ textDecoration: 'none', color: 'inherit' }}>
           <div className="sidebar-widget" style={{ cursor: 'pointer' }}>
             <div className="widget-header">📅 Gig Guide</div>
