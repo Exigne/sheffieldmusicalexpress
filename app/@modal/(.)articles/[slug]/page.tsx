@@ -6,8 +6,14 @@ import ArticleComments from '@/components/ArticleComments';
 
 export default async function ArticlePopOut({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const result = await sql`SELECT * FROM articles WHERE slug = ${slug} LIMIT 1`;
-  const article = result[0];
+  
+  let article = null;
+  try {
+    const result = await sql`SELECT * FROM articles WHERE slug = ${slug} LIMIT 1`;
+    article = result[0];
+  } catch (e) {
+    console.error("Failed to fetch article");
+  }
 
   if (!article) return null;
 
