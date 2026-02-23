@@ -2,12 +2,12 @@ export const dynamic = 'force-dynamic';
 
 import { sql } from '@/lib/db';
 import Link from 'next/link';
-import ReplyForm from '@/components/ReplyForm';
+import ReplyForm from '@/components/ReplyForm'; // <-- We import the form here!
 
 export default async function ThreadPage({ params }: { params: Promise<{ threadId: string }> }) {
   const { threadId } = await params;
 
-  // 1. Fetch the main thread info
+  // Fetch the main thread info
   const threads = await sql`
     SELECT t.*, b.name as board_name, b.slug as board_slug
     FROM threads t
@@ -20,7 +20,7 @@ export default async function ThreadPage({ params }: { params: Promise<{ threadI
     return <div className="page-wrapper"><div className="content-area">Thread not found.</div></div>;
   }
 
-  // 2. Fetch all posts (original post + replies) for this thread
+  // Fetch all posts for this thread
   const posts = await sql`
     SELECT p.*, u.username, u.avatar_initials 
     FROM posts p 
@@ -33,7 +33,6 @@ export default async function ThreadPage({ params }: { params: Promise<{ threadI
     <div className="page-wrapper" style={{ gridTemplateColumns: "1fr" }}>
       <div className="content-area" style={{ maxWidth: "800px", margin: "0 auto" }}>
         
-        {/* Navigation Breadcrumbs */}
         <nav className="breadcrumb">
           <Link href="/">Home</Link>
           <span className="breadcrumb-sep">›</span>
@@ -42,7 +41,6 @@ export default async function ThreadPage({ params }: { params: Promise<{ threadI
           <span>Discussion</span>
         </nav>
 
-        {/* Thread Title */}
         <div className="board-header">
           <div>
             <h1 className="board-header-title">{thread.title}</h1>
@@ -54,7 +52,7 @@ export default async function ThreadPage({ params }: { params: Promise<{ threadI
 
         {/* The Conversation (Posts) */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          {posts.map((post: any, index: number) => (
+          {posts.map((post: any) => (
             <div key={post.id} style={{ display: 'flex', gap: '15px', padding: '20px', background: 'var(--paper)', border: '1px solid var(--aged)', borderRadius: '4px' }}>
               <div style={{ width: '50px', flexShrink: 0 }}>
                 <div className="thread-avatar" style={{ margin: '0 auto' }}>{post.avatar_initials || '?'}</div>
@@ -74,7 +72,7 @@ export default async function ThreadPage({ params }: { params: Promise<{ threadI
           ))}
         </div>
 
-        {/* 3. The Smart Reply Form */}
+        {/* <-- THIS IS WHERE THE REPLY FORM GOES --> */}
         <ReplyForm threadId={thread.id} />
 
       </div>
