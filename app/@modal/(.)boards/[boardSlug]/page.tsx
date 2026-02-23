@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'; // <-- This kills the cache monster for good
+
 import { sql } from '@/lib/db';
 import Modal from '@/components/Modal';
 import BoardInteractive from '@/components/BoardInteractive';
@@ -22,7 +24,6 @@ export default async function PopOutBoard({ params }: { params: Promise<{ boardS
 
   return (
     <Modal>
-      {/* 3. Pass the data to our new interactive Client Component */}
       <BoardInteractive board={board} initialThreads={threads} />
     </Modal>
   );
