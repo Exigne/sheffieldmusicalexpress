@@ -1,198 +1,83 @@
+export const dynamic = 'force-dynamic';
+
 import { sql } from '@/lib/db';
-import { notFound } from 'next/navigation';
+import Link from 'next/link';
+import ReplyForm from '@/components/ReplyForm';
 
-type Thread = {
-  id: number;
-  title: string;
-  reply_count: number;
-  created_at: string;
-  board_name: string;
-  board_slug: string;
-  board_icon: string;
-  username: string;
-  is_pinned: boolean;
-};
-
-type Post = {
-  id: number;
-  body: string;
-  created_at: string;
-  username: string;
-  user_id: number;
-};
-
-async function getThread(id: number): Promise<Thread | null> {
-  try {
-    const rows = await sql`
-      SELECT
-        t.id, t.title, t.reply_count, t.created_at, t.is_pinned,
-        b.name AS board_name, b.slug AS board_slug, b.icon AS board_icon,
-        u.username
-      FROM threads t
-      LEFT JOIN boards b ON t.board_id = b.id
-      LEFT JOIN users u ON t.user_id = u.id
-      WHERE t.id = ${id}
-      LIMIT 1
-    `;
-    return (rows[0] as Thread | undefined) ?? null;
-  } catch (error) {
-    console.error('Error fetching thread:', error);
-    return null;
-  }
-}
-
-async function getPosts(threadId: number): Promise<Post[]> {
-  try {
-    const rows = await sql`
-      SELECT
-        p.id, p.body, p.created_at, p.user_id,
-        u.username
-      FROM posts p
-      LEFT JOIN users u ON p.user_id = u.id
-      WHERE p.thread_id = ${threadId}
-      ORDER BY p.created_at ASC
-    `;
-    return (rows as Post[]) ?? [];
-  } catch (error) {
-    console.error('Error fetching posts:', error);
-    return [];
-  }
-}
-
-function timeAgo(dateStr: string): string {
-  const diff = Date.now() - new Date(dateStr).getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 60) return `${mins}m ago`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
-  const days = Math.floor(hrs / 24);
-  if (days < 30) return `${days}d ago`;
-  return new Date(dateStr).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-}
-
-function formatDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString('en-GB', {
-    day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
-  });
-}
-
-export default async function ThreadPage({
-  params,
-}: {
-  params: Promise<{ threadId: string }>;
-}) {
+export default async function ThreadPage({ params }: { params: Promise<{ threadId: string }> }) {
   const { threadId } = await params;
-  const id = parseInt(threadId);
-  
-  if (isNaN(id)) {
-    notFound();
+
+  // 1. Fetch the main thread info
+  const threads = await sql`
+    SELECT t.*, b.name as board_name, b.slug as board_slug
+    FROM threads t
+    JOIN boards b ON t.board_id = b.id
+    WHERE t.id = ${threadId} LIMIT 1
+  `;
+  const thread = threads[0];
+
+  if (!thread) {
+    return <div className="page-wrapper"><div className="content-area">Thread not found.</div></div>;
   }
 
-  const [thread, posts] = await Promise.all([getThread(id), getPosts(id)]);
-  
-  if (!thread) {
-    notFound();
-  }
+  // 2. Fetch all posts (original post + replies) for this thread
+  const posts = await sql`
+    SELECT p.*, u.username, u.avatar_initials 
+    FROM posts p 
+    JOIN users u ON p.user_id = u.id 
+    WHERE p.thread_id = ${threadId} 
+    ORDER BY p.created_at ASC
+  `;
 
   return (
-    <div className="page-wrapper">
-      <div className="content-area">
-
-        {/* BREADCRUMB */}
-        <div className="breadcrumb">
-          <a href="/">Home</a>
+    <div className="page-wrapper" style={{ gridTemplateColumns: "1fr" }}>
+      <div className="content-area" style={{ maxWidth: "800px", margin: "0 auto" }}>
+        
+        {/* Navigation Breadcrumbs */}
+        <nav className="breadcrumb">
+          <Link href="/">Home</Link>
           <span className="breadcrumb-sep">›</span>
-          <a href={`/boards/${thread.board_slug}`}>{thread.board_icon} {thread.board_name}</a>
+          <Link href={`/boards/${thread.board_slug}`}>{thread.board_name}</Link>
           <span className="breadcrumb-sep">›</span>
-          <span>{thread.title}</span>
-        </div>
+          <span>Discussion</span>
+        </nav>
 
-        {/* THREAD TITLE */}
-        <div className="thread-header">
-          <h2 className="thread-header-title">{thread.title}</h2>
-          <div className="thread-header-meta">
-            Started by <strong>{thread.username ?? 'Unknown'}</strong>
-            {' · '}{formatDate(thread.created_at)}
-            {' · '}<strong>{thread.reply_count}</strong> replies
+        {/* Thread Title */}
+        <div className="board-header">
+          <div>
+            <h1 className="board-header-title">{thread.title}</h1>
+            <p className="board-header-desc">
+              Started in {thread.board_name} · {new Date(thread.created_at).toLocaleDateString()}
+            </p>
           </div>
         </div>
 
-        {/* POSTS */}
-        <div className="post-list">
-          {posts.map((post, index) => (
-            <div key={post.id} className={`post-card${index === 0 ? ' first-post' : ''}`}>
-              <div className="post-author">
-                <div className="post-avatar">
-                  {post.username?.slice(0, 2).toUpperCase() ?? '??'}
-                </div>
-                <div className="post-author-name">{post.username ?? 'Unknown'}</div>
-                <div className="post-number">#{index + 1}</div>
+        {/* The Conversation (Posts) */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          {posts.map((post: any, index: number) => (
+            <div key={post.id} style={{ display: 'flex', gap: '15px', padding: '20px', background: 'var(--paper)', border: '1px solid var(--aged)', borderRadius: '4px' }}>
+              <div style={{ width: '50px', flexShrink: 0 }}>
+                <div className="thread-avatar" style={{ margin: '0 auto' }}>{post.avatar_initials || '?'}</div>
               </div>
-              <div className="post-body">
-                <div className="post-text">{post.body}</div>
-                <div className="post-footer">
-                  <span className="post-time">{formatDate(post.created_at)}</span>
-                  <span className="post-ago">{timeAgo(post.created_at)}</span>
+              <div style={{ flexGrow: 1 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--aged)', paddingBottom: '10px', marginBottom: '10px' }}>
+                  <strong style={{ color: 'var(--rust)' }}>{post.username}</strong>
+                  <span style={{ fontSize: '0.75rem', color: '#666' }}>
+                    {new Date(post.created_at).toLocaleString('en-GB', { dateStyle: 'short', timeStyle: 'short' })}
+                  </span>
+                </div>
+                <div style={{ whiteSpace: 'pre-wrap', lineHeight: '1.6', color: '#222' }}>
+                  {post.body}
                 </div>
               </div>
             </div>
           ))}
         </div>
 
-        {/* REPLY FORM */}
-        <div className="reply-box">
-          <div className="section-label" style={{ marginBottom: '16px' }}>Post a Reply</div>
-          <form action={`/api/posts`} method="POST">
-            <input type="hidden" name="threadId" value={thread.id} />
-            <textarea
-              name="body"
-              className="reply-textarea"
-              placeholder="Write your reply here…"
-              rows={6}
-              required
-            />
-            <div className="reply-actions">
-              <span className="reply-note">You must be signed in to reply.</span>
-              <button type="submit" className="btn-submit">Post Reply →</button>
-            </div>
-          </form>
-        </div>
+        {/* 3. The Smart Reply Form */}
+        <ReplyForm threadId={thread.id} />
 
       </div>
-
-      {/* SIDEBAR */}
-      <aside className="sidebar">
-        <a href={`/boards/${thread.board_slug}/new-thread`} className="btn-post">
-          + New Thread
-        </a>
-
-        <div className="sidebar-widget">
-          <div className="widget-header">Thread Info</div>
-          <div className="widget-body">
-            <div className="stats-grid">
-              <div className="stat-box">
-                <span className="stat-number">{posts.length}</span>
-                <span className="stat-label">Posts</span>
-              </div>
-              <div className="stat-box">
-                <span className="stat-number">{thread.reply_count}</span>
-                <span className="stat-label">Replies</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="sidebar-widget">
-          <div className="widget-header">Board</div>
-          <div className="widget-body">
-            <a href={`/boards/${thread.board_slug}`} className="back-to-board">
-              {thread.board_icon} Back to {thread.board_name}
-            </a>
-          </div>
-        </div>
-
-        <a href="/" className="btn-register">← Back to Home</a>
-      </aside>
     </div>
   );
 }
