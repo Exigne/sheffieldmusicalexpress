@@ -2,6 +2,10 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+
+import { useState, useEffect } from "react";
+import Link from "next/link";
 
 export default function BoardInteractive({ board, initialThreads }: any) {
   const [threads, setThreads] = useState(initialThreads);
