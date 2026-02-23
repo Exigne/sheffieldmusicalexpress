@@ -3,15 +3,24 @@ export const dynamic = 'force-dynamic';
 import { sql } from '@/lib/db';
 import Link from 'next/link';
 
-// Fetch the latest threads to keep the community feeling alive
+// UPDATED: Fetch threads sorted by their newest reply, skipping empty ones
 async function getRecentThreads() {
   try {
     const rows = await sql`
-      SELECT t.id, t.title, t.reply_count, t.created_at, b.name AS board_name, u.username
+      SELECT 
+        t.id, 
+        t.title, 
+        t.reply_count, 
+        b.name AS board_name, 
+        u.username,
+        MAX(p.created_at) as last_interaction
       FROM threads t
-      LEFT JOIN boards b ON t.board_id = b.id
-      LEFT JOIN users u ON t.user_id = u.id
-      ORDER BY t.created_at DESC
+      JOIN boards b ON t.board_id = b.id
+      JOIN users u ON t.user_id = u.id
+      JOIN posts p ON p.thread_id = t.id
+      WHERE t.reply_count > 0
+      GROUP BY t.id, t.title, t.reply_count, b.name, u.username
+      ORDER BY last_interaction DESC
       LIMIT 6
     `;
     return rows ?? [];
@@ -21,8 +30,8 @@ async function getRecentThreads() {
   }
 }
 
-function timeAgo(dateStr: string): string {
-  const diff = Date.now() - new Date(dateStr).getTime();
+function timeAgo(dateInput: string | Date): string {
+  const diff = Date.now() - new Date(dateInput).getTime();
   const mins = Math.floor(diff / 60000);
   if (mins < 60) return `${mins}m ago`;
   const hrs = Math.floor(mins / 60);
@@ -68,10 +77,10 @@ export default async function HomePage() {
           </div>
         </div>
 
-        {/* RECENT FORUM ACTIVITY */}
-        <div className="section-label">Latest from the Boards</div>
+        {/* TRENDING FORUM ACTIVITY */}
+        <div className="section-label">Trending Discussions</div>
         {threads.length === 0 ? (
-          <div className="no-threads">The archive is empty. Head to the boards to start a thread.</div>
+          <div className="no-threads">No active discussions yet. Head to the boards to reply to a thread!</div>
         ) : (
           <ul className="thread-list">
             {threads.map((thread: any) => (
@@ -81,7 +90,7 @@ export default async function HomePage() {
                   <Link href={`/threads/${thread.id}`} className="thread-title">{thread.title}</Link>
                   <div className="thread-sub">
                     <span className="board-tag">{thread.board_name}</span>
-                    by <strong>{thread.username}</strong> · {timeAgo(thread.created_at)}
+                    Started by <strong>{thread.username}</strong> · Active {timeAgo(thread.last_interaction)}
                   </div>
                 </div>
                 <div className="thread-replies">
