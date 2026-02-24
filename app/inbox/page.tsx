@@ -13,12 +13,12 @@ export default function InboxPage() {
   const [activeContact, setActiveContact] = useState<string | null>(null);
   const [messages, setMessages] = useState<any[]>([]);
   const [newMessage, setNewMessage] = useState("");
-  const [newContactName, setNewContactName] = useState(""); // For starting a brand new chat
+  const [newContactName, setNewContactName] = useState(""); 
   
   // Auto-scroll reference
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // 1. Kick out guests and load the Contact List
+  // 1. Kick out guests, load Contacts, and check for incoming "chat" URLs!
   useEffect(() => {
     const loggedInUser = localStorage.getItem('sme_user');
     if (!loggedInUser) {
@@ -27,10 +27,25 @@ export default function InboxPage() {
     }
     setUser(loggedInUser);
 
+    // Read the URL to see if we clicked a "Message" button on a profile
+    const params = new URLSearchParams(window.location.search);
+    const targetChat = params.get('chat');
+
     fetch(`/api/messages/contacts?username=${loggedInUser}`)
       .then(res => res.json())
       .then(data => {
-        if (Array.isArray(data)) setContacts(data);
+        let loadedContacts = Array.isArray(data) ? data : [];
+        
+        // If we came from a profile button, open that chat instantly!
+        if (targetChat) {
+          setActiveContact(targetChat);
+          // Add them to the sidebar list if they aren't there yet
+          if (!loadedContacts.includes(targetChat)) {
+            loadedContacts = [targetChat, ...loadedContacts];
+          }
+        }
+        
+        setContacts(loadedContacts);
       });
   }, [router]);
 
@@ -76,7 +91,7 @@ export default function InboxPage() {
         body: JSON.stringify({ sender: user, receiver: activeContact, content: messageToSend })
       });
       
-      // If this is a brand new contact, add them to the sidebar list
+      // If this is a brand new contact, ensure they are in the sidebar list
       if (!contacts.includes(activeContact)) {
         setContacts([activeContact, ...contacts]);
       }
@@ -91,7 +106,7 @@ export default function InboxPage() {
     }
   };
 
-  // 5. Start a new conversation manually
+  // 5. Start a new conversation manually from the sidebar
   const handleStartNewChat = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newContactName.trim()) return;
@@ -197,7 +212,6 @@ export default function InboxPage() {
                       );
                     })
                   )}
-                  {/* Invisible div to snap the scrollbar to the bottom */}
                   <div ref={messagesEndRef} />
                 </div>
 
@@ -218,7 +232,7 @@ export default function InboxPage() {
                 </div>
               </>
             ) : (
-              // Empty State (When no contact is selected)
+              // Empty State
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#999', flexDirection: 'column', gap: '10px' }}>
                 <div style={{ fontSize: '3rem' }}>✉️</div>
                 <div>Select a conversation or start a new one to begin.</div>
