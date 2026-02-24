@@ -4,12 +4,9 @@ import { sql } from '@/lib/db';
 import Link from 'next/link';
 import { revalidatePath } from 'next/cache';
 
-const PASSCODE = "STEELCITY"; 
-
 export default async function AdminDashboard() {
 
   // --- SERVER ACTIONS ---
-
   async function addArticle(formData: FormData) {
     "use server";
     if (formData.get('passcode') !== PASSCODE) return;
@@ -30,18 +27,19 @@ export default async function AdminDashboard() {
     revalidatePath('/'); revalidatePath('/admin');
   }
 
+  // ADD GIG - NOW SUPPORTS 'ticket_url'
   async function addGig(formData: FormData) {
     "use server";
     if (formData.get('passcode') !== PASSCODE) return;
 
-    // FIXED: Using 'title' and 'price' to match your actual Neon database table
     await sql`
-      INSERT INTO gigs (title, venue, gig_date, price, description) 
+      INSERT INTO gigs (title, venue, gig_date, price, ticket_url, description) 
       VALUES (
         ${formData.get('title') as string}, 
         ${formData.get('venue') as string}, 
         ${formData.get('gig_date') as string}, 
         ${formData.get('price') as string}, 
+        ${formData.get('ticket_url') as string}, 
         ${formData.get('description') as string}
       )
     `;
@@ -110,12 +108,13 @@ export default async function AdminDashboard() {
           <div style={{ padding: '20px' }}>
             <form action={addGig} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-                {/* Notice these names match the original database setup exactly */}
                 <input name="title" className="form-input" placeholder="Artist / Band" required />
                 <input name="venue" className="form-input" placeholder="Venue" required />
                 <input name="gig_date" type="date" className="form-input" required />
-                <input name="price" className="form-input" placeholder="Price / Ticket Link" required />
+                <input name="price" className="form-input" placeholder="Price (e.g. £15.40)" />
               </div>
+              {/* NEW TICKET URL FIELD */}
+              <input name="ticket_url" className="form-input" placeholder="Ticket Link (https://...)" />
               <textarea name="description" className="reply-textarea" rows={2} placeholder="Extra info..." />
               <div style={{ display: 'flex', gap: '10px' }}>
                 <input name="passcode" type="password" className="form-input" placeholder="Passcode" required />
