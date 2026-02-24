@@ -3,16 +3,11 @@ export const dynamic = 'force-dynamic';
 import { sql } from '@/lib/db';
 import Link from 'next/link';
 
-// Helper for Trending Discussions
 async function getRecentThreads() {
   try {
     const rows = await sql`
       SELECT 
-        t.id, 
-        t.title, 
-        t.reply_count, 
-        b.name AS board_name, 
-        u.username,
+        t.id, t.title, t.reply_count, b.name AS board_name, u.username,
         MAX(p.created_at) as last_interaction
       FROM threads t
       JOIN boards b ON t.board_id = b.id
@@ -30,6 +25,7 @@ async function getRecentThreads() {
   }
 }
 
+// FIXED: TARGETS 'gigs' TABLE INSTEAD OF 'gig_guide'
 async function getUpcomingGigs() {
   try {
     const rows = await sql`
@@ -107,27 +103,23 @@ export default async function HomePage() {
         </div>
 
         <div className="section-label">Trending Discussions</div>
-        {threads.length === 0 ? (
-          <div className="no-threads">No active discussions yet.</div>
-        ) : (
-          <ul className="thread-list">
-            {threads.map((thread: any) => (
-              <li key={thread.id} className="thread-item">
-                <Link href={`/profile/${thread.username}`} style={{ textDecoration: 'none' }}>
-                  <div className="thread-avatar">{thread.username?.slice(0, 2).toUpperCase() || '??'}</div>
-                </Link>
-                <div className="thread-main">
-                  <Link href={`/threads/${thread.id}`} className="thread-title">{thread.title}</Link>
-                  <div className="thread-sub">
-                    <span className="board-tag">{thread.board_name}</span>
-                    Started by <Link href={`/profile/${thread.username}`} style={{ color: 'var(--rust)', textDecoration: 'none', fontWeight: 'bold' }}>{thread.username}</Link> · {timeAgo(thread.last_interaction)}
-                  </div>
+        <ul className="thread-list">
+          {threads.map((thread: any) => (
+            <li key={thread.id} className="thread-item">
+              <Link href={`/profile/${thread.username}`} style={{ textDecoration: 'none' }}>
+                <div className="thread-avatar">{thread.username?.slice(0, 2).toUpperCase() || '??'}</div>
+              </Link>
+              <div className="thread-main">
+                <Link href={`/threads/${thread.id}`} className="thread-title">{thread.title}</Link>
+                <div className="thread-sub">
+                  <span className="board-tag">{thread.board_name}</span>
+                  Started by <Link href={`/profile/${thread.username}`} style={{ color: 'var(--rust)', textDecoration: 'none', fontWeight: 'bold' }}>{thread.username}</Link> · {timeAgo(thread.last_interaction)}
                 </div>
-                <div className="thread-replies"><strong>{thread.reply_count || 0}</strong> replies</div>
-              </li>
-            ))}
-          </ul>
-        )}
+              </div>
+              <div className="thread-replies"><strong>{thread.reply_count || 0}</strong> replies</div>
+            </li>
+          ))}
+        </ul>
       </div>
 
       <aside className="sidebar">
@@ -144,7 +136,7 @@ export default async function HomePage() {
           </Link>
         )}
 
-        {/* --- DYNAMIC ADMIN GIG GUIDE --- */}
+        {/* --- DYNAMIC GIG GUIDE --- */}
         <div className="sidebar-widget">
           <div className="widget-header">📅 Upcoming Gigs</div>
           <div className="widget-body" style={{ padding: '15px' }}>
@@ -155,7 +147,7 @@ export default async function HomePage() {
                     <div style={{ fontSize: '0.7rem', color: '#666', fontFamily: 'IBM Plex Mono', textTransform: 'uppercase' }}>
                       {new Date(gig.gig_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} @ {gig.venue}
                     </div>
-                    <div style={{ fontWeight: 'bold', fontSize: '1rem', fontFamily: 'Playfair Display', color: 'var(--ink)' }}>
+                    <div style={{ fontWeight: 'bold', fontSize: '1.1rem', fontFamily: 'Playfair Display' }}>
                       {gig.artist}
                     </div>
                   </div>
@@ -164,7 +156,7 @@ export default async function HomePage() {
             ) : (
               <p style={{ margin: 0, color: '#666', fontSize: '0.9rem' }}>Check back soon for more listings.</p>
             )}
-            <Link href="/features/listings" style={{ display: 'block', marginTop: '15px', fontSize: '0.8rem', color: 'var(--rust)', fontWeight: 'bold', textDecoration: 'none' }}>
+            <Link href="/features/gig-guide" style={{ display: 'block', marginTop: '15px', fontSize: '0.8rem', color: 'var(--rust)', fontWeight: 'bold', textDecoration: 'none' }}>
               Full Calendar →
             </Link>
           </div>
