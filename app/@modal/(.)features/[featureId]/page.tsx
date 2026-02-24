@@ -36,7 +36,7 @@ export default function FeatureModal() {
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '25px', maxHeight: '60vh', overflowY: 'auto', paddingRight: '10px' }}>
           {gigs.length === 0 ? (
-            <p style={{ textAlign: 'center' }}>No upcoming gigs found.</p>
+            <p style={{ textAlign: 'center' }}>No upcoming gigs found in the 'gigs' table.</p>
           ) : (
             gigs.map((gig: any) => (
               <div key={gig.id} style={{ borderLeft: '4px solid var(--rust)', paddingLeft: '15px' }}>
