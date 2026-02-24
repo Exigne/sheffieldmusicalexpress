@@ -5,7 +5,9 @@ export default async function GigModal({ params }: { params: { id: string } }) {
   let gig = null;
 
   try {
-    const rows = await sql`SELECT * FROM gigs WHERE id = ${params.id}`;
+    // FIXED: Convert the string ID from the URL into a strict Number for the database
+    const gigId = Number(params.id); 
+    const rows = await sql`SELECT * FROM gigs WHERE id = ${gigId}`;
     gig = rows[0];
   } catch (error) {
     console.error("Failed to fetch gig details:", error);
@@ -15,7 +17,8 @@ export default async function GigModal({ params }: { params: { id: string } }) {
     return (
       <Modal>
         <div style={{ padding: '40px', textAlign: 'center' }}>
-          <h2>Listing not found or removed.</h2>
+          <h2 style={{ fontFamily: 'Playfair Display' }}>Listing not found or removed.</h2>
+          <p style={{ color: '#666' }}>The ID passed was: {params.id}</p>
         </div>
       </Modal>
     );
