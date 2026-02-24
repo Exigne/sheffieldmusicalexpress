@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic';
 import { sql } from '@/lib/db';
 import Link from 'next/link';
 
+// Helper to fetch Trending Discussions
 async function getRecentThreads() {
   try {
     const rows = await sql`
@@ -29,6 +30,25 @@ async function getRecentThreads() {
   }
 }
 
+// NEW Helper to fetch the next 3 gigs
+async function getUpcomingGigs() {
+  try {
+    // Assuming 'gigs' is the slug for your Gigs & Venues board
+    const rows = await sql`
+      SELECT t.id, t.title, t.created_at
+      FROM threads t
+      JOIN boards b ON t.board_id = b.id
+      WHERE b.slug = 'gigs'
+      ORDER BY t.created_at DESC
+      LIMIT 3
+    `;
+    return rows ?? [];
+  } catch (error) {
+    console.error('Gig Fetch Error:', error);
+    return [];
+  }
+}
+
 function timeAgo(dateInput: string | Date): string {
   const diff = Date.now() - new Date(dateInput).getTime();
   const mins = Math.floor(diff / 60000);
@@ -40,6 +60,7 @@ function timeAgo(dateInput: string | Date): string {
 
 export default async function HomePage() {
   const threads = await getRecentThreads();
+  const upcomingGigs = await getUpcomingGigs();
   
   // FETCH ARTICLES AND BAND FROM DB
   let articles: any[] = [];
@@ -99,8 +120,6 @@ export default async function HomePage() {
           <ul className="thread-list">
             {threads.map((thread: any) => (
               <li key={thread.id} className="thread-item">
-                
-                {/* 1. MAKE THE AVATAR CLICKABLE */}
                 <Link href={`/profile/${thread.username}`} style={{ textDecoration: 'none' }}>
                   <div className="thread-avatar" style={{ cursor: 'pointer' }}>
                     {thread.username?.slice(0, 2).toUpperCase() || '??'}
@@ -112,8 +131,6 @@ export default async function HomePage() {
                   <div className="thread-sub">
                     <span className="board-tag">{thread.board_name}</span>
                     Started by{' '}
-                    
-                    {/* 2. MAKE THE USERNAME CLICKABLE */}
                     <Link href={`/profile/${thread.username}`} style={{ color: 'var(--rust)', textDecoration: 'none', fontWeight: 'bold' }}>
                       {thread.username}
                     </Link>
@@ -150,16 +167,33 @@ export default async function HomePage() {
           <p style={{fontSize: '0.8rem', marginBottom: '20px'}}>Set a Band of the Month in the Mod Panel.</p>
         )}
 
-        {/* Gig Guide */}
-        <Link href="/features/gig-guide" style={{ textDecoration: 'none', color: 'inherit' }}>
-          <div className="sidebar-widget" style={{ cursor: 'pointer' }}>
-            <div className="widget-header">📅 Gig Guide</div>
-            <div className="widget-body" style={{ fontSize: '0.85rem' }}>
-              <p style={{ margin: '0 0 10px 0', color: '#555' }}>The best local shows happening in Sheffield this week.</p>
-              <span style={{ fontSize: '0.8rem', color: 'var(--rust)', fontWeight: 'bold' }}>View Listings →</span>
-            </div>
+        {/* --- DYNAMIC GIG GUIDE --- */}
+        <div className="sidebar-widget">
+          <div className="widget-header">📅 Upcoming Gigs</div>
+          <div className="widget-body" style={{ padding: '15px' }}>
+            {upcomingGigs.length > 0 ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                {upcomingGigs.map((gig: any) => (
+                  <Link key={gig.id} href={`/threads/${gig.id}`} style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
+                    <div style={{ borderLeft: '3px solid var(--rust)', paddingLeft: '10px', transition: 'transform 0.2s' }}>
+                      <div style={{ fontSize: '0.7rem', color: '#666', fontFamily: 'IBM Plex Mono' }}>
+                        {new Date(gig.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }).toUpperCase()}
+                      </div>
+                      <div style={{ fontWeight: 'bold', fontSize: '0.95rem', fontFamily: 'Playfair Display' }}>
+                        {gig.title}
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <p style={{ margin: 0, color: '#666' }}>No upcoming gigs listed.</p>
+            )}
+            <Link href="/boards/gigs" style={{ display: 'block', marginTop: '15px', fontSize: '0.8rem', color: 'var(--rust)', fontWeight: 'bold', textDecoration: 'none' }}>
+              View All Listings →
+            </Link>
           </div>
-        </Link>
+        </div>
 
       </aside>
     </div>
