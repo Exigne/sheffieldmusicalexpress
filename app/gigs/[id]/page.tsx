@@ -1,12 +1,14 @@
 import { sql } from '@/lib/db';
 import Link from 'next/link';
 
-export default async function GigFallbackPage({ params }: { params: { id: string } }) {
+export default async function GigFallbackPage(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
+  const rawId = params?.id;
+
   let gig = null;
 
   try {
-    // FIXED: Convert ID to Number
-    const gigId = Number(params.id);
+    const gigId = Number(rawId);
     const rows = await sql`SELECT * FROM gigs WHERE id = ${gigId}`;
     gig = rows[0];
   } catch (error) {
@@ -17,7 +19,8 @@ export default async function GigFallbackPage({ params }: { params: { id: string
     return (
       <div style={{ textAlign: 'center', padding: '100px', minHeight: '60vh' }}>
         <h2 style={{ fontFamily: 'Playfair Display' }}>Listing not found or removed.</h2>
-        <Link href="/" style={{ color: 'var(--rust)', fontWeight: 'bold' }}>← Return Home</Link>
+        <p style={{ color: '#666' }}>ID Attempted: {rawId || "UNDEFINED"}</p>
+        <Link href="/" style={{ color: 'var(--rust)', fontWeight: 'bold', marginTop: '20px', display: 'inline-block' }}>← Return Home</Link>
       </div>
     );
   }
