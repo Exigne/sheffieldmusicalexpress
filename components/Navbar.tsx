@@ -40,7 +40,7 @@ export default function Navbar() {
         {/* <-- NEW MARKETPLACE LINK --> */}
         <li><Link href="/marketplace">🛒 Gear Exchange</Link></li>
         
-        <li><Link href="/boards/albums">🎵 Technique</Link></li>
+        <li><Link href="/boards/albums">🎵 Album Reviews</Link></li>
         <li><Link href="/boards/gigs">🎤 Gigs &amp; Venues</Link></li>
         <li><Link href="/boards/band-wanted">🤝 Band Wanted</Link></li>
         <li><Link href="/boards/production">🎧 Production</Link></li>
