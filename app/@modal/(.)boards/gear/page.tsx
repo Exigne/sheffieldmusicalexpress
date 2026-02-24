@@ -20,20 +20,20 @@ export default function GearModal() {
 
   return (
     <Modal>
-      {/* 1. THE BANNER BOX */}
+      {/* WHITE BANNER BOX */}
       <div style={{ background: 'white', border: '1px solid #ddd', padding: '30px', display: 'flex', alignItems: 'center', gap: '25px', marginBottom: '30px' }}>
         <span style={{ fontSize: '4rem' }}>🎸</span>
         <div>
           <h1 style={{ fontFamily: 'Bebas Neue', fontSize: '3.5rem', margin: 0, lineHeight: 1, letterSpacing: '1px' }}>
-            GEAR &amp; LOCAL KIT
+            GEAR &amp; KIT TALK
           </h1>
           <p style={{ margin: '5px 0 0 0', color: '#666', fontSize: '1rem' }}>
-            Guitars, amps, pedals, and the eternal struggle for the perfect tone.
+            Guitars, amps, pedals, synths — buy, sell, and argue about Fender vs Gibson.
           </p>
         </div>
       </div>
 
-      {/* 2. THE CONTENT HEADER */}
+      {/* SUB-HEADER WITH BUTTON */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: '2px solid var(--rust)', paddingBottom: '10px', marginBottom: '20px' }}>
         <h2 style={{ fontFamily: 'Bebas Neue', color: 'var(--rust)', margin: 0, fontSize: '1.4rem', letterSpacing: '1px' }}>
           LATEST CONVERSATIONS
@@ -41,21 +41,20 @@ export default function GearModal() {
         <button className="btn-submit" style={{ padding: '8px 20px', fontSize: '0.9rem' }}>+ NEW THREAD</button>
       </div>
 
-      {/* 3. THREAD LISTING */}
       {loading ? (
-        <p style={{ fontFamily: 'IBM Plex Mono', color: '#666' }}>Scanning the frequency...</p>
+        <p style={{ fontFamily: 'IBM Plex Mono', color: '#666', padding: '20px' }}>Scanning the frequency...</p>
       ) : threads.length === 0 ? (
-        <p style={{ padding: '20px 0', color: '#666' }}>No threads here yet. Be the first!</p>
+        <p style={{ padding: '20px', color: '#666' }}>No threads here yet. Be the first!</p>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0px' }}>
           {threads.map((thread: any) => (
             <Link key={thread.id} href={`/threads/${thread.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-              <div style={{ padding: '15px', borderBottom: '1px solid var(--aged)', display: 'flex', justifyContent: 'space-between' }}>
+              <div style={{ padding: '15px 10px', borderBottom: '1px solid var(--aged)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
                   <h3 style={{ margin: 0, fontFamily: 'Playfair Display', fontSize: '1.2rem' }}>{thread.title}</h3>
                   <span style={{ fontSize: '0.75rem', color: '#666' }}>Posted by {thread.username}</span>
                 </div>
-                <div style={{ fontWeight: 'bold', color: 'var(--rust)' }}>{thread.reply_count} replies</div>
+                <div style={{ fontWeight: 'bold', color: 'var(--rust)', fontSize: '0.9rem' }}>{thread.reply_count} replies</div>
               </div>
             </Link>
           ))}
@@ -63,7 +62,7 @@ export default function GearModal() {
       )}
 
       <div style={{ marginTop: '20px', textAlign: 'center' }}>
-        <Link href="/boards/gear" style={{ color: 'var(--rust)', fontWeight: 'bold', textDecoration: 'none', fontSize: '0.9rem' }}>
+        <Link href="/boards/gear" style={{ color: 'var(--rust)', fontWeight: 'bold', textDecoration: 'none', fontSize: '0.9rem', borderBottom: '1px solid var(--rust)' }}>
           VIEW FULL BOARD →
         </Link>
       </div>
