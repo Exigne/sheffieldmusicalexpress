@@ -11,7 +11,7 @@ export default async function UserProfilePage({ params }: { params: Promise<{ us
   // 2. Look up the user in the database
   let user = null;
   try {
-    const userRes = await sql`SELECT id, username, created_at, avatar_initials FROM users WHERE username = ${decodedUsername} LIMIT 1`;
+    const userRes = await sql`SELECT id, username, created_at, avatar_initials, bio FROM users WHERE username = ${decodedUsername} LIMIT 1`;
     user = userRes[0];
   } catch (e) {
     console.error("Failed to fetch user");
@@ -69,16 +69,27 @@ export default async function UserProfilePage({ params }: { params: Promise<{ us
           <span style={{ color: 'var(--rust)' }}>{user.username}</span>
         </nav>
 
-        {/* PROFILE HEADER */}
+        {/* PROFILE HEADER WITH NEW MESSAGE BUTTON */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '20px', background: 'var(--paper)', border: '1px solid var(--ink)', padding: '30px', marginBottom: '40px', borderBottom: '4px solid var(--rust)' }}>
-          <div style={{ width: '80px', height: '80px', background: 'var(--ink)', color: 'var(--bright-gold)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', fontWeight: 'bold', fontFamily: 'Playfair Display' }}>
+          <div style={{ width: '80px', height: '80px', background: 'var(--ink)', color: 'var(--bright-gold)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', fontWeight: 'bold', fontFamily: 'Playfair Display', flexShrink: 0 }}>
             {user.avatar_initials || user.username.slice(0, 2).toUpperCase()}
           </div>
-          <div>
+          <div style={{ flexGrow: 1 }}>
             <h1 style={{ fontFamily: 'Playfair Display', fontSize: '2.5rem', margin: '0 0 5px 0' }}>{user.username}</h1>
-            <div style={{ fontSize: '0.9rem', color: '#666', fontFamily: 'IBM Plex Mono' }}>
+            <div style={{ fontSize: '0.9rem', color: '#666', fontFamily: 'IBM Plex Mono', marginBottom: '10px' }}>
               Member since {new Date(user.created_at).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })}
             </div>
+            {/* Show their bio if they filled it out in settings! */}
+            {user.bio && (
+              <div style={{ fontSize: '0.95rem', color: '#333', fontStyle: 'italic' }}>"{user.bio}"</div>
+            )}
+          </div>
+          
+          {/* <-- THE NEW DIRECT MESSAGE BUTTON --> */}
+          <div>
+            <Link href={`/inbox?chat=${user.username}`} className="btn-submit" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none', background: 'var(--rust)', color: 'white' }}>
+              ✉️ Message
+            </Link>
           </div>
         </div>
 
