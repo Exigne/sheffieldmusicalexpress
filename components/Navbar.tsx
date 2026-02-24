@@ -36,7 +36,7 @@ export default function Navbar() {
       <ul>
         <li><Link href="/">🏠 Home</Link></li>
         <li><Link href="/boards/gear">🎸 Gear &amp; Kit</Link></li>
-        <li><Link href="/boards/technique">🎵 Technique</Link></li>
+        <li><Link href="/boards/albums">🎵 Technique</Link></li>
         <li><Link href="/boards/gigs">🎤 Gigs &amp; Venues</Link></li>
         <li><Link href="/boards/band-wanted">🤝 Band Wanted</Link></li>
         <li><Link href="/boards/production">🎧 Production</Link></li>
