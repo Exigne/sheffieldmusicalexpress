@@ -13,50 +13,42 @@ export default async function AdminDashboard() {
   async function addArticle(formData: FormData) {
     "use server";
     if (formData.get('passcode') !== PASSCODE) return;
-    try {
-      await sql`
-        INSERT INTO articles (slug, title, category, excerpt, content) 
-        VALUES (${formData.get('slug') as string}, ${formData.get('title') as string}, ${formData.get('category') as string}, ${formData.get('excerpt') as string}, ${formData.get('content') as string})
-      `;
-      revalidatePath('/'); revalidatePath('/admin');
-    } catch (e) { console.error("Article Error:", e); }
+    await sql`
+      INSERT INTO articles (slug, title, category, excerpt, content) 
+      VALUES (${formData.get('slug') as string}, ${formData.get('title') as string}, ${formData.get('category') as string}, ${formData.get('excerpt') as string}, ${formData.get('content') as string})
+    `;
+    revalidatePath('/'); revalidatePath('/admin');
   }
 
   async function updateBand(formData: FormData) {
     "use server";
     if (formData.get('passcode') !== PASSCODE) return;
-    try {
-      await sql`
-        INSERT INTO featured_bands (name, description, next_gig, essential_track) 
-        VALUES (${formData.get('name') as string}, ${formData.get('description') as string}, ${formData.get('next_gig') as string}, ${formData.get('essential_track') as string})
-      `;
-      revalidatePath('/'); revalidatePath('/admin');
-    } catch (e) { console.error("Band Error:", e); }
+    await sql`
+      INSERT INTO featured_bands (name, description, next_gig, essential_track) 
+      VALUES (${formData.get('name') as string}, ${formData.get('description') as string}, ${formData.get('next_gig') as string}, ${formData.get('essential_track') as string})
+    `;
+    revalidatePath('/'); revalidatePath('/admin');
   }
 
   async function addGig(formData: FormData) {
     "use server";
     if (formData.get('passcode') !== PASSCODE) return;
 
-    try {
-      // Ensure these names match Step 1's SQL exactly
-      await sql`
-        INSERT INTO gigs (artist, venue, gig_date, ticket_url, description) 
-        VALUES (
-          ${formData.get('artist') as string}, 
-          ${formData.get('venue') as string}, 
-          ${formData.get('gig_date') as string}, 
-          ${formData.get('ticket_url') as string}, 
-          ${formData.get('description') as string}
-        )
-      `;
-      revalidatePath('/'); 
-      revalidatePath('/features/gig-guide'); 
-      revalidatePath('/admin');
-    } catch (e) {
-      console.error("GIG INSERT ERROR:", e);
-      throw new Error("Database mismatch. Ensure 'gigs' table has artist/venue/gig_date/ticket_url columns.");
-    }
+    // FIXED: Using 'title' and 'price' to match your actual Neon database table
+    await sql`
+      INSERT INTO gigs (title, venue, gig_date, price, description) 
+      VALUES (
+        ${formData.get('title') as string}, 
+        ${formData.get('venue') as string}, 
+        ${formData.get('gig_date') as string}, 
+        ${formData.get('price') as string}, 
+        ${formData.get('description') as string}
+      )
+    `;
+
+    revalidatePath('/'); 
+    revalidatePath('/features/gig-guide'); 
+    revalidatePath('/admin');
   }
 
   return (
@@ -96,7 +88,11 @@ export default async function AdminDashboard() {
           </div>
           <div style={{ padding: '20px' }}>
             <form action={updateBand} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-              <input name="name" className="form-input" placeholder="Band Name" required />
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                <input name="name" className="form-input" placeholder="Band Name" required />
+                <input name="essential_track" className="form-input" placeholder="Essential Track" required />
+              </div>
+              <input name="next_gig" className="form-input" placeholder="Next Gig" required />
               <textarea name="description" className="reply-textarea" rows={3} placeholder="Bio..." required />
               <div style={{ display: 'flex', gap: '10px' }}>
                 <input name="passcode" type="password" className="form-input" placeholder="Passcode" required />
@@ -114,10 +110,11 @@ export default async function AdminDashboard() {
           <div style={{ padding: '20px' }}>
             <form action={addGig} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-                <input name="artist" className="form-input" placeholder="Artist / Band" required />
+                {/* Notice these names match the original database setup exactly */}
+                <input name="title" className="form-input" placeholder="Artist / Band" required />
                 <input name="venue" className="form-input" placeholder="Venue" required />
                 <input name="gig_date" type="date" className="form-input" required />
-                <input name="ticket_url" className="form-input" placeholder="Ticket URL" />
+                <input name="price" className="form-input" placeholder="Price / Ticket Link" required />
               </div>
               <textarea name="description" className="reply-textarea" rows={2} placeholder="Extra info..." />
               <div style={{ display: 'flex', gap: '10px' }}>
