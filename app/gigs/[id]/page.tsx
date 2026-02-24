@@ -5,7 +5,9 @@ export default async function GigFallbackPage({ params }: { params: { id: string
   let gig = null;
 
   try {
-    const rows = await sql`SELECT * FROM gigs WHERE id = ${params.id}`;
+    // FIXED: Convert ID to Number
+    const gigId = Number(params.id);
+    const rows = await sql`SELECT * FROM gigs WHERE id = ${gigId}`;
     gig = rows[0];
   } catch (error) {
     console.error("Failed to fetch gig details:", error);
@@ -14,7 +16,7 @@ export default async function GigFallbackPage({ params }: { params: { id: string
   if (!gig) {
     return (
       <div style={{ textAlign: 'center', padding: '100px', minHeight: '60vh' }}>
-        <h2>Listing not found or removed.</h2>
+        <h2 style={{ fontFamily: 'Playfair Display' }}>Listing not found or removed.</h2>
         <Link href="/" style={{ color: 'var(--rust)', fontWeight: 'bold' }}>← Return Home</Link>
       </div>
     );
