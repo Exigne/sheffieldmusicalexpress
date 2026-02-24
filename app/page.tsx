@@ -25,7 +25,7 @@ async function getRecentThreads() {
   }
 }
 
-// FIXED: TARGETS 'gigs' TABLE INSTEAD OF 'gig_guide'
+// FETCH FROM 'gigs' TABLE
 async function getUpcomingGigs() {
   try {
     const rows = await sql`
@@ -136,7 +136,6 @@ export default async function HomePage() {
           </Link>
         )}
 
-        {/* --- DYNAMIC GIG GUIDE --- */}
         <div className="sidebar-widget">
           <div className="widget-header">📅 Upcoming Gigs</div>
           <div className="widget-body" style={{ padding: '15px' }}>
