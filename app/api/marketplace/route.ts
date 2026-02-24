@@ -16,18 +16,18 @@ export async function GET() {
   }
 }
 
-// 2. POST: Add a new piece of gear to the exchange
+// 2. POST: Add a new piece of gear to the exchange (Now with Images!)
 export async function POST(request: Request) {
   try {
-    const { seller, title, description, price, condition, category } = await request.json();
+    const { seller, title, description, price, condition, category, image_url } = await request.json();
     
     if (!seller || !title || !price) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
     await sql`
-      INSERT INTO marketplace_items (seller_username, title, description, price, condition, category)
-      VALUES (${seller}, ${title}, ${description}, ${price}, ${condition}, ${category})
+      INSERT INTO marketplace_items (seller_username, title, description, price, condition, category, image_url)
+      VALUES (${seller}, ${title}, ${description}, ${price}, ${condition}, ${category}, ${image_url || null})
     `;
 
     return NextResponse.json({ success: true }, { status: 201 });
