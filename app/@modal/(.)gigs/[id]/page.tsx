@@ -1,12 +1,15 @@
 import Modal from '@/components/Modal';
 import { sql } from '@/lib/db';
 
-export default async function GigModal({ params }: { params: { id: string } }) {
+// Next.js 15 requires params to be treated as a Promise
+export default async function GigModal(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params; // Unwrap the params securely
+  const rawId = params?.id; 
+
   let gig = null;
 
   try {
-    // FIXED: Convert the string ID from the URL into a strict Number for the database
-    const gigId = Number(params.id); 
+    const gigId = Number(rawId); 
     const rows = await sql`SELECT * FROM gigs WHERE id = ${gigId}`;
     gig = rows[0];
   } catch (error) {
@@ -18,7 +21,14 @@ export default async function GigModal({ params }: { params: { id: string } }) {
       <Modal>
         <div style={{ padding: '40px', textAlign: 'center' }}>
           <h2 style={{ fontFamily: 'Playfair Display' }}>Listing not found or removed.</h2>
-          <p style={{ color: '#666' }}>The ID passed was: {params.id}</p>
+          <p style={{ color: '#666' }}>
+            The ID passed was: <strong>{rawId || "UNDEFINED"}</strong>
+          </p>
+          {!rawId && (
+            <p style={{ fontSize: '0.8rem', color: 'var(--rust)', marginTop: '10px' }}>
+              *If this says UNDEFINED, rename your folder exactly to: <strong>[id]</strong>
+            </p>
+          )}
         </div>
       </Modal>
     );
