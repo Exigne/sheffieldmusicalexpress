@@ -25,13 +25,13 @@ async function getRecentThreads() {
   }
 }
 
-// FETCH FROM 'gigs' TABLE
+// FETCH FROM 'gigs' TABLE WITH TIMEZONE FALLBACK
 async function getUpcomingGigs() {
   try {
     const rows = await sql`
       SELECT id, artist, venue, gig_date
       FROM gigs 
-      WHERE gig_date >= CURRENT_DATE
+      WHERE gig_date >= (CURRENT_DATE - INTERVAL '1 day')
       ORDER BY gig_date ASC
       LIMIT 3
     `;
@@ -136,6 +136,7 @@ export default async function HomePage() {
           </Link>
         )}
 
+        {/* --- REPAIRED GIG GUIDE --- */}
         <div className="sidebar-widget">
           <div className="widget-header">📅 Upcoming Gigs</div>
           <div className="widget-body" style={{ padding: '15px' }}>
@@ -153,7 +154,10 @@ export default async function HomePage() {
                 ))}
               </div>
             ) : (
-              <p style={{ margin: 0, color: '#666', fontSize: '0.9rem' }}>Check back soon for more listings.</p>
+              <div style={{ fontSize: '0.85rem', color: '#666' }}>
+                <p style={{ margin: '0 0 5px 0' }}>No listings found in &apos;gigs&apos; table.</p>
+                <p style={{ margin: 0, fontSize: '0.7rem' }}>Checked at: {new Date().toLocaleTimeString()}</p>
+              </div>
             )}
             <Link href="/features/gig-guide" style={{ display: 'block', marginTop: '15px', fontSize: '0.8rem', color: 'var(--rust)', fontWeight: 'bold', textDecoration: 'none' }}>
               Full Calendar →
