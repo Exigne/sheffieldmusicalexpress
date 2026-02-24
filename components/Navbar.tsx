@@ -37,10 +37,12 @@ export default function Navbar() {
         <li><Link href="/">🏠 Home</Link></li>
         <li><Link href="/boards/gear">🎸 Gear &amp; Kit</Link></li>
         
-        {/* <-- NEW MARKETPLACE LINK --> */}
+        {/* MARKETPLACE LINK */}
         <li><Link href="/marketplace">🛒 Gear Exchange</Link></li>
         
-        <li><Link href="/boards/albums">🎵 Album Reviews</Link></li>
+        {/* FIXED: Pointing exactly to /boards/albums */}
+        <li><Link href="/boards/albums">💽 Album Reviews</Link></li>
+        
         <li><Link href="/boards/gigs">🎤 Gigs &amp; Venues</Link></li>
         <li><Link href="/boards/band-wanted">🤝 Band Wanted</Link></li>
         <li><Link href="/boards/production">🎧 Production</Link></li>
@@ -50,7 +52,6 @@ export default function Navbar() {
         {user ? (
           <li className="nav-auth-split" style={{ position: 'relative' }} ref={dropdownRef}>
             
-            {/* The Clickable Username Button */}
             <button 
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
               style={{ 
@@ -63,7 +64,6 @@ export default function Navbar() {
               👤 {user} <span style={{ fontSize: '0.7rem' }}>▼</span>
             </button>
 
-            {/* The Dropdown Menu Box */}
             {isDropdownOpen && (
               <div style={{ 
                 position: 'absolute', top: '100%', right: 0, marginTop: '8px', 
@@ -73,7 +73,6 @@ export default function Navbar() {
               }}>
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
                   
-                  {/* Link to Profile page */}
                   <Link 
                     href={`/profile/${user}`} 
                     onClick={() => setIsDropdownOpen(false)}
@@ -82,7 +81,6 @@ export default function Navbar() {
                     🗂️ My Posts
                   </Link>
 
-                  {/* <-- NEW INBOX LINK --> */}
                   <Link 
                     href="/inbox" 
                     onClick={() => setIsDropdownOpen(false)}
@@ -90,8 +88,16 @@ export default function Navbar() {
                   >
                     ✉️ Messages
                   </Link>
+
+                  {/* PREPPING FOR THE NEXT FEATURE: BAND BUILDER */}
+                  <Link 
+                    href="/musicians" 
+                    onClick={() => setIsDropdownOpen(false)}
+                    style={{ padding: '12px 15px', color: 'var(--ink)', textDecoration: 'none', borderBottom: '1px solid var(--aged)', fontSize: '0.9rem' }}
+                  >
+                    🎸 Find Musicians
+                  </Link>
                   
-                  {/* Link to Settings page */}
                   <Link 
                     href="/settings" 
                     onClick={() => setIsDropdownOpen(false)}
@@ -100,7 +106,6 @@ export default function Navbar() {
                     ⚙️ Settings
                   </Link>
                   
-                  {/* The Logout Button */}
                   <button 
                     onClick={handleLogout} 
                     style={{ 
@@ -116,7 +121,6 @@ export default function Navbar() {
             )}
           </li>
         ) : (
-          /* LOGGED OUT VIEW */
           <>
             <li className="nav-auth-split">
               <Link href="/register" style={{ background: 'var(--ink)', color: 'var(--bright-gold)', padding: '5px 15px', borderRadius: '3px' }}>🗞️ Join</Link>
