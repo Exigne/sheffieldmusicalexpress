@@ -99,12 +99,25 @@ export default async function HomePage() {
           <ul className="thread-list">
             {threads.map((thread: any) => (
               <li key={thread.id} className="thread-item">
-                <div className="thread-avatar">{thread.username?.slice(0, 2).toUpperCase() || '??'}</div>
+                
+                {/* 1. MAKE THE AVATAR CLICKABLE */}
+                <Link href={`/profile/${thread.username}`} style={{ textDecoration: 'none' }}>
+                  <div className="thread-avatar" style={{ cursor: 'pointer' }}>
+                    {thread.username?.slice(0, 2).toUpperCase() || '??'}
+                  </div>
+                </Link>
+
                 <div className="thread-main">
                   <Link href={`/threads/${thread.id}`} className="thread-title">{thread.title}</Link>
                   <div className="thread-sub">
                     <span className="board-tag">{thread.board_name}</span>
-                    Started by <strong>{thread.username}</strong> · Active {timeAgo(thread.last_interaction)}
+                    Started by{' '}
+                    
+                    {/* 2. MAKE THE USERNAME CLICKABLE */}
+                    <Link href={`/profile/${thread.username}`} style={{ color: 'var(--rust)', textDecoration: 'none', fontWeight: 'bold' }}>
+                      {thread.username}
+                    </Link>
+                    {' '}· Active {timeAgo(thread.last_interaction)}
                   </div>
                 </div>
                 <div className="thread-replies">
