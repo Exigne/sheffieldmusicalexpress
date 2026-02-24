@@ -6,16 +6,12 @@ import { useEffect, useState, useRef } from 'react';
 export default function Navbar() {
   const [user, setUser] = useState<string | null>(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  
-  // This reference helps us detect clicks outside the dropdown
   const dropdownRef = useRef<HTMLLIElement>(null);
 
   useEffect(() => {
-    // 1. Check if the user is logged in
     const savedUser = localStorage.getItem('sme_user');
     setUser(savedUser);
 
-    // 2. The "Click Outside" logic to close the menu automatically
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsDropdownOpen(false);
@@ -28,7 +24,7 @@ export default function Navbar() {
   const handleLogout = () => {
     localStorage.removeItem('sme_user');
     setUser(null);
-    window.location.href = '/'; // Reload to homepage
+    window.location.href = '/'; 
   };
 
   return (
@@ -36,22 +32,15 @@ export default function Navbar() {
       <ul>
         <li><Link href="/">🏠 Home</Link></li>
         <li><Link href="/boards/gear">🎸 Gear &amp; Kit</Link></li>
-        
-        {/* MARKETPLACE LINK */}
         <li><Link href="/marketplace">🛒 Gear Exchange</Link></li>
-        
-        {/* FIXED: Pointing exactly to /boards/albums */}
         <li><Link href="/boards/albums">💽 Album Reviews</Link></li>
-        
         <li><Link href="/boards/gigs">🎤 Gigs &amp; Venues</Link></li>
         <li><Link href="/boards/band-wanted">🤝 Band Wanted</Link></li>
         <li><Link href="/boards/production">🎧 Production</Link></li>
         <li><Link href="/boards/records">📻 Record Fair</Link></li>
 
-        {/* LOGGED IN VIEW WITH DROPDOWN */}
         {user ? (
           <li className="nav-auth-split" style={{ position: 'relative' }} ref={dropdownRef}>
-            
             <button 
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
               style={{ 
@@ -72,7 +61,6 @@ export default function Navbar() {
                 minWidth: '160px', zIndex: 1000, overflow: 'hidden'
               }}>
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  
                   <Link 
                     href={`/profile/${user}`} 
                     onClick={() => setIsDropdownOpen(false)}
@@ -87,15 +75,6 @@ export default function Navbar() {
                     style={{ padding: '12px 15px', color: 'var(--ink)', textDecoration: 'none', borderBottom: '1px solid var(--aged)', fontSize: '0.9rem' }}
                   >
                     ✉️ Messages
-                  </Link>
-
-                  {/* PREPPING FOR THE NEXT FEATURE: BAND BUILDER */}
-                  <Link 
-                    href="/musicians" 
-                    onClick={() => setIsDropdownOpen(false)}
-                    style={{ padding: '12px 15px', color: 'var(--ink)', textDecoration: 'none', borderBottom: '1px solid var(--aged)', fontSize: '0.9rem' }}
-                  >
-                    🎸 Find Musicians
                   </Link>
                   
                   <Link 
