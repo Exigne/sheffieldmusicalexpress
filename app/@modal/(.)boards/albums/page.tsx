@@ -28,17 +28,20 @@ export default function AlbumReviewsModal() {
             ALBUM REVIEWS
           </h1>
           <p style={{ margin: '5px 0 0 0', color: '#666', fontSize: '1rem' }}>
-            Steel City&apos;s verdict on the latest releases, local demos, and all-time classics.
+            Steel City&apos;s verdict on the latest releases, local demos, and classics.
           </p>
         </div>
       </div>
 
-      {/* SUB-HEADER WITH BUTTON */}
+      {/* SUB-HEADER WITH WORKING BUTTON */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: '2px solid var(--rust)', paddingBottom: '10px', marginBottom: '20px' }}>
         <h2 style={{ fontFamily: 'Bebas Neue', color: 'var(--rust)', margin: 0, fontSize: '1.4rem', letterSpacing: '1px' }}>
           LATEST CONVERSATIONS
         </h2>
-        <button className="btn-submit" style={{ padding: '8px 20px', fontSize: '0.9rem' }}>+ NEW THREAD</button>
+        {/* FIXED: Added Link to the new thread page */}
+        <Link href="/new-thread?board=albums" className="btn-submit" style={{ textDecoration: 'none', padding: '8px 20px', fontSize: '0.9rem' }}>
+          + NEW THREAD
+        </Link>
       </div>
 
       {loading ? (
@@ -46,7 +49,7 @@ export default function AlbumReviewsModal() {
       ) : threads.length === 0 ? (
         <p style={{ padding: '20px', color: '#666' }}>No reviews posted yet. Be the first!</p>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
           {threads.map((thread: any) => (
             <Link key={thread.id} href={`/threads/${thread.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
               <div style={{ padding: '15px 10px', borderBottom: '1px solid var(--aged)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -60,12 +63,6 @@ export default function AlbumReviewsModal() {
           ))}
         </div>
       )}
-
-      <div style={{ marginTop: '20px', textAlign: 'center' }}>
-        <Link href="/boards/albums" style={{ color: 'var(--rust)', fontWeight: 'bold', textDecoration: 'none', fontSize: '0.9rem', borderBottom: '1px solid var(--rust)' }}>
-          VIEW FULL BOARD →
-        </Link>
-      </div>
     </Modal>
   );
 }
