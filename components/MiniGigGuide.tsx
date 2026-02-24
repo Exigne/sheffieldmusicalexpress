@@ -8,46 +8,41 @@ export default function MiniGigGuide() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // FIXED: Fetching from our new admin-only gig API
     fetch('/api/gigs')
       .then(res => res.json())
       .then(data => {
-        setGigs(Array.isArray(data) ? data : []);
+        // We only want the top 3 for the sidebar
+        setGigs(data.slice(0, 3));
         setLoading(false);
-      })
-      .catch(() => setLoading(false));
+      });
   }, []);
 
-  return (
-    <div style={{ 
-      background: 'white', 
-      border: '4px solid var(--ink)', 
-      padding: '20px',
-      boxShadow: '10px 10px 0px var(--rust)' 
-    }}>
-      <div style={{ borderBottom: '2px solid var(--ink)', marginBottom: '15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h2 style={{ fontFamily: 'Bebas Neue', fontSize: '1.8rem', margin: 0 }}>📅 UPCOMING GIGS</h2>
-        <Link href="/features/gig-guide" style={{ fontSize: '0.7rem', color: 'var(--rust)', fontWeight: 'bold', textDecoration: 'none' }}>VIEW ALL →</Link>
-      </div>
+  if (loading) return <div className="sidebar-widget">Loading Gigs...</div>;
 
-      {loading ? (
-        <p style={{ fontFamily: 'IBM Plex Mono', fontSize: '0.8rem' }}>Scanning the city...</p>
-      ) : gigs.length === 0 ? (
-        <p style={{ fontSize: '0.8rem', color: '#666' }}>No gigs listed for this week.</p>
-      ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-          {gigs.map((gig: any) => (
-            <div key={gig.id} style={{ borderLeft: '3px solid var(--rust)', paddingLeft: '12px' }}>
-              <div style={{ fontSize: '0.7rem', fontFamily: 'IBM Plex Mono', color: '#666', textTransform: 'uppercase' }}>
-                {new Date(gig.gig_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} @ {gig.venue}
+  return (
+    <div className="sidebar-widget">
+      <div className="widget-header">📅 UPCOMING GIGS</div>
+      <div className="widget-body" style={{ padding: '15px' }}>
+        {gigs.length > 0 ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+            {gigs.map((gig: any) => (
+              <div key={gig.id} style={{ borderLeft: '3px solid var(--rust)', paddingLeft: '10px' }}>
+                <div style={{ fontSize: '0.7rem', color: '#666', fontFamily: 'IBM Plex Mono' }}>
+                  {new Date(gig.gig_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }).toUpperCase()} @ {gig.venue}
+                </div>
+                <div style={{ fontWeight: 'bold', fontSize: '1rem', fontFamily: 'Playfair Display' }}>
+                  {gig.artist}
+                </div>
               </div>
-              <div style={{ fontWeight: 'bold', fontFamily: 'Playfair Display', fontSize: '1.1rem', color: 'var(--ink)' }}>
-                {gig.artist}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        ) : (
+          <p style={{ fontSize: '0.8rem' }}>No gigs found.</p>
+        )}
+        <Link href="/features/gig-guide" style={{ display: 'block', marginTop: '15px', fontSize: '0.8rem', color: 'var(--rust)', fontWeight: 'bold', textDecoration: 'none' }}>
+          VIEW FULL CALENDAR →
+        </Link>
+      </div>
     </div>
   );
 }
