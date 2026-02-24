@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic';
 import { sql } from '@/lib/db';
 import Link from 'next/link';
 
-// Helper to fetch Trending Discussions
+// Helper for Trending Discussions
 async function getRecentThreads() {
   try {
     const rows = await sql`
@@ -30,21 +30,19 @@ async function getRecentThreads() {
   }
 }
 
-// NEW Helper to fetch the next 3 gigs
+// FIXED: Fetches from admin-controlled gig_guide table
 async function getUpcomingGigs() {
   try {
-    // Assuming 'gigs' is the slug for your Gigs & Venues board
     const rows = await sql`
-      SELECT t.id, t.title, t.created_at
-      FROM threads t
-      JOIN boards b ON t.board_id = b.id
-      WHERE b.slug = 'gigs'
-      ORDER BY t.created_at DESC
+      SELECT id, artist, venue, gig_date
+      FROM gig_guide
+      WHERE gig_date >= CURRENT_DATE
+      ORDER BY gig_date ASC
       LIMIT 3
     `;
     return rows ?? [];
   } catch (error) {
-    console.error('Gig Fetch Error:', error);
+    console.error('Gig Guide Fetch Error:', error);
     return [];
   }
 }
@@ -62,7 +60,6 @@ export default async function HomePage() {
   const threads = await getRecentThreads();
   const upcomingGigs = await getUpcomingGigs();
   
-  // FETCH ARTICLES AND BAND FROM DB
   let articles: any[] = [];
   let band: any = null;
   try {
@@ -77,7 +74,6 @@ export default async function HomePage() {
   return (
     <div className="page-wrapper">
       <div className="content-area">
-        
         <div className="section-label">The Steel City Wire</div>
         
         {featuredArticle ? (
@@ -99,7 +95,6 @@ export default async function HomePage() {
           <p style={{marginBottom: '20px', color: '#666', fontSize: '0.9rem'}}>Publish your first article in the Mod Panel!</p>
         )}
 
-        {/* Secondary Articles Grid */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '40px' }}>
           {subArticles.map((article: any) => (
             <Link key={article.id} href={`/articles/${article.slug}`} style={{ textDecoration: 'none', color: 'inherit' }}>
@@ -112,89 +107,69 @@ export default async function HomePage() {
           ))}
         </div>
 
-        {/* TRENDING FORUM ACTIVITY */}
         <div className="section-label">Trending Discussions</div>
         {threads.length === 0 ? (
-          <div className="no-threads">No active discussions yet. Head to the boards to reply to a thread!</div>
+          <div className="no-threads">No active discussions yet.</div>
         ) : (
           <ul className="thread-list">
             {threads.map((thread: any) => (
               <li key={thread.id} className="thread-item">
                 <Link href={`/profile/${thread.username}`} style={{ textDecoration: 'none' }}>
-                  <div className="thread-avatar" style={{ cursor: 'pointer' }}>
-                    {thread.username?.slice(0, 2).toUpperCase() || '??'}
-                  </div>
+                  <div className="thread-avatar">{thread.username?.slice(0, 2).toUpperCase() || '??'}</div>
                 </Link>
-
                 <div className="thread-main">
                   <Link href={`/threads/${thread.id}`} className="thread-title">{thread.title}</Link>
                   <div className="thread-sub">
                     <span className="board-tag">{thread.board_name}</span>
-                    Started by{' '}
-                    <Link href={`/profile/${thread.username}`} style={{ color: 'var(--rust)', textDecoration: 'none', fontWeight: 'bold' }}>
-                      {thread.username}
-                    </Link>
-                    {' '}· Active {timeAgo(thread.last_interaction)}
+                    Started by <Link href={`/profile/${thread.username}`} style={{ color: 'var(--rust)', textDecoration: 'none', fontWeight: 'bold' }}>{thread.username}</Link> · {timeAgo(thread.last_interaction)}
                   </div>
                 </div>
-                <div className="thread-replies">
-                  <strong>{thread.reply_count || 0}</strong> replies
-                </div>
+                <div className="thread-replies"><strong>{thread.reply_count || 0}</strong> replies</div>
               </li>
             ))}
           </ul>
         )}
       </div>
 
-      {/* SIDEBAR */}
       <aside className="sidebar">
-        
-        {/* Band Spotlight */}
-        {band ? (
+        {band && (
           <Link href="/features/band-of-the-month" style={{ textDecoration: 'none', color: 'inherit' }}>
-            <div className="sidebar-widget" style={{ cursor: 'pointer' }}>
+            <div className="sidebar-widget">
               <div className="widget-header">🎸 Band of the Month</div>
               <div className="widget-body">
                 <h4 style={{ margin: '0 0 5px 0', fontFamily: 'Playfair Display', fontSize: '1.2rem' }}>{band.name}</h4>
-                <p style={{ fontSize: '0.8rem', lineHeight: '1.4', marginBottom: '10px' }}>
-                  {band.description.slice(0, 100)}...
-                </p>
+                <p style={{ fontSize: '0.8rem', lineHeight: '1.4', marginBottom: '10px' }}>{band.description.slice(0, 100)}...</p>
                 <span style={{ fontSize: '0.8rem', color: 'var(--rust)', fontWeight: 'bold' }}>Read Feature →</span>
               </div>
             </div>
           </Link>
-        ) : (
-          <p style={{fontSize: '0.8rem', marginBottom: '20px'}}>Set a Band of the Month in the Mod Panel.</p>
         )}
 
-        {/* --- DYNAMIC GIG GUIDE --- */}
+        {/* --- DYNAMIC ADMIN GIG GUIDE --- */}
         <div className="sidebar-widget">
           <div className="widget-header">📅 Upcoming Gigs</div>
           <div className="widget-body" style={{ padding: '15px' }}>
             {upcomingGigs.length > 0 ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                 {upcomingGigs.map((gig: any) => (
-                  <Link key={gig.id} href={`/threads/${gig.id}`} style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
-                    <div style={{ borderLeft: '3px solid var(--rust)', paddingLeft: '10px', transition: 'transform 0.2s' }}>
-                      <div style={{ fontSize: '0.7rem', color: '#666', fontFamily: 'IBM Plex Mono' }}>
-                        {new Date(gig.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }).toUpperCase()}
-                      </div>
-                      <div style={{ fontWeight: 'bold', fontSize: '0.95rem', fontFamily: 'Playfair Display' }}>
-                        {gig.title}
-                      </div>
+                  <div key={gig.id} style={{ borderLeft: '3px solid var(--rust)', paddingLeft: '10px' }}>
+                    <div style={{ fontSize: '0.7rem', color: '#666', fontFamily: 'IBM Plex Mono', textTransform: 'uppercase' }}>
+                      {new Date(gig.gig_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} @ {gig.venue}
                     </div>
-                  </Link>
+                    <div style={{ fontWeight: 'bold', fontSize: '1rem', fontFamily: 'Playfair Display', color: 'var(--ink)' }}>
+                      {gig.artist}
+                    </div>
+                  </div>
                 ))}
               </div>
             ) : (
-              <p style={{ margin: 0, color: '#666' }}>No upcoming gigs listed.</p>
+              <p style={{ margin: 0, color: '#666', fontSize: '0.9rem' }}>Check back soon for more listings.</p>
             )}
-            <Link href="/boards/gigs" style={{ display: 'block', marginTop: '15px', fontSize: '0.8rem', color: 'var(--rust)', fontWeight: 'bold', textDecoration: 'none' }}>
-              View All Listings →
+            <Link href="/features/gig-guide" style={{ display: 'block', marginTop: '15px', fontSize: '0.8rem', color: 'var(--rust)', fontWeight: 'bold', textDecoration: 'none' }}>
+              Full Calendar →
             </Link>
           </div>
         </div>
-
       </aside>
     </div>
   );
