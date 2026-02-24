@@ -30,19 +30,18 @@ async function getRecentThreads() {
   }
 }
 
-// FIXED: Fetches from admin-controlled gig_guide table
 async function getUpcomingGigs() {
   try {
     const rows = await sql`
       SELECT id, artist, venue, gig_date
-      FROM gig_guide
+      FROM gigs 
       WHERE gig_date >= CURRENT_DATE
       ORDER BY gig_date ASC
       LIMIT 3
     `;
     return rows ?? [];
   } catch (error) {
-    console.error('Gig Guide Fetch Error:', error);
+    console.error('Gig Fetch Error:', error);
     return [];
   }
 }
