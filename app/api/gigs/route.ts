@@ -1,4 +1,8 @@
-// Change 'gig_guide' to 'gigs' in your SQL queries
+import { sql } from '@/lib/db';
+import { NextResponse } from 'next/server';
+
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const rows = await sql`
