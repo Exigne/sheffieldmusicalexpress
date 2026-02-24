@@ -165,7 +165,7 @@ export default async function HomePage() {
             ) : (
               <p style={{ margin: 0, color: '#666', fontSize: '0.9rem' }}>Check back soon for more listings.</p>
             )}
-            <Link href="/features/gig-guide" style={{ display: 'block', marginTop: '15px', fontSize: '0.8rem', color: 'var(--rust)', fontWeight: 'bold', textDecoration: 'none' }}>
+            <Link href="/features/listings" style={{ display: 'block', marginTop: '15px', fontSize: '0.8rem', color: 'var(--rust)', fontWeight: 'bold', textDecoration: 'none' }}>
               Full Calendar →
             </Link>
           </div>
