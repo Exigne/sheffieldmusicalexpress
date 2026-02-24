@@ -8,13 +8,14 @@ export default function MiniGigGuide() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Fetch only the next 3 gigs from your database/api
-    fetch('/api/threads?board=gigs&limit=3')
+    // FIXED: Fetching from our new admin-only gig API
+    fetch('/api/gigs')
       .then(res => res.json())
       .then(data => {
-        setGigs(data);
+        setGigs(Array.isArray(data) ? data : []);
         setLoading(false);
-      });
+      })
+      .catch(() => setLoading(false));
   }, []);
 
   return (
@@ -26,24 +27,24 @@ export default function MiniGigGuide() {
     }}>
       <div style={{ borderBottom: '2px solid var(--ink)', marginBottom: '15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h2 style={{ fontFamily: 'Bebas Neue', fontSize: '1.8rem', margin: 0 }}>📅 UPCOMING GIGS</h2>
-        <Link href="/boards/gigs" style={{ fontSize: '0.7rem', color: 'var(--rust)', fontWeight: 'bold' }}>VIEW ALL →</Link>
+        <Link href="/features/gig-guide" style={{ fontSize: '0.7rem', color: 'var(--rust)', fontWeight: 'bold', textDecoration: 'none' }}>VIEW ALL →</Link>
       </div>
 
       {loading ? (
-        <p>Scanning the city...</p>
+        <p style={{ fontFamily: 'IBM Plex Mono', fontSize: '0.8rem' }}>Scanning the city...</p>
+      ) : gigs.length === 0 ? (
+        <p style={{ fontSize: '0.8rem', color: '#666' }}>No gigs listed for this week.</p>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
           {gigs.map((gig: any) => (
-            <Link key={gig.id} href={`/threads/${gig.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-              <div style={{ borderLeft: '3px solid var(--rust)', paddingLeft: '12px' }}>
-                <div style={{ fontSize: '0.7rem', fontFamily: 'IBM Plex Mono', color: '#666' }}>
-                  {new Date(gig.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }).toUpperCase()}
-                </div>
-                <div style={{ fontWeight: 'bold', fontFamily: 'Playfair Display', fontSize: '1.1rem' }}>
-                  {gig.title}
-                </div>
+            <div key={gig.id} style={{ borderLeft: '3px solid var(--rust)', paddingLeft: '12px' }}>
+              <div style={{ fontSize: '0.7rem', fontFamily: 'IBM Plex Mono', color: '#666', textTransform: 'uppercase' }}>
+                {new Date(gig.gig_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} @ {gig.venue}
               </div>
-            </Link>
+              <div style={{ fontWeight: 'bold', fontFamily: 'Playfair Display', fontSize: '1.1rem', color: 'var(--ink)' }}>
+                {gig.artist}
+              </div>
+            </div>
           ))}
         </div>
       )}
