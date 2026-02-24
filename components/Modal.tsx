@@ -1,54 +1,47 @@
 "use client";
 
-import { useRouter } from 'next/navigation';
-import { useEffect, useCallback } from 'react';
+import { useRouter } from "next/navigation";
+import { useEffect, useRef } from "react";
 
 export default function Modal({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const overlay = useRef<HTMLDivElement>(null);
 
-  const onDismiss = useCallback(() => {
-    router.back(); // Closes the pop-out and goes back to the dashboard
-  }, [router]);
+  const onDismiss = () => router.back();
 
-  // Close on ESC key
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onDismiss();
+      if (e.key === "Escape") onDismiss();
     };
-    document.addEventListener('keydown', onKeyDown);
-    return () => document.removeEventListener('keydown', onKeyDown);
-  }, [onDismiss]);
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, []);
 
   return (
-    <div 
+    <div
+      ref={overlay}
+      onClick={(e) => e.target === overlay.current && onDismiss()}
       style={{
-        position: 'fixed', zIndex: 9999, left: 0, top: 0, width: '100vw', height: '100vh',
-        backgroundColor: 'rgba(12, 15, 18, 0.85)', backdropFilter: 'blur(4px)',
-        display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px'
+        position: 'fixed', zIndex: 9999, top: 0, left: 0, right: 0, bottom: 0,
+        backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: '20px', backdropFilter: 'blur(4px)'
       }}
-      onClick={onDismiss} // Clicking the dark background closes it
     >
-      <div 
-        style={{
-          background: 'var(--paper)', width: '100%', maxWidth: '800px', maxHeight: '90vh',
-          overflowY: 'auto', borderRadius: '4px', border: '1px solid var(--ink)',
-          position: 'relative', boxShadow: '0 20px 40px rgba(0,0,0,0.5)'
-        }}
-        onClick={(e) => e.stopPropagation()} // Clicking inside the modal DOES NOT close it
-      >
+      <div style={{
+        position: 'relative', background: 'var(--paper)', width: '100%', maxWidth: '1100px',
+        maxHeight: '90vh', overflow: 'hidden', border: '2px solid var(--ink)', boxShadow: '0 20px 40px rgba(0,0,0,0.4)'
+      }}>
         <button 
           onClick={onDismiss}
           style={{
-            position: 'absolute', top: '15px', right: '15px', background: 'var(--ink)',
-            color: 'var(--paper)', border: 'none', padding: '5px 10px', cursor: 'pointer'
+            position: 'absolute', top: '15px', right: '15px', zIndex: 10,
+            background: 'var(--rust)', color: 'white', border: 'none', 
+            padding: '5px 12px', cursor: 'pointer', fontWeight: 'bold'
           }}
         >
-          ✕ Close
+          CLOSE [X]
         </button>
-        {/* The board content goes here */}
-        <div style={{ padding: '30px' }}>
-          {children}
-        </div>
+        {children}
       </div>
     </div>
   );
