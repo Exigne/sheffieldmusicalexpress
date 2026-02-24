@@ -36,6 +36,10 @@ export default function Navbar() {
       <ul>
         <li><Link href="/">🏠 Home</Link></li>
         <li><Link href="/boards/gear">🎸 Gear &amp; Kit</Link></li>
+        
+        {/* <-- NEW MARKETPLACE LINK --> */}
+        <li><Link href="/marketplace">🛒 Gear Exchange</Link></li>
+        
         <li><Link href="/boards/albums">🎵 Technique</Link></li>
         <li><Link href="/boards/gigs">🎤 Gigs &amp; Venues</Link></li>
         <li><Link href="/boards/band-wanted">🤝 Band Wanted</Link></li>
@@ -76,6 +80,15 @@ export default function Navbar() {
                     style={{ padding: '12px 15px', color: 'var(--ink)', textDecoration: 'none', borderBottom: '1px solid var(--aged)', fontSize: '0.9rem' }}
                   >
                     🗂️ My Posts
+                  </Link>
+
+                  {/* <-- NEW INBOX LINK --> */}
+                  <Link 
+                    href="/inbox" 
+                    onClick={() => setIsDropdownOpen(false)}
+                    style={{ padding: '12px 15px', color: 'var(--ink)', textDecoration: 'none', borderBottom: '1px solid var(--aged)', fontSize: '0.9rem' }}
+                  >
+                    ✉️ Messages
                   </Link>
                   
                   {/* Link to Settings page */}
