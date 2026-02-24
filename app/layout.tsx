@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import Navbar from './Navbar'; // <-- We import the smart nav here
 import AdminLink from '@/components/AdminLink'; // <-- We import the smart Admin Link here
+import MailNotification from '@/components/MailNotification'; // <-- We import the Mail Alert here
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -35,6 +36,10 @@ export default function RootLayout({
           <div className="masthead-top">
             <span>Est. 2026 — Steel City, South Yorkshire</span>
             <span className="masthead-date">{today}</span>
+            
+            {/* <-- NEW MAIL ALERT COMPONENT --> */}
+            <MailNotification />
+
             <div style={{ display: 'flex', gap: '15px' }}>
               
               {/* <-- SMART ADMIN LINK GOES HERE --> */}
