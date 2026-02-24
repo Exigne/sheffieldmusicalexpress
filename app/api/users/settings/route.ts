@@ -1,7 +1,7 @@
 import { sql } from '@/lib/db';
 import { NextResponse } from 'next/server';
 
-// 1. GET: Fetch the user's current settings when the page loads
+// GET: Fetch the user's current initials and bio when the page loads
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const username = searchParams.get('username');
@@ -9,36 +9,34 @@ export async function GET(request: Request) {
   if (!username) return NextResponse.json({ error: "No username provided" }, { status: 400 });
 
   try {
-    const users = await sql`SELECT email FROM users WHERE username = ${username} LIMIT 1`;
+    const users = await sql`SELECT avatar_initials, bio FROM users WHERE username = ${username} LIMIT 1`;
     if (users.length > 0) {
-      return NextResponse.json({ email: users[0].email });
+      return NextResponse.json({ 
+        initials: users[0].avatar_initials || "", 
+        bio: users[0].bio || "" 
+      });
     }
     return NextResponse.json({ error: "User not found" }, { status: 404 });
   } catch (err) {
-    console.error("Settings GET Error:", err);
     return NextResponse.json({ error: "Database error" }, { status: 500 });
   }
 }
 
-// 2. POST: Save the new email or password to the database
+// POST: Save the new initials and bio to the database
 export async function POST(request: Request) {
   try {
-    const { username, email, password } = await request.json();
+    const { username, initials, bio } = await request.json();
     if (!username) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    // Update Email
-    if (email) {
-      await sql`UPDATE users SET email = ${email} WHERE username = ${username}`;
-    }
-
-    // Update Password
-    if (password) {
-      await sql`UPDATE users SET password_hash = ${password} WHERE username = ${username}`;
-    }
+    // Update the user's profile
+    await sql`
+      UPDATE users 
+      SET avatar_initials = ${initials}, bio = ${bio} 
+      WHERE username = ${username}
+    `;
 
     return NextResponse.json({ success: true });
   } catch (err: any) {
-    console.error("Settings POST Error:", err.message);
-    return NextResponse.json({ error: "Failed to update settings" }, { status: 500 });
+    return NextResponse.json({ error: "Failed to update profile" }, { status: 500 });
   }
 }
