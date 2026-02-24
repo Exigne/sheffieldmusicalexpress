@@ -18,7 +18,7 @@ export default function PrivacyPage() {
           </div>
 
           <div className="thread-form" style={{ lineHeight: '1.6', fontSize: '0.85rem', color: '#555' }}>
-            <p>At <strong>Sheffield Musical Express</strong>, we value your privacy. We only collect the information necessary to provide the forum service:</p>
+            <p>At <strong>Sheffield Music Express</strong>, we value your privacy. We only collect the information necessary to provide the forum service:</p>
             <ul style={{ paddingLeft: '20px' }}>
               <li><strong>Email:</strong> Used only for account verification and password resets.</li>
               <li><strong>Username:</strong> Displayed publicly next to your posts.</li>
