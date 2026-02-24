@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic';
 import { sql } from '@/lib/db';
 import Link from 'next/link';
 
+// FETCH FROM 'threads' TABLE
 async function getRecentThreads() {
   try {
     const rows = await sql`
@@ -25,11 +26,11 @@ async function getRecentThreads() {
   }
 }
 
-// FETCH FROM 'gigs' TABLE WITH TIMEZONE FALLBACK
+// FIXED: FETCH FROM 'gigs' USING 'title' INSTEAD OF 'artist'
 async function getUpcomingGigs() {
   try {
     const rows = await sql`
-      SELECT id, artist, venue, gig_date
+      SELECT id, title, venue, gig_date
       FROM gigs 
       WHERE gig_date >= (CURRENT_DATE - INTERVAL '1 day')
       ORDER BY gig_date ASC
@@ -136,7 +137,7 @@ export default async function HomePage() {
           </Link>
         )}
 
-        {/* --- REPAIRED GIG GUIDE --- */}
+        {/* --- REPAIRED GIG GUIDE WIDGET --- */}
         <div className="sidebar-widget">
           <div className="widget-header">📅 Upcoming Gigs</div>
           <div className="widget-body" style={{ padding: '15px' }}>
@@ -147,15 +148,16 @@ export default async function HomePage() {
                     <div style={{ fontSize: '0.7rem', color: '#666', fontFamily: 'IBM Plex Mono', textTransform: 'uppercase' }}>
                       {new Date(gig.gig_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} @ {gig.venue}
                     </div>
+                    {/* FIXED: Using gig.title instead of gig.artist */}
                     <div style={{ fontWeight: 'bold', fontSize: '1.1rem', fontFamily: 'Playfair Display' }}>
-                      {gig.artist}
+                      {gig.title}
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
               <div style={{ fontSize: '0.85rem', color: '#666' }}>
-                <p style={{ margin: '0 0 5px 0' }}>No listings found in &apos;gigs&apos; table.</p>
+                <p style={{ margin: '0 0 5px 0' }}>No listings found.</p>
                 <p style={{ margin: 0, fontSize: '0.7rem' }}>Checked at: {new Date().toLocaleTimeString()}</p>
               </div>
             )}
