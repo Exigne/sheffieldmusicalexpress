@@ -3,7 +3,6 @@ export const dynamic = 'force-dynamic';
 import { sql } from '@/lib/db';
 import Link from 'next/link';
 
-// FETCH FROM 'threads' TABLE
 async function getRecentThreads() {
   try {
     const rows = await sql`
@@ -26,7 +25,6 @@ async function getRecentThreads() {
   }
 }
 
-// FIXED: FETCH FROM 'gigs' USING 'title' INSTEAD OF 'artist'
 async function getUpcomingGigs() {
   try {
     const rows = await sql`
@@ -34,7 +32,7 @@ async function getUpcomingGigs() {
       FROM gigs 
       WHERE gig_date >= (CURRENT_DATE - INTERVAL '1 day')
       ORDER BY gig_date ASC
-      LIMIT 3
+      LIMIT 5
     `;
     return rows ?? [];
   } catch (error) {
@@ -137,33 +135,31 @@ export default async function HomePage() {
           </Link>
         )}
 
-        {/* --- REPAIRED GIG GUIDE WIDGET --- */}
+        {/* --- CLICKABLE GIG GUIDE WIDGET --- */}
         <div className="sidebar-widget">
           <div className="widget-header">📅 Upcoming Gigs</div>
           <div className="widget-body" style={{ padding: '15px' }}>
             {upcomingGigs.length > 0 ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                 {upcomingGigs.map((gig: any) => (
-                  <div key={gig.id} style={{ borderLeft: '3px solid var(--rust)', paddingLeft: '10px' }}>
-                    <div style={{ fontSize: '0.7rem', color: '#666', fontFamily: 'IBM Plex Mono', textTransform: 'uppercase' }}>
-                      {new Date(gig.gig_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} @ {gig.venue}
+                  <Link key={gig.id} href={`/gigs/${gig.id}`} style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
+                    <div style={{ borderLeft: '3px solid var(--rust)', paddingLeft: '10px', cursor: 'pointer' }}>
+                      <div style={{ fontSize: '0.7rem', color: '#666', fontFamily: 'IBM Plex Mono', textTransform: 'uppercase' }}>
+                        {new Date(gig.gig_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} @ {gig.venue}
+                      </div>
+                      <div style={{ fontWeight: 'bold', fontSize: '1.1rem', fontFamily: 'Playfair Display', color: 'var(--ink)' }}>
+                        {gig.title}
+                      </div>
                     </div>
-                    {/* FIXED: Using gig.title instead of gig.artist */}
-                    <div style={{ fontWeight: 'bold', fontSize: '1.1rem', fontFamily: 'Playfair Display' }}>
-                      {gig.title}
-                    </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
             ) : (
               <div style={{ fontSize: '0.85rem', color: '#666' }}>
-                <p style={{ margin: '0 0 5px 0' }}>No listings found.</p>
-                <p style={{ margin: 0, fontSize: '0.7rem' }}>Checked at: {new Date().toLocaleTimeString()}</p>
+                <p style={{ margin: 0 }}>No upcoming shows listed.</p>
               </div>
             )}
-            <Link href="/features/gig-guide" style={{ display: 'block', marginTop: '15px', fontSize: '0.8rem', color: 'var(--rust)', fontWeight: 'bold', textDecoration: 'none' }}>
-              Full Calendar →
-            </Link>
+            {/* The Full Calendar link has been successfully evicted! */}
           </div>
         </div>
       </aside>
