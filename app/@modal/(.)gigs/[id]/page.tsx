@@ -1,9 +1,8 @@
 import Modal from '@/components/Modal';
 import { sql } from '@/lib/db';
 
-// Next.js 15 requires params to be treated as a Promise
 export default async function GigModal(props: { params: Promise<{ id: string }> }) {
-  const params = await props.params; // Unwrap the params securely
+  const params = await props.params; 
   const rawId = params?.id; 
 
   let gig = null;
@@ -21,14 +20,6 @@ export default async function GigModal(props: { params: Promise<{ id: string }> 
       <Modal>
         <div style={{ padding: '40px', textAlign: 'center' }}>
           <h2 style={{ fontFamily: 'Playfair Display' }}>Listing not found or removed.</h2>
-          <p style={{ color: '#666' }}>
-            The ID passed was: <strong>{rawId || "UNDEFINED"}</strong>
-          </p>
-          {!rawId && (
-            <p style={{ fontSize: '0.8rem', color: 'var(--rust)', marginTop: '10px' }}>
-              *If this says UNDEFINED, rename your folder exactly to: <strong>[id]</strong>
-            </p>
-          )}
         </div>
       </Modal>
     );
@@ -53,10 +44,17 @@ export default async function GigModal(props: { params: Promise<{ id: string }> 
           <p style={{ color: '#666', fontStyle: 'italic' }}>No additional details provided.</p>
         )}
         
-        <div style={{ marginTop: '30px' }}>
+        {/* UPDATED PRICE & BUTTON SECTION */}
+        <div style={{ marginTop: '30px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px' }}>
           {gig.price && (
-            <a href={gig.price.startsWith('http') ? gig.price : '#'} target="_blank" rel="noopener noreferrer" className="btn-submit" style={{ display: 'inline-block', textDecoration: 'none', fontSize: '1rem', padding: '10px 25px' }}>
-              {gig.price.startsWith('http') ? 'GET TICKETS →' : `TICKETS: ${gig.price}`}
+            <div style={{ fontWeight: 'bold', fontSize: '1.2rem', color: 'var(--ink)' }}>
+              TICKETS: {gig.price.includes('£') ? gig.price : `£${gig.price}`}
+            </div>
+          )}
+          
+          {gig.ticket_url && (
+            <a href={gig.ticket_url} target="_blank" rel="noopener noreferrer" className="btn-submit" style={{ display: 'inline-block', textDecoration: 'none', fontSize: '1.1rem', padding: '12px 30px' }}>
+              BUY TICKETS →
             </a>
           )}
         </div>
