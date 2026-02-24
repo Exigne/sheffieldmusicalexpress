@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import Navbar from './Navbar'; // <-- We import the smart nav here
+import Navbar from '@/components/Navbar'; // <-- We import the smart nav here
 import AdminLink from '@/components/AdminLink'; // <-- We import the smart Admin Link here
 import MailNotification from '@/components/MailNotification'; // <-- We import the Mail Alert here
 import './globals.css';
