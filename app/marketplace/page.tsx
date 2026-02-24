@@ -15,8 +15,8 @@ export default function MarketplacePage() {
   const [condition, setCondition] = useState("Good");
   const [category, setCategory] = useState("Guitars");
   const [description, setDescription] = useState("");
+  const [imageUrl, setImageUrl] = useState(""); // <-- NEW IMAGE STATE
 
-  // Load items and check auth on mount
   useEffect(() => {
     setUser(localStorage.getItem('sme_user'));
     fetchItems();
@@ -42,12 +42,15 @@ export default function MarketplacePage() {
       const res = await fetch('/api/marketplace', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ seller: user, title, price, condition, category, description })
+        body: JSON.stringify({ 
+          seller: user, title, price, condition, category, description, image_url: imageUrl 
+        })
       });
 
       if (res.ok) {
         setShowForm(false);
-        setTitle(""); setPrice(""); setDescription(""); // Reset form
+        // Reset form
+        setTitle(""); setPrice(""); setDescription(""); setImageUrl(""); 
         fetchItems(); // Refresh the grid
       }
     } catch (err) {
@@ -97,6 +100,21 @@ export default function MarketplacePage() {
                   <option>Brand New</option><option>Excellent</option><option>Good</option><option>Road Worn</option><option>Broken / For Parts</option>
                 </select>
               </div>
+              
+              {/* <-- NEW IMAGE URL FIELD --> */}
+              <div>
+                <input 
+                  type="url" 
+                  className="form-input" 
+                  placeholder="Image Link (e.g. https://imgur.com/your-image.jpg)" 
+                  value={imageUrl} 
+                  onChange={e => setImageUrl(e.target.value)} 
+                />
+                <div style={{ fontSize: '0.75rem', color: '#666', marginTop: '5px' }}>
+                  Optional: Paste a direct image link from sites like Imgur or Postimages.
+                </div>
+              </div>
+
               <textarea className="reply-textarea" rows={3} placeholder="Describe the item, modifications, and why you are selling..." value={description} onChange={e => setDescription(e.target.value)} required />
               <button type="submit" className="btn-submit" style={{ alignSelf: 'flex-start' }}>Post Listing</button>
             </form>
@@ -113,7 +131,16 @@ export default function MarketplacePage() {
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' }}>
             {items.map(item => (
-              <div key={item.id} style={{ border: '1px solid var(--aged)', background: 'var(--paper)', display: 'flex', flexDirection: 'column' }}>
+              <div key={item.id} style={{ border: '1px solid var(--aged)', background: 'var(--paper)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                
+                {/* <-- NEW IMAGE RENDERER --> */}
+                {item.image_url ? (
+                  <div style={{ width: '100%', height: '200px', backgroundColor: '#eee', backgroundImage: `url(${item.image_url})`, backgroundSize: 'cover', backgroundPosition: 'center', borderBottom: '1px solid var(--aged)' }} />
+                ) : (
+                  <div style={{ width: '100%', height: '120px', backgroundColor: 'var(--paper-dark)', display: 'flex', alignItems: 'center', justifyContent: 'center', borderBottom: '1px solid var(--aged)', color: '#999', fontSize: '0.8rem', fontStyle: 'italic' }}>
+                    No image provided
+                  </div>
+                )}
                 
                 <div style={{ padding: '15px', borderBottom: '1px solid var(--aged)', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                   <div>
@@ -135,7 +162,6 @@ export default function MarketplacePage() {
                     Seller: <Link href={`/profile/${item.seller_username}`} style={{ color: 'var(--rust)', fontWeight: 'bold', textDecoration: 'none' }}>{item.seller_username}</Link>
                   </div>
                   
-                  {/* MAGIC MAKE OFFER BUTTON */}
                   {user && user !== item.seller_username && (
                     <Link href={`/inbox?chat=${item.seller_username}`} className="btn-submit" style={{ padding: '5px 12px', fontSize: '0.8rem', textDecoration: 'none' }}>
                       ✉️ Make Offer
