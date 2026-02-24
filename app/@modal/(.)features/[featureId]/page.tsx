@@ -1,82 +1,71 @@
-export const dynamic = 'force-dynamic';
+"use client";
 
 import Modal from '@/components/Modal';
-import { sql } from '@/lib/db';
+import { useState, useEffect } from 'react';
+import { useParams } from 'next/navigation';
 
-export default async function FeaturePopOut({ params }: { params: Promise<{ featureId: string }> }) {
-  const { featureId } = await params;
+export default function FeatureModal() {
+  const params = useParams();
+  const featureId = params.featureId;
+  const [gigs, setGigs] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // 1. Fetch Band of the Month if requested
-  if (featureId === 'band-of-the-month') {
-    let band = null;
-    try {
-      const bandRes = await sql`SELECT * FROM featured_bands ORDER BY created_at DESC LIMIT 1`;
-      band = bandRes[0];
-    } catch(e) {}
-    
-    if (!band) return <Modal><div style={{padding: '30px', textAlign: 'center'}}>No band set yet.</div></Modal>;
+  useEffect(() => {
+    // Only fetch if we are looking at the gig guide
+    if (featureId === 'gig-guide') {
+      fetch('/api/gigs')
+        .then(res => res.json())
+        .then(data => {
+          setGigs(Array.isArray(data) ? data : []);
+          setLoading(false);
+        })
+        .catch(() => setLoading(false));
+    } else {
+      setLoading(false);
+    }
+  }, [featureId]);
 
+  // If it's not the gig guide, we can show a generic message or handle other features
+  if (featureId !== 'gig-guide') {
     return (
       <Modal>
-        <div style={{ textAlign: 'center', borderBottom: '2px solid var(--ink)', paddingBottom: '20px', marginBottom: '20px' }}>
-          <h2 style={{ fontSize: '1rem', color: 'var(--rust)', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '10px' }}>🎸 Band of the Month</h2>
-          <h1 style={{ fontFamily: 'Playfair Display', fontSize: '3rem', margin: 0 }}>{band.name}</h1>
-        </div>
-        <div style={{ fontSize: '1.1rem', lineHeight: '1.8', color: '#333' }}>
-          <p>{band.description}</p>
-          <div style={{ marginTop: '20px', padding: '15px', background: 'var(--paper)', borderLeft: '4px solid var(--rust)' }}>
-            <p style={{ margin: '0 0 10px 0' }}><strong>Next Gig:</strong> {band.next_gig}</p>
-            <p style={{ margin: 0 }}><strong>Essential Track:</strong> {band.essential_track}</p>
-          </div>
+        <div style={{ padding: '40px', textAlign: 'center' }}>
+          <h2>Feature: {featureId}</h2>
+          <p>This section is coming soon!</p>
         </div>
       </Modal>
     );
   }
 
-  // 2. Fetch Live Gig Guide if requested
-  if (featureId === 'gig-guide') {
-    let gigs: any[] = [];
-    try {
-      const result = await sql`
-        SELECT * FROM gigs 
-        WHERE gig_date >= CURRENT_DATE 
-        ORDER BY gig_date ASC 
-        LIMIT 10
-      `;
-      gigs = result || [];
-    } catch (e) {}
+  return (
+    <Modal>
+      <div style={{ borderBottom: '4px solid var(--ink)', paddingBottom: '15px', marginBottom: '30px', textAlign: 'center' }}>
+        <h1 style={{ fontFamily: 'Bebas Neue', fontSize: '3rem', margin: 0 }}>LIVE GIG GUIDE</h1>
+        <p style={{ color: 'var(--rust)', fontWeight: 'bold', fontSize: '0.9rem' }}>OFFICIAL ADMIN LISTINGS</p>
+      </div>
 
-    return (
-      <Modal>
-        <div style={{ textAlign: 'center', borderBottom: '2px solid var(--ink)', paddingBottom: '20px', marginBottom: '20px' }}>
-          <h2 style={{ fontSize: '1rem', color: 'var(--rust)', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '10px' }}>📅 The Local Scene</h2>
-          <h1 style={{ fontFamily: 'Playfair Display', fontSize: '2.5rem', margin: 0 }}>Live Gig Guide</h1>
-        </div>
-        
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          {gigs.length === 0 ? (
-            <p style={{ textAlign: 'center', color: '#666', padding: '20px' }}>
-              No upcoming gigs announced yet. Check back soon!
-            </p>
-          ) : (
-            gigs.map((gig: any) => (
-              <div key={gig.id} style={{ padding: '15px', background: 'var(--paper)', borderLeft: '4px solid var(--rust)' }}>
-                <h3 style={{ margin: '0 0 5px 0', fontFamily: 'Playfair Display', color: 'var(--ink)' }}>
-                  {new Date(gig.gig_date).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' })}: {gig.title}
-                </h3>
-                {gig.description && (
-                  <p style={{ margin: '0 0 10px 0', fontSize: '0.9rem', color: '#555' }}>{gig.description}</p>
-                )}
-                <div style={{ fontSize: '0.85rem', fontWeight: 'bold', color: 'var(--rust)' }}>
-                  📍 {gig.venue} | 🎟️ {gig.price}
-                </div>
+      {loading ? (
+        <p style={{ textAlign: 'center', fontFamily: 'IBM Plex Mono' }}>SCANNING THE CITY...</p>
+      ) : gigs.length === 0 ? (
+        <p style={{ textAlign: 'center', padding: '20px' }}>No upcoming gigs found in the database.</p>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '25px', maxHeight: '60vh', overflowY: 'auto', paddingRight: '10px' }}>
+          {gigs.map((gig: any) => (
+            <div key={gig.id} style={{ borderLeft: '4px solid var(--rust)', paddingLeft: '15px', marginBottom: '10px' }}>
+              <div style={{ fontSize: '0.8rem', fontFamily: 'IBM Plex Mono', color: 'var(--rust)', fontWeight: 'bold' }}>
+                {new Date(gig.gig_date).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' }).toUpperCase()}
               </div>
-            ))
-          )}
+              <h2 style={{ fontFamily: 'Playfair Display', fontSize: '1.6rem', margin: '5px 0' }}>{gig.artist}</h2>
+              <div style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>📍 {gig.venue}</div>
+              {gig.ticket_url && (
+                <a href={gig.ticket_url} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.8rem', color: 'var(--rust)', fontWeight: 'bold', textDecoration: 'none', borderBottom: '1px solid var(--rust)', marginTop: '5px', display: 'inline-block' }}>
+                  GET TICKETS →
+                </a>
+              )}
+            </div>
+          ))}
         </div>
-      </Modal>
-    );
-  }
-
-  return null;
+      )}
+    </Modal>
+  );
 }
