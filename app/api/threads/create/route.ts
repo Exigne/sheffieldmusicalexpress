@@ -1,42 +1,36 @@
 import { sql } from '@/lib/db';
+import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
-import { revalidatePath } from 'next/cache'; // <-- This is the magic cache breaker
 
-export async function POST(request: Request) {
+export async function POST(req: Request) {
   try {
-    const { boardSlug, username, title, body } = await request.json();
+    const { title, body, boardId } = await req.json();
+    const cookieStore = await cookies();
+    const username = cookieStore.get('username')?.value;
 
-    // 1. Find User ID
-    const users = await sql`SELECT id FROM users WHERE username = ${username} LIMIT 1`;
-    if (users.length === 0) return NextResponse.json({ error: "User not found" }, { status: 404 });
-    const userId = users[0].id;
+    if (!username) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    // 2. Find Board ID
-    const boards = await sql`SELECT id FROM boards WHERE slug = ${boardSlug} LIMIT 1`;
-    if (boards.length === 0) return NextResponse.json({ error: "Board not found" }, { status: 404 });
-    const boardId = boards[0].id;
+    // 1. Get User ID
+    const userRes = await sql`SELECT id FROM users WHERE username = ${username} LIMIT 1`;
+    const userId = userRes[0]?.id;
 
-    // 3. Create Thread
-    const newThread = await sql`
-      INSERT INTO threads (board_id, user_id, title)
-      VALUES (${boardId}, ${userId}, ${title})
+    // 2. Insert Thread
+    const threadRes = await sql`
+      INSERT INTO threads (title, board_id, user_id) 
+      VALUES (${title}, ${boardId}, ${userId}) 
       RETURNING id
     `;
-    const threadId = newThread[0].id;
+    const threadId = threadRes[0].id;
 
-    // 4. Create Initial Post
+    // 3. Insert the first post (the body of the thread)
     await sql`
-      INSERT INTO posts (thread_id, user_id, body)
-      VALUES (${threadId}, ${userId}, ${body})
+      INSERT INTO posts (body, thread_id, user_id) 
+      VALUES (${body}, ${threadId}, ${userId})
     `;
 
-    // 5. THE FIX: Tell Next.js to immediately wipe the cache for this board and the homepage
-    revalidatePath(`/boards/${boardSlug}`);
-    revalidatePath(`/`);
-
-    return NextResponse.json({ threadId }, { status: 201 });
-  } catch (err: any) {
-    console.error("THREAD CREATION ERROR:", err.message);
-    return NextResponse.json({ error: "Failed to create thread" }, { status: 500 });
+    return NextResponse.json({ id: threadId });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json({ error: 'Server Error' }, { status: 500 });
   }
 }
