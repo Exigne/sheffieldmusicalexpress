@@ -1,63 +1,50 @@
 export const dynamic = 'force-dynamic';
 
 import { sql } from '@/lib/db';
-import Link from 'next/link';
 import { revalidatePath } from 'next/cache';
 
-const PASSCODE = "STEELCITY"; 
+const PASSCODE = "STEELCITY"; // Your secret key
 
 export default async function AdminDashboard() {
 
   // --- SERVER ACTIONS ---
+
   async function addArticle(formData: FormData) {
     "use server";
     if (formData.get('passcode') !== PASSCODE) return;
+    
+    // Safety check: Strip URL parts if the user accidentally pasted a link as the slug
+    let slug = (formData.get('slug') as string)
+      .replace('https://sheffieldmusicexpress.co.uk/articles/', '')
+      .replace('https://sheffieldmusicexpress.co.uk/', '')
+      .trim().toLowerCase().replace(/ /g, '-');
+
     await sql`
       INSERT INTO articles (slug, title, category, excerpt, content) 
-      VALUES (${formData.get('slug') as string}, ${formData.get('title') as string}, ${formData.get('category') as string}, ${formData.get('excerpt') as string}, ${formData.get('content') as string})
+      VALUES (${slug}, ${formData.get('title') as string}, ${formData.get('category') as string}, ${formData.get('excerpt') as string}, ${formData.get('content') as string})
     `;
     revalidatePath('/'); revalidatePath('/admin');
   }
 
-  // UPDATED: Now includes spotify_url
-  async function updateBand(formData: FormData) {
+  async function deleteArticle(formData: FormData) {
     "use server";
     if (formData.get('passcode') !== PASSCODE) return;
-    await sql`
-      INSERT INTO featured_bands (name, description, next_gig, essential_track, spotify_url) 
-      VALUES (
-        ${formData.get('name') as string}, 
-        ${formData.get('description') as string}, 
-        ${formData.get('next_gig') as string}, 
-        ${formData.get('essential_track') as string},
-        ${formData.get('spotify_url') as string}
-      )
-    `;
-    revalidatePath('/'); 
-    revalidatePath('/admin');
-    revalidatePath('/features/band-of-the-month');
+    const id = formData.get('id');
+    await sql`DELETE FROM articles WHERE id = ${id}`;
+    revalidatePath('/'); revalidatePath('/admin');
   }
 
-  async function addGig(formData: FormData) {
+  async function deleteGig(formData: FormData) {
     "use server";
     if (formData.get('passcode') !== PASSCODE) return;
-
-    await sql`
-      INSERT INTO gigs (title, venue, gig_date, price, ticket_url, description) 
-      VALUES (
-        ${formData.get('title') as string}, 
-        ${formData.get('venue') as string}, 
-        ${formData.get('gig_date') as string}, 
-        ${formData.get('price') as string}, 
-        ${formData.get('ticket_url') as string}, 
-        ${formData.get('description') as string}
-      )
-    `;
-
-    revalidatePath('/'); 
-    revalidatePath('/features/gig-guide'); 
-    revalidatePath('/admin');
+    const id = formData.get('id');
+    await sql`DELETE FROM gigs WHERE id = ${id}`;
+    revalidatePath('/'); revalidatePath('/features/gig-guide'); revalidatePath('/admin');
   }
+
+  // --- FETCH DATA FOR MANAGEMENT TABLES ---
+  const currentArticles = await sql`SELECT id, title, slug FROM articles ORDER BY created_at DESC`;
+  const currentGigs = await sql`SELECT id, title, venue, gig_date FROM gigs ORDER BY gig_date ASC LIMIT 20`;
 
   return (
     <div className="page-wrapper" style={{ gridTemplateColumns: "1fr" }}>
@@ -67,72 +54,66 @@ export default async function AdminDashboard() {
           MODERATOR PANEL
         </h1>
 
-        {/* ARTICLES SECTION */}
-        <div className="form-card" style={{ marginBottom: '40px' }}>
-          <div className="form-card-header" style={{ borderBottom: '2px solid var(--rust)', paddingBottom: '15px' }}>
-            <h2 className="form-card-title">🗞️ Publish Article</h2>
-          </div>
-          <div style={{ padding: '20px' }}>
-            <form action={addArticle} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px' }}>
-                <input name="title" className="form-input" placeholder="Headline" required />
-                <input name="slug" className="form-input" placeholder="URL-slug" required />
-                <input name="category" className="form-input" placeholder="Category" required />
-              </div>
-              <textarea name="excerpt" className="form-input" rows={2} placeholder="Excerpt..." required />
-              <textarea name="content" className="reply-textarea" rows={6} placeholder="Full content..." required />
-              <div style={{ display: 'flex', gap: '10px' }}>
-                <input name="passcode" type="password" className="form-input" placeholder="Passcode" required />
-                <button type="submit" className="btn-submit">Publish</button>
-              </div>
-            </form>
-          </div>
+        {/* 🗞️ PUBLISH ARTICLE FORM (Same as before but with slug safety) */}
+        <div className="form-card" style={{ marginBottom: '60px', border: '2px solid var(--ink)', padding: '30px', background: 'var(--paper)' }}>
+          <h2 style={{ fontFamily: 'Bebas Neue', fontSize: '2rem', borderBottom: '2px solid var(--rust)', marginBottom: '20px' }}>🗞️ Publish Article</h2>
+          <form action={addArticle} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+             <input name="passcode" type="password" placeholder="Admin Passcode" required style={{ padding: '10px' }} />
+             <input name="title" placeholder="Article Title" required style={{ padding: '10px' }} />
+             <input name="slug" placeholder="Slug (e.g. why-we-built-this)" required style={{ padding: '10px' }} />
+             <input name="category" placeholder="Category (e.g. News)" required style={{ padding: '10px' }} />
+             <textarea name="excerpt" placeholder="Short Excerpt" rows={2} style={{ padding: '10px' }} />
+             <textarea name="content" placeholder="Full Article Content" rows={10} required style={{ padding: '10px' }} />
+             <button type="submit" style={{ background: 'var(--ink)', color: 'white', padding: '15px', fontWeight: 'bold', cursor: 'pointer' }}>PUBLISH TO HOMEPAGE</button>
+          </form>
         </div>
 
-        {/* BAND SECTION - UPDATED */}
-        <div className="form-card" style={{ marginBottom: '40px' }}>
-          <div className="form-card-header" style={{ borderBottom: '2px solid var(--rust)', paddingBottom: '15px' }}>
-            <h2 className="form-card-title">🎸 Update Band of the Month</h2>
-          </div>
-          <div style={{ padding: '20px' }}>
-            <form action={updateBand} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-                <input name="name" className="form-input" placeholder="Band Name" required />
-                <input name="essential_track" className="form-input" placeholder="Essential Track Name" required />
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-                <input name="next_gig" className="form-input" placeholder="Next Gig Info" required />
-                <input name="spotify_url" className="form-input" placeholder="Spotify Track URL (Optional)" />
-              </div>
-              <textarea name="description" className="reply-textarea" rows={3} placeholder="Band bio..." required />
-              <div style={{ display: 'flex', gap: '10px' }}>
-                <input name="passcode" type="password" className="form-input" placeholder="Passcode" required />
-                <button type="submit" className="btn-submit">Update Band</button>
-              </div>
-            </form>
-          </div>
-        </div>
+        {/* 🛠️ DATABASE MANAGER SECTION */}
+        <div style={{ background: '#eee', padding: '40px', border: '4px double var(--ink)' }}>
+          <h2 style={{ fontFamily: 'Bebas Neue', fontSize: '2.5rem', textAlign: 'center', marginBottom: '30px' }}>🛠️ Database Manager</h2>
 
-        {/* GIG SECTION */}
-        <div className="form-card">
-          <div className="form-card-header" style={{ borderBottom: '2px solid var(--rust)', paddingBottom: '15px' }}>
-            <h2 className="form-card-title">📅 Add New Gig</h2>
-          </div>
-          <div style={{ padding: '20px' }}>
-            <form action={addGig} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-                <input name="title" className="form-input" placeholder="Artist / Band" required />
-                <input name="venue" className="form-input" placeholder="Venue" required />
-                <input name="gig_date" type="date" className="form-input" required />
-                <input name="price" className="form-input" placeholder="Price (e.g. £15.40)" />
-              </div>
-              <input name="ticket_url" className="form-input" placeholder="Ticket Link (https://...)" />
-              <textarea name="description" className="reply-textarea" rows={2} placeholder="Extra info..." />
-              <div style={{ display: 'flex', gap: '10px' }}>
-                <input name="passcode" type="password" className="form-input" placeholder="Passcode" required />
-                <button type="submit" className="btn-submit">Add Gig</button>
-              </div>
-            </form>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px' }}>
+            
+            {/* Manage Articles */}
+            <div>
+              <h3 style={{ fontFamily: 'IBM Plex Mono', borderBottom: '2px solid var(--ink)' }}>Live Articles</h3>
+              <ul style={{ listStyle: 'none', padding: 0 }}>
+                {currentArticles.map((art: any) => (
+                  <li key={art.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid #ccc' }}>
+                    <div style={{ fontSize: '0.85rem' }}>
+                      <strong>{art.title}</strong><br/>
+                      <code style={{ fontSize: '0.7rem', color: 'var(--rust)' }}>/{art.slug}</code>
+                    </div>
+                    <form action={deleteArticle}>
+                      <input type="hidden" name="id" value={art.id} />
+                      <input type="hidden" name="passcode" value={PASSCODE} />
+                      <button type="submit" style={{ background: 'red', color: 'white', border: 'none', padding: '5px 10px', fontSize: '0.7rem', cursor: 'pointer' }}>DELETE</button>
+                    </form>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Manage Gigs */}
+            <div>
+              <h3 style={{ fontFamily: 'IBM Plex Mono', borderBottom: '2px solid var(--ink)' }}>Upcoming Gigs</h3>
+              <ul style={{ listStyle: 'none', padding: 0 }}>
+                {currentGigs.map((gig: any) => (
+                  <li key={gig.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid #ccc' }}>
+                    <div style={{ fontSize: '0.85rem' }}>
+                      <strong>{gig.title}</strong><br/>
+                      <span style={{ fontSize: '0.7rem' }}>{gig.venue}</span>
+                    </div>
+                    <form action={deleteGig}>
+                      <input type="hidden" name="id" value={gig.id} />
+                      <input type="hidden" name="passcode" value={PASSCODE} />
+                      <button type="submit" style={{ background: 'red', color: 'white', border: 'none', padding: '5px 10px', fontSize: '0.7rem', cursor: 'pointer' }}>DELETE</button>
+                    </form>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
           </div>
         </div>
 
