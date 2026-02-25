@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic';
 
 import { sql } from '@/lib/db';
 import Link from 'next/link';
-import CreateThreadForm from '@/components/CreateThreadForm';
+// NO FORM IMPORT HERE
 
 export default async function BoardPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -93,12 +93,25 @@ export default async function BoardPage({ params }: { params: Promise<{ slug: st
           )}
         </ul>
 
-        {/* RESTORED THE REAL FORM HERE */}
+        {/* SAFE PLACEHOLDER BUTTON */}
         <div style={{ marginTop: '50px' }}>
           <h3 style={{ fontFamily: 'Bebas Neue', fontSize: '2.5rem', borderBottom: '2px solid var(--ink)', paddingBottom: '10px', marginBottom: '20px' }}>
             Start a New Discussion
           </h3>
-          <CreateThreadForm boardId={board.id} />
+          
+          <div style={{ background: 'var(--paper)', padding: '30px', textAlign: 'center', border: '1px dashed var(--aged)' }}>
+            <p style={{ fontFamily: 'IBM Plex Mono', color: 'var(--rust)', marginBottom: '15px' }}>
+              Form temporarily disabled for site updates.
+            </p>
+            <button 
+              disabled
+              style={{ 
+                display: 'inline-block', background: 'var(--aged)', color: '#666', padding: '12px 25px', fontWeight: 'bold', fontFamily: 'IBM Plex Mono', fontSize: '1.1rem', border: '2px solid #ccc', textTransform: 'uppercase', cursor: 'not-allowed'
+              }}
+            >
+              + Start New Discussion
+            </button>
+          </div>
         </div>
 
       </div>
