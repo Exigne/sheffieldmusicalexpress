@@ -4,25 +4,25 @@ import { NextResponse } from 'next/server';
 
 export async function POST(req: Request) {
   try {
-    const { title, body, boardId, username: bodyUsername } = await req.json();
+    const { title, body, boardId, username: manualUsername } = await req.json();
     const cookieStore = await cookies();
     
-    // Check cookie first, then fall back to the username sent in the body
-    const username = cookieStore.get('username')?.value || bodyUsername;
+    // Check for cookie FIRST, then fall back to the username sent in the form
+    const username = cookieStore.get('username')?.value || manualUsername;
 
     if (!username) {
-      return NextResponse.json({ error: 'Unauthorized: No username found.' }, { status: 401 });
+      return NextResponse.json({ error: 'Please log in to post.' }, { status: 401 });
     }
 
-    // Find the user ID
+    // Grab the ID from your Neon database
     const userRes = await sql`SELECT id FROM users WHERE username = ${username} LIMIT 1`;
     const userId = userRes[0]?.id;
 
     if (!userId) {
-      return NextResponse.json({ error: `User "${username}" not found.` }, { status: 404 });
+      return NextResponse.json({ error: 'User account not found.' }, { status: 404 });
     }
 
-    // Insert Thread
+    // Save the new thread to Neon
     const threadRes = await sql`
       INSERT INTO threads (title, board_id, user_id) 
       VALUES (${title}, ${boardId}, ${userId}) 
@@ -30,7 +30,7 @@ export async function POST(req: Request) {
     `;
     const threadId = threadRes[0].id;
 
-    // Insert first post
+    // Save the first post to Neon
     await sql`
       INSERT INTO posts (body, thread_id, user_id) 
       VALUES (${body}, ${threadId}, ${userId})
@@ -38,7 +38,6 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ id: threadId });
   } catch (error) {
-    console.error(error);
-    return NextResponse.json({ error: 'Server Error' }, { status: 500 });
+    return NextResponse.json({ error: 'Database error' }, { status: 500 });
   }
 }
