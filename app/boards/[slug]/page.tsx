@@ -2,11 +2,13 @@ export const dynamic = 'force-dynamic';
 
 import { sql } from '@/lib/db';
 import Link from 'next/link';
-// NO FORM IMPORT HERE
+// IMPORT RESTORED:
+import CreateThreadForm from '@/components/CreateThreadForm'; 
 
 export default async function BoardPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
 
+  // 1. Fetch the board details
   const boards = await sql`SELECT * FROM boards WHERE slug = ${slug} LIMIT 1`;
   const board = boards[0];
 
@@ -21,6 +23,7 @@ export default async function BoardPage({ params }: { params: Promise<{ slug: st
     );
   }
 
+  // 2. Fetch the threads, INCLUDING t.is_sold
   const threads = await sql`
     SELECT 
       t.id, t.title, t.reply_count, t.is_sold, t.created_at, u.username,
@@ -71,18 +74,28 @@ export default async function BoardPage({ params }: { params: Promise<{ slug: st
                   <div className="thread-avatar">{thread.username?.slice(0, 2).toUpperCase() || '??'}</div>
                 </Link>
                 <div className="thread-main">
+                  
+                  {/* TITLE & SOLD BADGE */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
                     <Link href={`/threads/${thread.id}`} className="thread-title">
                       {thread.title}
                     </Link>
                     {thread.is_sold && (
                       <span style={{ 
-                        background: 'var(--rust)', color: 'var(--paper)', padding: '2px 6px', fontSize: '0.7rem', fontWeight: 'bold', fontFamily: 'IBM Plex Mono', borderRadius: '3px', textTransform: 'uppercase'
+                        background: 'var(--rust)', 
+                        color: 'var(--paper)', 
+                        padding: '2px 6px', 
+                        fontSize: '0.7rem', 
+                        fontWeight: 'bold', 
+                        fontFamily: 'IBM Plex Mono',
+                        borderRadius: '3px',
+                        textTransform: 'uppercase'
                       }}>
                         SOLD
                       </span>
                     )}
                   </div>
+
                   <div className="thread-sub">
                     Started by <Link href={`/profile/${thread.username}`} style={{ color: 'var(--rust)', textDecoration: 'none', fontWeight: 'bold' }}>{thread.username}</Link> · {timeAgo(thread.last_interaction)}
                   </div>
@@ -93,25 +106,12 @@ export default async function BoardPage({ params }: { params: Promise<{ slug: st
           )}
         </ul>
 
-        {/* SAFE PLACEHOLDER BUTTON */}
+        {/* WORKING FORM RESTORED ON FULL PAGE */}
         <div style={{ marginTop: '50px' }}>
           <h3 style={{ fontFamily: 'Bebas Neue', fontSize: '2.5rem', borderBottom: '2px solid var(--ink)', paddingBottom: '10px', marginBottom: '20px' }}>
             Start a New Discussion
           </h3>
-          
-          <div style={{ background: 'var(--paper)', padding: '30px', textAlign: 'center', border: '1px dashed var(--aged)' }}>
-            <p style={{ fontFamily: 'IBM Plex Mono', color: 'var(--rust)', marginBottom: '15px' }}>
-              Form temporarily disabled for site updates.
-            </p>
-            <button 
-              disabled
-              style={{ 
-                display: 'inline-block', background: 'var(--aged)', color: '#666', padding: '12px 25px', fontWeight: 'bold', fontFamily: 'IBM Plex Mono', fontSize: '1.1rem', border: '2px solid #ccc', textTransform: 'uppercase', cursor: 'not-allowed'
-              }}
-            >
-              + Start New Discussion
-            </button>
-          </div>
+          <CreateThreadForm boardId={board.id} />
         </div>
 
       </div>
