@@ -1,18 +1,15 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 type OptimisticPost = {
   id: string;
   body: string;
   username: string;
-  created_at: string;
   avatar_initials: string;
 };
 
 export default function ReplyForm({ threadId }: { threadId: number }) {
-  const router = useRouter();
   const [user, setUser] = useState<string | null>(null);
   const [body, setBody] = useState("");
   const [loading, setLoading] = useState(false);
@@ -27,16 +24,17 @@ export default function ReplyForm({ threadId }: { threadId: number }) {
     if (!body.trim() || !user) return;
     setLoading(true);
 
-    // 1. Immediately show the post on screen (optimistic)
     const tempPost: OptimisticPost = {
       id: `temp-${Date.now()}`,
       body: body.trim(),
       username: user,
-      created_at: new Date().toISOString(),
       avatar_initials: user.slice(0, 2).toUpperCase(),
     };
+
+    // 1. Show the post instantly
     setOptimisticPosts((prev) => [...prev, tempPost]);
-    setBody(""); // Clear the box immediately
+    setBody("");
+    setLoading(false);
 
     try {
       const res = await fetch("/api/posts/create", {
@@ -45,22 +43,18 @@ export default function ReplyForm({ threadId }: { threadId: number }) {
         body: JSON.stringify({ threadId, username: user, body: tempPost.body }),
       });
 
-      if (res.ok) {
-        // 2. Sync with server in the background (replaces optimistic post with real data)
-        router.refresh();
-      } else {
-        // 3. If it failed, remove the optimistic post and restore the text
+      if (!res.ok) {
+        // If save failed, remove the optimistic post and restore the text
         setOptimisticPosts((prev) => prev.filter((p) => p.id !== tempPost.id));
         setBody(tempPost.body);
         alert("Failed to post reply. Please try again.");
       }
+      // No router.refresh() — optimistic post stays visible until page reload
     } catch (err) {
       setOptimisticPosts((prev) => prev.filter((p) => p.id !== tempPost.id));
       setBody(tempPost.body);
       alert("Connection error.");
     }
-
-    setLoading(false);
   };
 
   if (!user) {
@@ -75,7 +69,7 @@ export default function ReplyForm({ threadId }: { threadId: number }) {
   return (
     <div style={{ marginTop: '20px' }}>
 
-      {/* Optimistically rendered posts appear here instantly */}
+      {/* New posts appear here instantly */}
       {optimisticPosts.map((post) => (
         <div
           key={post.id}
@@ -87,7 +81,6 @@ export default function ReplyForm({ threadId }: { threadId: number }) {
             border: '1px solid var(--aged)',
             borderRadius: '4px',
             marginBottom: '20px',
-            opacity: 0.85, // Slightly faded to show it's being saved
           }}
         >
           <div style={{ width: '50px', flexShrink: 0 }}>
@@ -96,7 +89,13 @@ export default function ReplyForm({ threadId }: { threadId: number }) {
             </div>
           </div>
           <div style={{ flexGrow: 1 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--aged)', paddingBottom: '10px', marginBottom: '10px' }}>
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              borderBottom: '1px solid var(--aged)',
+              paddingBottom: '10px',
+              marginBottom: '10px'
+            }}>
               <strong style={{ color: 'var(--rust)' }}>{post.username}</strong>
               <span style={{ fontSize: '0.75rem', color: '#666' }}>Just now</span>
             </div>
