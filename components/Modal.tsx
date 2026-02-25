@@ -51,7 +51,6 @@ export default function Modal({ children }: { children: React.ReactNode }) {
           alignItems: 'center' 
         }}>
           <span style={{ fontFamily: 'Bebas Neue', letterSpacing: '1px', fontSize: '1.2rem' }}>
-            SME // INTERNAL_VIEW
           </span>
           <button 
             onClick={onDismiss}
