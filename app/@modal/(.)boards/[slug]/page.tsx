@@ -4,14 +4,15 @@ import Modal from '@/components/Modal';
 import { sql } from '@/lib/db';
 import Link from 'next/link';
 
-export default async function BoardModal(props: { params: Promise<{ boardSlug: string }> }) {
+// FIXED: Now expecting { slug: string } to match the exact folder name
+export default async function BoardModal(props: { params: Promise<{ slug: string }> }) {
   const params = await props.params;
-  const boardSlug = params?.boardSlug;
+  const slug = params?.slug;
 
-  // 1. Fetch the board details
+  // 1. Fetch the board details using 'slug' instead of 'boardSlug'
   let board = null;
   try {
-    const boards = await sql`SELECT * FROM boards WHERE slug = ${boardSlug} LIMIT 1`;
+    const boards = await sql`SELECT * FROM boards WHERE slug = ${slug} LIMIT 1`;
     board = boards[0];
   } catch (error) {
     console.error("Failed to fetch board:", error);
@@ -27,7 +28,7 @@ export default async function BoardModal(props: { params: Promise<{ boardSlug: s
     );
   }
 
-  // 2. Fetch the threads, INCLUDING t.is_sold
+  // 2. Fetch the threads
   let threads: any[] = [];
   try {
     threads = await sql`
@@ -121,15 +122,9 @@ export default async function BoardModal(props: { params: Promise<{ boardSlug: s
           )}
         </ul>
 
-        {/* Note: In a modal, we usually link to the full page to create a new thread, 
-            or you can embed your CreateThreadForm here if it fits! */}
         <div style={{ marginTop: '30px', textAlign: 'center' }}>
           <Link 
             href={`/boards/${board.slug}`} 
-            onClick={() => {
-               // Optional: trigger hard navigation if you want to leave the modal
-               window.location.href = `/boards/${board.slug}`;
-            }}
             style={{ display: 'inline-block', background: 'var(--ink)', color: 'var(--paper)', padding: '10px 20px', textDecoration: 'none', fontWeight: 'bold', fontFamily: 'IBM Plex Mono' }}>
             Open Full Board to Post
           </Link>
