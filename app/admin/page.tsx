@@ -4,6 +4,8 @@ import { sql } from '@/lib/db';
 import Link from 'next/link';
 import { revalidatePath } from 'next/cache';
 
+const PASSCODE = "STEELCITY"; 
+
 export default async function AdminDashboard() {
 
   // --- SERVER ACTIONS ---
@@ -17,17 +19,25 @@ export default async function AdminDashboard() {
     revalidatePath('/'); revalidatePath('/admin');
   }
 
+  // UPDATED: Now includes spotify_url
   async function updateBand(formData: FormData) {
     "use server";
     if (formData.get('passcode') !== PASSCODE) return;
     await sql`
-      INSERT INTO featured_bands (name, description, next_gig, essential_track) 
-      VALUES (${formData.get('name') as string}, ${formData.get('description') as string}, ${formData.get('next_gig') as string}, ${formData.get('essential_track') as string})
+      INSERT INTO featured_bands (name, description, next_gig, essential_track, spotify_url) 
+      VALUES (
+        ${formData.get('name') as string}, 
+        ${formData.get('description') as string}, 
+        ${formData.get('next_gig') as string}, 
+        ${formData.get('essential_track') as string},
+        ${formData.get('spotify_url') as string}
+      )
     `;
-    revalidatePath('/'); revalidatePath('/admin');
+    revalidatePath('/'); 
+    revalidatePath('/admin');
+    revalidatePath('/features/band-of-the-month');
   }
 
-  // ADD GIG - NOW SUPPORTS 'ticket_url'
   async function addGig(formData: FormData) {
     "use server";
     if (formData.get('passcode') !== PASSCODE) return;
@@ -79,7 +89,7 @@ export default async function AdminDashboard() {
           </div>
         </div>
 
-        {/* BAND SECTION */}
+        {/* BAND SECTION - UPDATED */}
         <div className="form-card" style={{ marginBottom: '40px' }}>
           <div className="form-card-header" style={{ borderBottom: '2px solid var(--rust)', paddingBottom: '15px' }}>
             <h2 className="form-card-title">🎸 Update Band of the Month</h2>
@@ -88,13 +98,16 @@ export default async function AdminDashboard() {
             <form action={updateBand} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
                 <input name="name" className="form-input" placeholder="Band Name" required />
-                <input name="essential_track" className="form-input" placeholder="Essential Track" required />
+                <input name="essential_track" className="form-input" placeholder="Essential Track Name" required />
               </div>
-              <input name="next_gig" className="form-input" placeholder="Next Gig" required />
-              <textarea name="description" className="reply-textarea" rows={3} placeholder="Bio..." required />
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                <input name="next_gig" className="form-input" placeholder="Next Gig Info" required />
+                <input name="spotify_url" className="form-input" placeholder="Spotify Track URL (Optional)" />
+              </div>
+              <textarea name="description" className="reply-textarea" rows={3} placeholder="Band bio..." required />
               <div style={{ display: 'flex', gap: '10px' }}>
                 <input name="passcode" type="password" className="form-input" placeholder="Passcode" required />
-                <button type="submit" className="btn-submit">Update</button>
+                <button type="submit" className="btn-submit">Update Band</button>
               </div>
             </form>
           </div>
@@ -113,7 +126,6 @@ export default async function AdminDashboard() {
                 <input name="gig_date" type="date" className="form-input" required />
                 <input name="price" className="form-input" placeholder="Price (e.g. £15.40)" />
               </div>
-              {/* NEW TICKET URL FIELD */}
               <input name="ticket_url" className="form-input" placeholder="Ticket Link (https://...)" />
               <textarea name="description" className="reply-textarea" rows={2} placeholder="Extra info..." />
               <div style={{ display: 'flex', gap: '10px' }}>
