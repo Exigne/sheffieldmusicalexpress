@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 type OptimisticPost = {
@@ -10,6 +11,7 @@ type OptimisticPost = {
 };
 
 export default function ReplyForm({ threadId }: { threadId: number }) {
+  const router = useRouter();
   const [user, setUser] = useState<string | null>(null);
   const [body, setBody] = useState("");
   const [loading, setLoading] = useState(false);
@@ -31,7 +33,7 @@ export default function ReplyForm({ threadId }: { threadId: number }) {
       avatar_initials: user.slice(0, 2).toUpperCase(),
     };
 
-    // 1. Show the post instantly
+    // 1. Show the post instantly and clear the box
     setOptimisticPosts((prev) => [...prev, tempPost]);
     setBody("");
     setLoading(false);
@@ -43,13 +45,19 @@ export default function ReplyForm({ threadId }: { threadId: number }) {
         body: JSON.stringify({ threadId, username: user, body: tempPost.body }),
       });
 
-      if (!res.ok) {
-        // If save failed, remove the optimistic post and restore the text
+      if (res.ok) {
+        // 2. Wait 1.5s so the optimistic post is visible, THEN refresh the
+        //    server cache so the board page shows the updated reply count
+        //    when the user navigates back
+        setTimeout(() => {
+          router.refresh();
+        }, 1500);
+      } else {
+        // 3. If it failed, remove the optimistic post and restore the text
         setOptimisticPosts((prev) => prev.filter((p) => p.id !== tempPost.id));
         setBody(tempPost.body);
         alert("Failed to post reply. Please try again.");
       }
-      // No router.refresh() — optimistic post stays visible until page reload
     } catch (err) {
       setOptimisticPosts((prev) => prev.filter((p) => p.id !== tempPost.id));
       setBody(tempPost.body);
@@ -94,7 +102,7 @@ export default function ReplyForm({ threadId }: { threadId: number }) {
               justifyContent: 'space-between',
               borderBottom: '1px solid var(--aged)',
               paddingBottom: '10px',
-              marginBottom: '10px'
+              marginBottom: '10px',
             }}>
               <strong style={{ color: 'var(--rust)' }}>{post.username}</strong>
               <span style={{ fontSize: '0.75rem', color: '#666' }}>Just now</span>
