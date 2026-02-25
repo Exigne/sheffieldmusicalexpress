@@ -24,14 +24,17 @@ export default function CreateThreadForm({ boardId }: { boardId: number }) {
         const data = await res.json();
         setTitle('');
         setBody('');
-        // Refresh the page and redirect to the new thread
         router.refresh();
         router.push(`/threads/${data.id}`);
+      } else if (res.status === 401) {
+        // More specific message for the error in your screenshot
+        alert("You must be logged in to start a new discussion! Please sign in and try again.");
       } else {
-        alert("Failed to create thread. Are you logged in?");
+        alert("Something went wrong on the server. Please try again later.");
       }
     } catch (err) {
       console.error(err);
+      alert("Network error. Check your connection.");
     } finally {
       setLoading(false);
     }
@@ -49,6 +52,7 @@ export default function CreateThreadForm({ boardId }: { boardId: number }) {
       />
       <textarea
         className="reply-textarea"
+        // CLEANER PLACEHOLDER: Removed the gear/selling text
         placeholder="What's on your mind?"
         rows={5}
         value={body}
