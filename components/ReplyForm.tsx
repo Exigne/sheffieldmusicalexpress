@@ -46,14 +46,17 @@ export default function ReplyForm({ threadId }: { threadId: number }) {
       });
 
       if (res.ok) {
-        // 2. Wait 1.5s so the optimistic post is visible, THEN refresh the
-        //    server cache so the board page shows the updated reply count
-        //    when the user navigates back
+        // 2. Immediately invalidate the router cache so the board modal
+        //    re-fetches fresh data when the user navigates back to it
+        router.refresh();
+
+        // 3. After 2s the server re-render will have completed and the real
+        //    post will be in the list — clear the optimistic copy to avoid duplicates
         setTimeout(() => {
-          router.refresh();
-        }, 1500);
+          setOptimisticPosts((prev) => prev.filter((p) => p.id !== tempPost.id));
+        }, 2000);
       } else {
-        // 3. If it failed, remove the optimistic post and restore the text
+        // 4. If it failed, remove the optimistic post and restore the text
         setOptimisticPosts((prev) => prev.filter((p) => p.id !== tempPost.id));
         setBody(tempPost.body);
         alert("Failed to post reply. Please try again.");
