@@ -49,7 +49,7 @@ export default function CreateThreadForm({ boardId }: { boardId: number }) {
       />
       <textarea
         className="reply-textarea"
-        placeholder="What's on your mind? (If selling gear, include price and details)"
+        placeholder="What's on your mind?"
         rows={5}
         value={body}
         onChange={(e) => setBody(e.target.value)}
