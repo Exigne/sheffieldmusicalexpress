@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic';
 import Modal from '@/components/Modal';
 import { sql } from '@/lib/db';
 import Link from 'next/link';
-import CreateThreadForm from '@/components/CreateThreadForm';
+// NO FORM IMPORT HERE
 
 export default async function BoardModal(props: { params: Promise<{ slug: string }> }) {
   const params = await props.params;
@@ -103,12 +103,16 @@ export default async function BoardModal(props: { params: Promise<{ slug: string
           )}
         </ul>
 
-        {/* RESTORED THE REAL FORM HERE */}
-        <div style={{ marginTop: '40px', background: 'var(--paper)' }}>
-          <h3 style={{ fontFamily: 'Bebas Neue', fontSize: '2rem', borderBottom: '2px solid var(--ink)', paddingBottom: '10px', marginBottom: '20px' }}>
-            Start a New Discussion
-          </h3>
-          <CreateThreadForm boardId={board.id} />
+        {/* SAFE PLACEHOLDER LINK */}
+        <div style={{ marginTop: '40px', background: 'var(--paper)', textAlign: 'center' }}>
+          <Link 
+            href={`/boards/${board.slug}`} 
+            style={{ 
+              display: 'inline-block', background: 'var(--rust)', color: 'var(--paper)', padding: '12px 25px', textDecoration: 'none', fontWeight: 'bold', fontFamily: 'IBM Plex Mono', fontSize: '1.1rem', border: '2px solid var(--ink)', boxShadow: '4px 4px 0px var(--ink)', textTransform: 'uppercase'
+            }}
+          >
+            + Start New Discussion
+          </Link>
         </div>
       </div>
     </Modal>
