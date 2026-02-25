@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 import Link from 'next/link';
 
@@ -24,14 +23,17 @@ export default function SignInPage() {
       const data = await res.json();
 
       if (res.ok) {
-        // 1. Save the username so the Smart Navbar sees it
+        // 1. Save to localStorage so the Smart Navbar sees it
         localStorage.setItem("sme_user", username);
-        
-        // 2. HARD REDIRECT to the home page (Fixes the stuck screen issue)
-        window.location.href = "/"; 
+
+        // 2. Set a cookie so the SERVER can identify you when posting threads
+        document.cookie = `username=${username}; path=/; max-age=604800; SameSite=Lax`;
+
+        // 3. Hard redirect to the home page
+        window.location.href = "/";
       } else {
         setError(data.error || "Invalid Sheffield credentials.");
-        setLoading(false); // Only turn off loading if there's an error
+        setLoading(false);
       }
     } catch (err) {
       setError("Connection error. Is the server running?");
@@ -83,7 +85,12 @@ export default function SignInPage() {
             {error && <div className="form-error">{error}</div>}
 
             <div className="form-actions" style={{ flexDirection: 'column', gap: '15px', alignItems: 'flex-start' }}>
-              <button type="submit" className="btn-submit" disabled={loading} style={{ width: '100%' }}>
+              <button
+                type="submit"
+                className="btn-submit"
+                disabled={loading}
+                style={{ width: '100%' }}
+              >
                 {loading ? "Verifying..." : "Sign In →"}
               </button>
               <Link href="/register" style={{ fontSize: '0.8rem', color: 'var(--rust)', textDecoration: 'none' }}>
