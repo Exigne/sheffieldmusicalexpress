@@ -1,60 +1,59 @@
+export const dynamic = 'force-dynamic';
+
 import { sql } from '@/lib/db';
 import Link from 'next/link';
 import ArticleComments from '@/components/ArticleComments';
 
-export const dynamic = 'force-dynamic';
+export default async function FullArticlePage(props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
+  const slug = params.slug;
 
-export default async function ArticlePage(props: { params: Promise<{ slug: string }> }) {
-  const { slug } = await props.params;
-
-  let article = null;
-  try {
-    const result = await sql`SELECT * FROM articles WHERE slug = ${slug} LIMIT 1`;
-    article = result[0];
-  } catch (e) {
-    console.error('Failed to fetch article');
-  }
+  const result = await sql`SELECT * FROM articles WHERE slug = ${slug} LIMIT 1`;
+  const article = result[0];
 
   if (!article) {
     return (
-      <div style={{ textAlign: 'center', padding: '100px', minHeight: '60vh' }}>
-        <h2 style={{ fontFamily: 'Playfair Display' }}>Article not found.</h2>
-        <Link href="/" style={{ color: 'var(--rust)', fontWeight: 'bold' }}>← Return Home</Link>
+      <div className="page-wrapper">
+        <div className="content-area" style={{ textAlign: 'center', padding: '100px' }}>
+          <h2>Article not found.</h2>
+          <Link href="/">← Back to Home</Link>
+        </div>
       </div>
     );
   }
 
   return (
-    <div style={{ padding: '60px 20px', maxWidth: '800px', margin: '0 auto', minHeight: '70vh' }}>
+    <div className="page-wrapper" style={{ gridTemplateColumns: "1fr" }}>
+      <div className="content-area" style={{ maxWidth: "800px", margin: "0 auto" }}>
+        
+        <nav style={{ marginBottom: '20px', fontFamily: 'IBM Plex Mono', fontSize: '0.8rem' }}>
+          <Link href="/" style={{ color: 'var(--rust)', textDecoration: 'none' }}>HOME</Link>
+          <span style={{ margin: '0 10px', color: '#ccc' }}>/</span>
+          <span style={{ color: '#666', textTransform: 'uppercase' }}>{article.category}</span>
+        </nav>
 
-      <nav className="breadcrumb" style={{ marginBottom: '40px' }}>
-        <Link href="/">Home</Link>
-        <span className="breadcrumb-sep">›</span>
-        <span>{article.category}</span>
-      </nav>
+        <article>
+          <h1 style={{ fontFamily: 'Bebas Neue', fontSize: '4rem', lineHeight: '1', marginBottom: '10px' }}>
+            {article.title}
+          </h1>
+          <p style={{ fontFamily: 'IBM Plex Mono', fontSize: '0.9rem', color: '#666', marginBottom: '30px' }}>
+            Published {new Date(article.created_at).toLocaleDateString()}
+          </p>
+          
+          <div style={{ 
+             fontSize: '1.2rem', 
+             lineHeight: '1.8', 
+             whiteSpace: 'pre-wrap', 
+             color: '#222',
+             marginBottom: '60px'
+          }}>
+            {article.content}
+          </div>
+        </article>
 
-      <div style={{ borderBottom: '2px solid var(--ink)', paddingBottom: '20px', marginBottom: '20px' }}>
-        <div style={{ fontSize: '0.8rem', fontWeight: 'bold', color: 'var(--rust)', textTransform: 'uppercase', marginBottom: '10px' }}>
-          {article.category}
+        <div style={{ borderTop: '4px solid var(--ink)', paddingTop: '40px' }}>
+           <ArticleComments articleId={article.id} />
         </div>
-        <h1 style={{ fontFamily: 'Playfair Display', fontSize: '3rem', margin: '0 0 10px 0', lineHeight: '1.1' }}>
-          {article.title}
-        </h1>
-        <div style={{ fontSize: '0.85rem', color: '#666', fontFamily: 'IBM Plex Mono' }}>
-          By The Editor · {new Date(article.created_at).toLocaleDateString()}
-        </div>
-      </div>
-
-      <div style={{ fontFamily: 'Barlow', fontSize: '1.1rem', lineHeight: '1.8', color: '#222', whiteSpace: 'pre-wrap', marginBottom: '40px' }}>
-        {article.content}
-      </div>
-
-      <ArticleComments articleId={article.id} />
-
-      <div style={{ marginTop: '60px', textAlign: 'center' }}>
-        <Link href="/" style={{ fontWeight: 'bold', color: 'var(--ink)', borderBottom: '2px solid var(--rust)', textDecoration: 'none' }}>
-          ← Back to Sheffield Music Express
-        </Link>
       </div>
     </div>
   );
