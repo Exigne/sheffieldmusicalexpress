@@ -3,7 +3,6 @@ export const dynamic = 'force-dynamic';
 import Modal from '@/components/Modal';
 import { sql } from '@/lib/db';
 import Link from 'next/link';
-import CreateThreadForm from '@/components/CreateThreadForm'; // WE BROUGHT THIS BACK!
 
 export default async function BoardModal(props: { params: Promise<{ slug: string }> }) {
   const params = await props.params;
@@ -70,7 +69,7 @@ export default async function BoardModal(props: { params: Promise<{ slug: string
 
       <div style={{ padding: '10px 0' }}>
         
-        {/* WE RESTORED YOUR PROPER CSS CLASSES HERE */}
+        {/* PROPER CSS CLASSES KEPT ALIVE */}
         <ul className="thread-list">
           {threads.length === 0 ? (
             <div style={{ padding: '30px', textAlign: 'center', color: '#666', fontStyle: 'italic', background: 'var(--paper)', border: '1px solid var(--aged)' }}>
@@ -114,12 +113,26 @@ export default async function BoardModal(props: { params: Promise<{ slug: string
           )}
         </ul>
 
-        {/* WE RESTORED YOUR CREATE THREAD FORM HERE */}
-        <div style={{ marginTop: '40px', background: 'var(--paper)' }}>
-          <h3 style={{ fontFamily: 'Bebas Neue', fontSize: '2rem', borderBottom: '2px solid var(--ink)', paddingBottom: '10px', marginBottom: '20px' }}>
-            Start a New Discussion
-          </h3>
-          <CreateThreadForm boardId={board.id} />
+        {/* REPLACED WITH A BIG STYLED LINK INSTEAD OF THE MISSING COMPONENT */}
+        <div style={{ marginTop: '40px', background: 'var(--paper)', textAlign: 'center' }}>
+          <Link 
+            href={`/boards/${board.slug}`} 
+            style={{ 
+              display: 'inline-block', 
+              background: 'var(--rust)', 
+              color: 'var(--paper)', 
+              padding: '12px 25px', 
+              textDecoration: 'none', 
+              fontWeight: 'bold', 
+              fontFamily: 'IBM Plex Mono',
+              fontSize: '1.1rem',
+              border: '2px solid var(--ink)',
+              boxShadow: '4px 4px 0px var(--ink)',
+              textTransform: 'uppercase'
+            }}
+          >
+            + Start New Discussion
+          </Link>
         </div>
 
       </div>
