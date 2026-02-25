@@ -3,18 +3,19 @@ export const dynamic = 'force-dynamic';
 import { sql } from '@/lib/db';
 import Link from 'next/link';
 
+// 1. UPDATED SQL: Now selects 't.is_sold' and groups by it!
 async function getRecentThreads() {
   try {
     const rows = await sql`
       SELECT 
-        t.id, t.title, t.reply_count, b.name AS board_name, u.username,
+        t.id, t.title, t.reply_count, t.is_sold, b.name AS board_name, u.username,
         MAX(p.created_at) as last_interaction
       FROM threads t
       JOIN boards b ON t.board_id = b.id
       JOIN users u ON t.user_id = u.id
       JOIN posts p ON p.thread_id = t.id
       WHERE t.reply_count > 0
-      GROUP BY t.id, t.title, t.reply_count, b.name, u.username
+      GROUP BY t.id, t.title, t.reply_count, t.is_sold, b.name, u.username
       ORDER BY last_interaction DESC
       LIMIT 6
     `;
@@ -109,7 +110,28 @@ export default async function HomePage() {
                 <div className="thread-avatar">{thread.username?.slice(0, 2).toUpperCase() || '??'}</div>
               </Link>
               <div className="thread-main">
-                <Link href={`/threads/${thread.id}`} className="thread-title">{thread.title}</Link>
+                
+                {/* 2. UPDATED JSX: Thread Title + SOLD Tag */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                  <Link href={`/threads/${thread.id}`} className="thread-title">
+                    {thread.title}
+                  </Link>
+                  {thread.is_sold && (
+                    <span style={{ 
+                      background: 'var(--rust)', 
+                      color: 'var(--paper)', 
+                      padding: '2px 6px', 
+                      fontSize: '0.7rem', 
+                      fontWeight: 'bold', 
+                      fontFamily: 'IBM Plex Mono',
+                      borderRadius: '3px',
+                      textTransform: 'uppercase'
+                    }}>
+                      SOLD
+                    </span>
+                  )}
+                </div>
+
                 <div className="thread-sub">
                   <span className="board-tag">{thread.board_name}</span>
                   Started by <Link href={`/profile/${thread.username}`} style={{ color: 'var(--rust)', textDecoration: 'none', fontWeight: 'bold' }}>{thread.username}</Link> · {timeAgo(thread.last_interaction)}
@@ -135,7 +157,6 @@ export default async function HomePage() {
           </Link>
         )}
 
-        {/* --- CLICKABLE GIG GUIDE WIDGET --- */}
         <div className="sidebar-widget">
           <div className="widget-header">📅 Upcoming Gigs</div>
           <div className="widget-body" style={{ padding: '15px' }}>
@@ -159,7 +180,6 @@ export default async function HomePage() {
                 <p style={{ margin: 0 }}>No upcoming shows listed.</p>
               </div>
             )}
-            {/* The Full Calendar link has been successfully evicted! */}
           </div>
         </div>
       </aside>
