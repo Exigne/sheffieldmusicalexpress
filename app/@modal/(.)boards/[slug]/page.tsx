@@ -3,13 +3,12 @@ export const dynamic = 'force-dynamic';
 import Modal from '@/components/Modal';
 import { sql } from '@/lib/db';
 import Link from 'next/link';
+import CreateThreadForm from '@/components/CreateThreadForm'; // WE BROUGHT THIS BACK!
 
-// FIXED: Now expecting { slug: string } to match the exact folder name
 export default async function BoardModal(props: { params: Promise<{ slug: string }> }) {
   const params = await props.params;
   const slug = params?.slug;
 
-  // 1. Fetch the board details using 'slug' instead of 'boardSlug'
   let board = null;
   try {
     const boards = await sql`SELECT * FROM boards WHERE slug = ${slug} LIMIT 1`;
@@ -28,7 +27,6 @@ export default async function BoardModal(props: { params: Promise<{ slug: string
     );
   }
 
-  // 2. Fetch the threads
   let threads: any[] = [];
   try {
     threads = await sql`
@@ -70,27 +68,24 @@ export default async function BoardModal(props: { params: Promise<{ slug: string
         </p>
       </div>
 
-      <div style={{ padding: '10px 20px' }}>
-        <ul className="thread-list" style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+      <div style={{ padding: '10px 0' }}>
+        
+        {/* WE RESTORED YOUR PROPER CSS CLASSES HERE */}
+        <ul className="thread-list">
           {threads.length === 0 ? (
-            <div style={{ padding: '30px', textAlign: 'center', color: '#666', fontStyle: 'italic', background: '#f9f9f9', border: '1px solid #eee' }}>
+            <div style={{ padding: '30px', textAlign: 'center', color: '#666', fontStyle: 'italic', background: 'var(--paper)', border: '1px solid var(--aged)' }}>
               No threads here yet. Be the first to start a discussion!
             </div>
           ) : (
             threads.map((thread: any) => (
-              <li key={thread.id} className="thread-item" style={{ display: 'flex', gap: '15px', padding: '15px 0', borderBottom: '1px solid #eee' }}>
-                
+              <li key={thread.id} className="thread-item">
                 <Link href={`/profile/${thread.username}`} style={{ textDecoration: 'none' }}>
-                  <div className="thread-avatar" style={{ width: '40px', height: '40px', background: 'var(--ink)', color: 'var(--paper)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', borderRadius: '4px' }}>
-                    {thread.username?.slice(0, 2).toUpperCase() || '??'}
-                  </div>
+                  <div className="thread-avatar">{thread.username?.slice(0, 2).toUpperCase() || '??'}</div>
                 </Link>
-                
-                <div className="thread-main" style={{ flexGrow: 1 }}>
+                <div className="thread-main">
                   
-                  {/* TITLE & SOLD BADGE */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '4px' }}>
-                    <Link href={`/threads/${thread.id}`} className="thread-title" style={{ fontWeight: 'bold', fontSize: '1.1rem', color: 'var(--ink)', textDecoration: 'none' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                    <Link href={`/threads/${thread.id}`} className="thread-title">
                       {thread.title}
                     </Link>
                     {thread.is_sold && (
@@ -109,25 +104,22 @@ export default async function BoardModal(props: { params: Promise<{ slug: string
                     )}
                   </div>
 
-                  <div className="thread-sub" style={{ fontSize: '0.8rem', color: '#666' }}>
+                  <div className="thread-sub">
                     Started by <Link href={`/profile/${thread.username}`} style={{ color: 'var(--rust)', textDecoration: 'none', fontWeight: 'bold' }}>{thread.username}</Link> · {timeAgo(thread.last_interaction)}
                   </div>
                 </div>
-                
-                <div className="thread-replies" style={{ fontSize: '0.85rem', color: '#555', textAlign: 'right', minWidth: '70px' }}>
-                  <strong>{thread.reply_count || 0}</strong> replies
-                </div>
+                <div className="thread-replies"><strong>{thread.reply_count || 0}</strong> replies</div>
               </li>
             ))
           )}
         </ul>
 
-        <div style={{ marginTop: '30px', textAlign: 'center' }}>
-          <Link 
-            href={`/boards/${board.slug}`} 
-            style={{ display: 'inline-block', background: 'var(--ink)', color: 'var(--paper)', padding: '10px 20px', textDecoration: 'none', fontWeight: 'bold', fontFamily: 'IBM Plex Mono' }}>
-            Open Full Board to Post
-          </Link>
+        {/* WE RESTORED YOUR CREATE THREAD FORM HERE */}
+        <div style={{ marginTop: '40px', background: 'var(--paper)' }}>
+          <h3 style={{ fontFamily: 'Bebas Neue', fontSize: '2rem', borderBottom: '2px solid var(--ink)', paddingBottom: '10px', marginBottom: '20px' }}>
+            Start a New Discussion
+          </h3>
+          <CreateThreadForm boardId={board.id} />
         </div>
 
       </div>
