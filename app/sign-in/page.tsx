@@ -23,13 +23,8 @@ export default function SignInPage() {
       const data = await res.json();
 
       if (res.ok) {
-        // 1. Save to localStorage so the Smart Navbar sees it
         localStorage.setItem("sme_user", username);
-
-        // 2. Set a cookie so the SERVER can identify you when posting threads
         document.cookie = `username=${username}; path=/; max-age=604800; SameSite=Lax`;
-
-        // 3. Hard redirect to the home page
         window.location.href = "/";
       } else {
         setError(data.error || "Invalid Sheffield credentials.");
@@ -93,9 +88,30 @@ export default function SignInPage() {
               >
                 {loading ? "Verifying..." : "Sign In →"}
               </button>
-              <Link href="/register" style={{ fontSize: '0.8rem', color: 'var(--rust)', textDecoration: 'none' }}>
-                Don't have an account? Register for free.
-              </Link>
+
+              <div style={{ 
+                width: '100%', 
+                borderTop: '1px solid var(--aged)', 
+                paddingTop: '15px', 
+                marginTop: '10px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '8px'
+              }}>
+                <Link href="/register" style={{ fontSize: '0.85rem', color: 'var(--ink)', textDecoration: 'none', fontWeight: 'bold' }}>
+                  Don't have an account? <span style={{color: 'var(--rust)'}}>Register for free.</span>
+                </Link>
+
+                <div style={{ fontSize: '0.85rem', color: '#666' }}>
+                  Forgot your password?{' '}
+                  <a 
+                    href="mailto:matt@sheffieldmusicexpress.co.uk?subject=SME%20Password%20Reset%20Request" 
+                    style={{ color: 'var(--rust)', textDecoration: 'none', fontWeight: 'bold' }}
+                  >
+                    Email Matt for help →
+                  </a>
+                </div>
+              </div>
             </div>
           </form>
         </div>
