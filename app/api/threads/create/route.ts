@@ -4,17 +4,25 @@ import { NextResponse } from 'next/server';
 
 export async function POST(req: Request) {
   try {
-    const { title, body, boardId } = await req.json();
+    const { title, body, boardId, username: bodyUsername } = await req.json();
     const cookieStore = await cookies();
-    const username = cookieStore.get('username')?.value;
+    
+    // Check cookie first, then fall back to the username sent in the body
+    const username = cookieStore.get('username')?.value || bodyUsername;
 
-    if (!username) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!username) {
+      return NextResponse.json({ error: 'Unauthorized: No username found.' }, { status: 401 });
+    }
 
-    // 1. Get User ID
+    // Find the user ID
     const userRes = await sql`SELECT id FROM users WHERE username = ${username} LIMIT 1`;
     const userId = userRes[0]?.id;
 
-    // 2. Insert Thread
+    if (!userId) {
+      return NextResponse.json({ error: `User "${username}" not found.` }, { status: 404 });
+    }
+
+    // Insert Thread
     const threadRes = await sql`
       INSERT INTO threads (title, board_id, user_id) 
       VALUES (${title}, ${boardId}, ${userId}) 
@@ -22,7 +30,7 @@ export async function POST(req: Request) {
     `;
     const threadId = threadRes[0].id;
 
-    // 3. Insert the first post (the body of the thread)
+    // Insert first post
     await sql`
       INSERT INTO posts (body, thread_id, user_id) 
       VALUES (${body}, ${threadId}, ${userId})
