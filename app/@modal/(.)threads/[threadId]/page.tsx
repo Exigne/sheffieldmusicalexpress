@@ -1,26 +1,25 @@
-export const dynamic = 'force-dynamic';
-
 import { sql } from '@/lib/db';
-import Modal from '@/components/Modal';
-import ReplyForm from '@/components/ReplyForm';
+import Link from 'next/link';
+import PostReplyForm from '@/components/PostReplyForm';
 
-export default async function PopOutThread({ params }: { params: Promise<{ threadId: string }> }) {
+export default async function ThreadModal({ params }: { params: Promise<{ threadId: string }> }) {
   const { threadId } = await params;
 
-  // 1. Fetch the main thread info
-  const threads = await sql`
-    SELECT t.*, b.name as board_name
-    FROM threads t
-    JOIN boards b ON t.board_id = b.id
-    WHERE t.id = ${threadId} LIMIT 1
+  // Fetch the thread AND its associated board so we can make a working "Close" button
+  const threadRes = await sql`
+    SELECT t.*, b.slug as board_slug 
+    FROM threads t 
+    JOIN boards b ON t.board_id = b.id 
+    WHERE t.id = ${threadId} 
+    LIMIT 1
   `;
-  const thread = threads[0];
+  const thread = threadRes[0];
 
   if (!thread) return null;
 
-  // 2. Fetch all posts for this thread
+  // Fetch all posts/replies for this thread
   const posts = await sql`
-    SELECT p.*, u.username, u.avatar_initials 
+    SELECT p.*, u.username 
     FROM posts p 
     JOIN users u ON p.user_id = u.id 
     WHERE p.thread_id = ${threadId} 
@@ -28,59 +27,117 @@ export default async function PopOutThread({ params }: { params: Promise<{ threa
   `;
 
   return (
-    <Modal>
-      {/* Thread Title Header */}
-      <div className="board-header" style={{ marginTop: 0, paddingBottom: '15px', borderBottom: '2px solid var(--ink)' }}>
-        <div>
-          <h2 className="board-header-title" style={{ fontSize: '1.8rem', marginBottom: '5px' }}>{thread.title}</h2>
-          <p className="board-header-desc">
-            Started in {thread.board_name} · {new Date(thread.created_at).toLocaleDateString()}
-          </p>
+    <div style={{ 
+      position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, 
+      background: 'rgba(0,0,0,0.85)', zIndex: 9999, 
+      display: 'flex', alignItems: 'center', justifyContent: 'center', 
+      padding: '20px' 
+    }}>
+      
+      {/* MODAL CONTAINER - Styled to look like the main board's page-wrapper */}
+      <div style={{ 
+        background: 'var(--aged)', 
+        width: '100%', 
+        maxWidth: '900px', 
+        maxHeight: '90vh', 
+        display: 'flex',
+        flexDirection: 'column',
+        border: '6px solid var(--ink)', 
+        boxShadow: '15px 15px 0px var(--rust)'
+      }}>
+        
+        {/* MODAL TOP BAR */}
+        <div style={{ 
+          background: 'var(--ink)', 
+          padding: '15px 30px', 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center',
+          position: 'sticky',
+          top: 0,
+          zIndex: 10
+        }}>
+          <div style={{ color: 'white', fontFamily: 'IBM Plex Mono', fontSize: '0.9rem', fontWeight: 'bold' }}>
+            VIEWING THREAD
+          </div>
+          {/* Close button routes back to the specific board to cleanly dismiss the modal */}
+          <Link 
+            href={`/boards/${thread.board_slug}`} 
+            style={{ 
+              color: 'var(--rust)', 
+              fontFamily: 'Bebas Neue', 
+              fontSize: '2rem', 
+              textDecoration: 'none',
+              lineHeight: '1'
+            }}
+          >
+            X CLOSE
+          </Link>
+        </div>
+
+        {/* MODAL SCROLLABLE CONTENT */}
+        <div style={{ padding: '40px 30px', overflowY: 'auto' }}>
+          
+          <h1 style={{ fontFamily: 'Bebas Neue', fontSize: '5rem', lineHeight: '0.9', marginBottom: '40px' }}>
+            {thread.title}
+          </h1>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '25px', marginBottom: '50px' }}>
+            {posts.map((p: any, index: number) => (
+              <div key={p.id} style={{ 
+                background: 'white', 
+                border: '3px solid var(--ink)', 
+                padding: '25px', 
+                boxShadow: index === 0 ? '8px 8px 0px var(--rust)' : '8px 8px 0px var(--ink)' 
+              }}>
+                <div style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '15px', 
+                  marginBottom: '20px', 
+                  borderBottom: '2px solid var(--ink)', 
+                  paddingBottom: '15px' 
+                }}>
+                  {/* User Avatar Block */}
+                  <div style={{ 
+                    width: '45px', height: '45px', 
+                    background: index === 0 ? 'var(--rust)' : 'var(--ink)', 
+                    color: 'white', 
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                    fontFamily: 'Bebas Neue', fontSize: '1.5rem' 
+                  }}>
+                    {p.username.slice(0, 2).toUpperCase()}
+                  </div>
+                  <div>
+                    <strong style={{ fontFamily: 'IBM Plex Mono', fontSize: '0.9rem', display: 'block' }}>
+                      @{p.username.toUpperCase()}
+                    </strong>
+                    <span style={{ fontSize: '0.7rem', fontFamily: 'IBM Plex Mono', color: '#666' }}>
+                      {new Date(p.created_at).toLocaleString()}
+                    </span>
+                  </div>
+                </div>
+                
+                <p style={{ fontFamily: 'Barlow', fontSize: '1.25rem', lineHeight: '1.6', margin: 0, whiteSpace: 'pre-wrap' }}>
+                  {p.body}
+                </p>
+              </div>
+            ))}
+          </div>
+          
+          {/* REPLY FORM CONTAINER */}
+          <div style={{ 
+            background: 'white', 
+            border: '4px solid var(--ink)', 
+            padding: '30px', 
+            boxShadow: '10px 10px 0px var(--aged)' 
+          }}>
+            <h2 style={{ fontFamily: 'Bebas Neue', fontSize: '3rem', marginBottom: '20px' }}>ADD A REPLY</h2>
+            <PostReplyForm threadId={thread.id} />
+          </div>
+
         </div>
       </div>
-
-      {/* The Conversation List */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginTop: '20px', maxHeight: '50vh', overflowY: 'auto', paddingRight: '10px' }}>
-        {posts.map((post: any) => (
-          <div key={post.id} style={{ display: 'flex', gap: '15px', padding: '15px', background: 'var(--paper)', border: '1px solid var(--aged)', borderRadius: '4px' }}>
-            
-            {/* User Avatar */}
-            <div style={{ width: '40px', flexShrink: 0 }}>
-              <div className="thread-avatar" style={{ margin: '0 auto', width: '40px', height: '40px', fontSize: '1rem' }}>
-                {post.avatar_initials || '?'}
-              </div>
-            </div>
-
-            {/* Post Content */}
-            <div style={{ flexGrow: 1 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--aged)', paddingBottom: '8px', marginBottom: '8px' }}>
-                <strong style={{ color: 'var(--rust)' }}>{post.username}</strong>
-                <span style={{ fontSize: '0.75rem', color: '#666' }}>
-                  {new Date(post.created_at).toLocaleString('en-GB', { dateStyle: 'short', timeStyle: 'short' })}
-                </span>
-              </div>
-              <div style={{ whiteSpace: 'pre-wrap', lineHeight: '1.5', color: '#222', fontSize: '0.9rem' }}>
-                {post.body}
-              </div>
-
-              {/* The Reply Button on Every Post */}
-              <div style={{ textAlign: 'right', marginTop: '10px' }}>
-                <a 
-                  href="#reply-box" 
-                  style={{ fontSize: '0.75rem', color: 'var(--ink)', textDecoration: 'none', fontWeight: 'bold', background: '#f4f4f4', padding: '5px 10px', borderRadius: '3px', border: '1px solid #ddd' }}
-                >
-                  ↩ Reply
-                </a>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* The Smart Reply Form anchored to the bottom */}
-      <div id="reply-box">
-        <ReplyForm threadId={thread.id} />
-      </div>
-    </Modal>
+    </div>
   );
 }
