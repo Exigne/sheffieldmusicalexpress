@@ -32,7 +32,7 @@ export default function Navbar() {
       <ul>
         <li><Link href="/">🏠 Home</Link></li>
         <li><Link href="/boards/gear">🎸 Gear &amp; Kit</Link></li>
-        <li><Link href="/marketplace">🛒 Gear Exchange</Link></li>
+        <li><Link href="/boards/gear-exchange">🛒 Gear Exchange</Link></li>
         <li><Link href="/boards/albums">💽 Album Reviews</Link></li>
         <li><Link href="/boards/gigs">🎤 Gigs &amp; Venues</Link></li>
         <li><Link href="/boards/band-wanted">🤝 Band Wanted</Link></li>
