@@ -47,12 +47,12 @@ export default function Navbar() {
             </button>
           </div>
         ) : (
-          /* LOGGED OUT VIEW */
+/* LOGGED OUT VIEW */
           <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
-            <Link href="/login" style={{ color: 'white', textDecoration: 'none', border: '1px solid white', padding: '5px 15px' }}>
+            <a href="/login" style={{ color: 'white', textDecoration: 'none', border: '1px solid white', padding: '5px 15px' }}>
               LOGIN
-            </Link>
-            <Link href="/register" style={{ 
+            </a>
+            <Link href="/register" style={{
               background: 'var(--rust)', 
               color: 'white', 
               textDecoration: 'none', 
