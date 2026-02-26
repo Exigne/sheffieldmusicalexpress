@@ -1,127 +1,74 @@
 "use client";
-
 import { useState } from "react";
-import Link from "next/link";
 
 export default function RegisterPage() {
   const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
-  const [isError, setIsError] = useState(false);
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setMessage("");
-    setIsError(false);
+    setError("");
 
     try {
-      const res = await fetch("/api/register", {
+      const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, email, password }),
+        body: JSON.stringify({ username, password, email }),
       });
 
       const data = await res.json();
 
       if (res.ok) {
-        setMessage("Success! Welcome to the SME community.");
-        
-        // 1. Automatically log the user in so they don't have to type it again
         localStorage.setItem("sme_user", username);
-        
-        // 2. Hard redirect to the dashboard after a tiny delay so they see the success message
-        setTimeout(() => {
-          window.location.href = "/";
-        }, 800);
+        window.location.href = "/"; // Hard redirect to dashboard
       } else {
-        setIsError(true);
-        setMessage(data.error || "Registration failed.");
+        setError(data.error || "Registration failed.");
         setLoading(false);
       }
     } catch (err) {
-      setIsError(true);
-      setMessage("Connection error. Is the server running?");
+      setError("Connection error.");
       setLoading(false);
     }
   };
 
   return (
-    <div className="page-wrapper" style={{ gridTemplateColumns: "1fr" }}>
-      <div className="content-area" style={{ maxWidth: "600px", margin: "0 auto" }}>
-        <nav className="breadcrumb">
-          <Link href="/">Home</Link>
-          <span className="breadcrumb-sep">›</span>
-          <span>Register Free</span>
-        </nav>
+    <div style={{ background: 'var(--aged)', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+      <div style={{ background: 'white', width: '100%', maxWidth: '500px', border: '6px solid var(--ink)', boxShadow: '15px 15px 0px var(--rust)', padding: '40px' }}>
+        
+        <h1 style={{ fontFamily: 'Bebas Neue', fontSize: '4rem', lineHeight: '0.9', marginBottom: '10px' }}>JOIN SME</h1>
+        <p style={{ fontFamily: 'IBM Plex Mono', fontSize: '0.9rem', fontWeight: 'bold', color: 'var(--rust)', marginBottom: '30px' }}>CREATE YOUR ARTIST PROFILE</p>
 
-        <div className="form-card">
-          <div className="form-card-header">
-            <div className="form-card-icon">🗞️</div>
-            <div>
-              <div className="form-card-title">Join the Express</div>
-              <div className="form-card-sub">Claim your name in the Steel City music scene</div>
-            </div>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <div>
+            <label style={{ display: 'block', fontFamily: 'IBM Plex Mono', fontWeight: 'bold', fontSize: '0.7rem' }}>USERNAME</label>
+            <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} required style={{ width: '100%', padding: '12px', border: '3px solid var(--ink)', fontFamily: 'Barlow', fontSize: '1.1rem' }} />
           </div>
 
-          <form onSubmit={handleSubmit} className="thread-form">
-            <div className="form-group">
-              <label className="form-label">Desired Username</label>
-              <input
-                type="text"
-                className="form-input"
-                placeholder="e.g., LeadLungs_S1"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
-              />
-              <span className="form-hint">This is how you'll appear on boards and articles.</span>
-            </div>
+          <div>
+            <label style={{ display: 'block', fontFamily: 'IBM Plex Mono', fontWeight: 'bold', fontSize: '0.7rem' }}>EMAIL</label>
+            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required style={{ width: '100%', padding: '12px', border: '3px solid var(--ink)', fontFamily: 'Barlow', fontSize: '1.1rem' }} />
+          </div>
 
-            <div className="form-group">
-              <label className="form-label">Email Address</label>
-              <input
-                type="email"
-                className="form-input"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
+          <div>
+            <label style={{ display: 'block', fontFamily: 'IBM Plex Mono', fontWeight: 'bold', fontSize: '0.7rem' }}>PASSWORD</label>
+            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required style={{ width: '100%', padding: '12px', border: '3px solid var(--ink)', fontFamily: 'Barlow', fontSize: '1.1rem' }} />
+          </div>
 
-            <div className="form-group">
-              <label className="form-label">Password</label>
-              <input
-                type="password"
-                className="form-input"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
+          {error && <div style={{ background: 'var(--rust)', color: 'white', padding: '10px', fontFamily: 'IBM Plex Mono', fontWeight: 'bold' }}>{error}</div>}
 
-            {message && (
-              <div className="form-error" style={{ 
-                background: isError ? '#fdf0ee' : '#eefdf3', 
-                borderColor: isError ? 'var(--rust)' : '#27ae60', 
-                color: isError ? 'var(--rust)' : '#27ae60' 
-              }}>
-                {message}
-              </div>
-            )}
+          <button type="submit" disabled={loading} style={{ background: 'var(--ink)', color: 'white', padding: '15px', fontFamily: 'Bebas Neue', fontSize: '2rem', border: 'none', cursor: 'pointer', boxShadow: '6px 6px 0px var(--rust)' }}>
+            {loading ? "CREATING..." : "REGISTER NOW →"}
+          </button>
+        </form>
 
-            <div className="form-actions" style={{ flexDirection: 'column', gap: '15px', alignItems: 'flex-start' }}>
-              <button type="submit" className="btn-submit" disabled={loading} style={{ width: '100%' }}>
-                {loading ? "Registering..." : "Join the Community →"}
-              </button>
-              <Link href="/sign-in" style={{ fontSize: '0.8rem', color: 'var(--rust)', textDecoration: 'none' }}>
-                Already have an account? Sign in here.
-              </Link>
-            </div>
-          </form>
+        <div style={{ marginTop: '30px', borderTop: '3px solid var(--ink)', paddingTop: '20px' }}>
+          <a href="/login" style={{ fontFamily: 'IBM Plex Mono', fontSize: '0.85rem', color: 'var(--ink)', textDecoration: 'none', fontWeight: 'bold' }}>
+            ALREADY A MEMBER? <span style={{ color: 'var(--rust)' }}>SIGN IN HERE.</span>
+          </a>
         </div>
       </div>
     </div>
