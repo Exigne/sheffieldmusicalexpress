@@ -3,9 +3,9 @@ export const revalidate = 0;
 
 import { sql } from '@/lib/db';
 import Link from 'next/link';
-import CreateArticleForm from '@/components/CreateArticleForm';
 
 export default async function ArticlesPage() {
+  // Fetch all articles from Neon.tech
   let articles: any[] = [];
   try {
     articles = await sql`
@@ -22,21 +22,19 @@ export default async function ArticlesPage() {
     <div className="page-wrapper" style={{ gridTemplateColumns: '1fr', background: 'var(--paper)', minHeight: '100vh' }}>
       <div className="content-area" style={{ maxWidth: '1000px', margin: '0 auto', padding: '60px 20px' }}>
         
+        {/* 📰 SECTION HEADER */}
         <header style={{ borderBottom: '12px solid var(--ink)', paddingBottom: '30px', marginBottom: '60px' }}>
           <h1 style={{ fontFamily: 'Bebas Neue', fontSize: '8rem', margin: 0, lineHeight: '0.8' }}>SME ARTICLES</h1>
           <p style={{ fontSize: '1.2rem', fontFamily: 'IBM Plex Mono', fontWeight: 'bold', color: 'var(--rust)', marginTop: '10px' }}>
-            NEWS · INTERVIEWS · GIG REVIEWS · SCENE REPORTS
+            LATEST NEWS · INTERVIEWS · REVIEWS
           </p>
         </header>
 
+        {/* 📑 ARTICLE LIST */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
           {articles.length > 0 ? (
             articles.map((article) => (
-              <Link 
-                key={article.id} 
-                href={`/articles/${article.id}`} // 👈 Ensuring this points to [id]
-                style={{ textDecoration: 'none', color: 'inherit' }}
-              >
+              <Link key={article.id} href={`/articles/${article.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
                 <div style={{ 
                   display: 'grid', 
                   gridTemplateColumns: article.image_url ? '280px 1fr' : '1fr', 
@@ -60,7 +58,7 @@ export default async function ArticlesPage() {
                       {article.title}
                     </h2>
                     <p style={{ fontFamily: 'Barlow', fontSize: '1.1rem', color: '#444', lineHeight: '1.5' }}>
-                      {article.content.slice(0, 180)}...
+                      {article.content.slice(0, 200)}...
                     </p>
                     <div style={{ marginTop: '20px', fontFamily: 'IBM Plex Mono', fontSize: '0.8rem', fontWeight: 'bold' }}>
                       READ FULL ARTICLE →
@@ -74,11 +72,6 @@ export default async function ArticlesPage() {
               <p style={{ fontFamily: 'IBM Plex Mono' }}>No articles published yet.</p>
             </div>
           )}
-        </div>
-
-        <div style={{ marginTop: '100px', padding: '60px', background: 'white', border: '6px solid var(--ink)', boxShadow: '20px 20px 0px var(--aged)' }}>
-          <h2 style={{ fontFamily: 'Bebas Neue', fontSize: '3rem', marginBottom: '30px' }}>POST NEW ARTICLE</h2>
-          <CreateArticleForm />
         </div>
       </div>
     </div>
