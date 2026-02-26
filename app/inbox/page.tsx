@@ -38,8 +38,11 @@ export default function InboxPage() {
       });
   }, [router]);
 
+  // 💡 THIS IS THE UPDATED USE-EFFECT
   useEffect(() => {
     if (!user || !activeContact) return;
+    
+    // Fetch the chat history
     const fetchMessages = async () => {
       try {
         const res = await fetch(`/api/messages?user1=${user}&user2=${activeContact}`);
@@ -47,8 +50,28 @@ export default function InboxPage() {
         if (Array.isArray(data)) setMessages(data);
       } catch (e) { console.error("Failed to fetch messages"); }
     };
+
+    // Tell the database "I am looking at these messages, mark them as read!"
+    const markAsRead = async () => {
+      try {
+        await fetch('/api/messages/mark-read', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ currentUser: user, chattingWith: activeContact })
+        });
+      } catch (e) { console.error("Failed to mark as read"); }
+    };
+
+    // Run both immediately when you click their name
     fetchMessages();
-    const interval = setInterval(fetchMessages, 3000);
+    markAsRead(); 
+
+    // Keep checking for new messages and marking them read while the chat is open
+    const interval = setInterval(() => {
+      fetchMessages();
+      markAsRead(); 
+    }, 3000);
+    
     return () => clearInterval(interval);
   }, [user, activeContact]);
 
