@@ -1,7 +1,7 @@
 import { sql } from '@/lib/db';
 import Link from 'next/link';
 import PostReplyForm from '@/components/PostReplyForm';
-import CloseModalButton from '@/components/CloseModalButton'; // <-- Imported the new button
+import CloseModalButton from '@/components/CloseModalButton';
 
 export default async function ThreadModal({ params }: { params: Promise<{ threadId: string }> }) {
   const { threadId } = await params;
@@ -35,7 +35,7 @@ export default async function ThreadModal({ params }: { params: Promise<{ thread
       padding: '20px' 
     }}>
       
-      {/* MODAL CONTAINER - Styled to look like the main board's page-wrapper */}
+      {/* MODAL CONTAINER */}
       <div style={{ 
         background: 'var(--aged)', 
         width: '100%', 
@@ -62,7 +62,6 @@ export default async function ThreadModal({ params }: { params: Promise<{ thread
             VIEWING THREAD
           </div>
           
-          {/* True back-navigation to cleanly dismiss the intercepted modal */}
           <CloseModalButton />
           
         </div>
@@ -111,8 +110,9 @@ export default async function ThreadModal({ params }: { params: Promise<{ thread
                         @{p.username.toUpperCase()}
                       </Link>
                       
+                      {/* 👈 THE FIX IS HERE: Pointing to /inbox?chat= */}
                       <Link 
-                        href={`/messages?to=${p.username}`} 
+                        href={`/inbox?chat=${p.username}`} 
                         style={{ 
                           fontFamily: 'IBM Plex Mono', 
                           fontSize: '0.7rem', 
