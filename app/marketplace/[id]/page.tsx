@@ -74,10 +74,12 @@ export default async function MarketplaceItemPage({ params }: { params: any }) {
               {!item.is_sold ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                   
+                  {/* 📩 NEW MESSAGE SELLER BUTTONS */}
                   <div style={{ display: 'flex', gap: '15px' }}>
-                    {/* 📩 NEW MESSAGE SELLER BUTTON */}
+                    
+                    {/* Redirects to Inbox with a ?chat=username parameter */}
                     <a 
-                      href={`/messages?chat=${item.username}`} 
+                      href={`/inbox?chat=${item.username}`} 
                       style={{ 
                         background: 'var(--rust)', 
                         color: 'white', 
@@ -87,9 +89,7 @@ export default async function MarketplaceItemPage({ params }: { params: any }) {
                         fontSize: '1.5rem', 
                         display: 'inline-block',
                         boxShadow: '6px 6px 0px var(--ink)',
-                        border: '3px solid var(--ink)',
-                        flexGrow: 1,
-                        textAlign: 'center'
+                        border: '3px solid var(--ink)'
                       }}
                     >
                       MESSAGE SELLER →
@@ -105,8 +105,7 @@ export default async function MarketplaceItemPage({ params }: { params: any }) {
                         fontFamily: 'Bebas Neue', 
                         fontSize: '1.5rem', 
                         display: 'inline-block',
-                        border: '3px solid var(--ink)',
-                        textAlign: 'center'
+                        border: '3px solid var(--ink)'
                       }}
                     >
                       EMAIL
