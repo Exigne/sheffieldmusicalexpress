@@ -63,7 +63,8 @@ export default function Navbar() {
             <div style={{ display: 'flex', alignItems: 'center' }}>
               {/* ✉️ NOTIFICATION ICON: Only shows if count > 0 */}
               {messageCount > 0 && (
-                <a href="/messages" style={{ 
+                {/* 💡 UPDATED LINK TO /inbox HERE */}
+                <a href="/inbox" style={{ 
                   marginRight: '12px', 
                   textDecoration: 'none', 
                   position: 'relative',
