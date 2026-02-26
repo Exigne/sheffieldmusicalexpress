@@ -1,9 +1,8 @@
 export const dynamic = 'force-dynamic';
-export const revalidate = 0; // Kills Next.js caching to ensure listings show instantly
+export const revalidate = 0; // Essential to bypass cache and show new listings immediately
 
 import { sql } from '@/lib/db';
 import Link from 'next/link';
-// Ensure this path matches your file structure exactly
 import PostReplyForm from '@/components/PostReplyForm';
 
 export default async function ThreadPage({ 
@@ -16,8 +15,9 @@ export default async function ThreadPage({
   const { threadId } = await params;
   const { type } = await searchParams;
 
-  // 1. PRIMARY CHECK: Is this a Marketplace Listing?
-  // We check the gear_listings table first because it has the "Proper Advert" data
+  // ---------------------------------------------------------
+  // 1. PRIMARY CHECK: Try to find a Marketplace Advert
+  // ---------------------------------------------------------
   const gearRes = await sql`
     SELECT g.*, u.username, b.slug as board_slug, b.name as board_name
     FROM gear_listings g 
@@ -28,6 +28,7 @@ export default async function ThreadPage({
   `;
   const gear = gearRes[0];
 
+  // If we found a record in gear_listings, show the "Proper Advert" UI
   if (gear) {
     return (
       <div className="page-wrapper" style={{ gridTemplateColumns: '1fr' }}>
@@ -39,7 +40,7 @@ export default async function ThreadPage({
             <Link href={`/boards/${gear.board_slug}`}>{gear.board_name}</Link>
           </nav>
 
-          {/* 🎸 THE PROPER ADVERT LAYOUT */}
+          {/* 🎸 THE HIGH-IMPACT ADVERT HEADER */}
           <div style={{ 
             background: 'white', 
             border: '5px solid var(--ink)', 
@@ -48,7 +49,7 @@ export default async function ThreadPage({
             boxShadow: '20px 20px 0px var(--rust)',
             marginBottom: '50px'
           }}>
-            {/* Left Column: Image */}
+            {/* Left Side: Product Image */}
             {gear.image_url && (
               <div style={{ background: '#111', borderRight: '5px solid var(--ink)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
                 <img 
@@ -59,7 +60,7 @@ export default async function ThreadPage({
               </div>
             )}
 
-            {/* Right Column: Listing Details */}
+            {/* Right Side: Price, Title, Condition */}
             <div style={{ padding: '50px' }}>
               <div style={{ 
                 background: 'var(--rust)', color: 'white', padding: '5px 15px', 
@@ -103,7 +104,6 @@ export default async function ThreadPage({
             </div>
           </div>
 
-          {/* 💬 REPLIES SECTION */}
           <div style={{ maxWidth: '800px' }}>
             <h3 style={{ fontFamily: 'Bebas Neue', fontSize: '2rem', marginBottom: '20px' }}>Questions for Seller</h3>
             <PostReplyForm threadId={Number(threadId)} />
@@ -113,28 +113,31 @@ export default async function ThreadPage({
     );
   }
 
-  // 2. SECONDARY CHECK: Fallback to Standard Thread
+  // ---------------------------------------------------------
+  // 2. SECONDARY CHECK: Try to find a Standard Thread
+  // ---------------------------------------------------------
   const threadRes = await sql`
     SELECT t.*, u.username, b.slug as board_slug, b.name as board_name
-    FROM threads t 
+    FROM threads t  
     JOIN users u ON t.user_id = u.id 
     JOIN boards b ON t.board_id = b.id
-    WHERE t.id = ${threadId} 
+    WHERE t.id = ${threadId}  
     LIMIT 1
   `;
   const thread = threadRes[0];
 
+  // If nothing exists in either table, show a "Syncing" state
   if (!thread) {
     return (
       <div className="page-wrapper" style={{ textAlign: 'center', padding: '100px' }}>
         <h1 style={{ fontFamily: 'Bebas Neue', fontSize: '3rem' }}>Fetching Listing...</h1>
-        <p style={{ fontSize: '1.2rem', margin: '20px 0' }}>The database is synchronizing. Please wait 2 seconds and refresh.</p>
+        <p style={{ fontSize: '1.2rem', margin: '20px 0' }}>The database is synchronizing. Please wait a moment and refresh.</p>
         <button onClick={() => window.location.reload()} className="btn-submit" style={{width: 'auto', padding: '10px 30px'}}>REFRESH PAGE</button>
       </div>
     );
   }
 
-  // 3. FETCH REPLIES (Standard Thread only)
+  // 3. FETCH REPLIES (For standard threads)
   const posts = await sql`
     SELECT p.*, u.username FROM posts p
     JOIN users u ON p.user_id = u.id
