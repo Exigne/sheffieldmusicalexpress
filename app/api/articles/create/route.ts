@@ -12,9 +12,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Author not found' }, { status: 404 });
     }
 
+    // THE TWEAK: Using `imageUrl || null` prevents database errors if you leave the image blank!
     const result = await sql`
       INSERT INTO articles (title, content, category, image_url, author_id)
-      VALUES (${title}, ${content}, ${category}, ${imageUrl}, ${userId})
+      VALUES (${title}, ${content}, ${category}, ${imageUrl || null}, ${userId})
       RETURNING id
     `;
 
