@@ -1,15 +1,15 @@
 export const dynamic = 'force-dynamic';
+export const fetchCache = 'force-no-store';
 
 import Modal from '@/components/Modal';
 import { sql } from '@/lib/db';
 import Link from 'next/link';
-import CreateThreadForm from '@/components/CreateThreadForm';
+import CreateThreadModal from '@/components/CreateThreadModal';
 
 export default async function BoardModal(props: { params: Promise<{ slug: string }> }) {
   const params = await props.params;
   const slug = params?.slug;
 
-  // 1. Fetch Board Details
   const boardRes = await sql`SELECT * FROM boards WHERE slug = ${slug} LIMIT 1`;
   const board = boardRes[0];
 
@@ -17,7 +17,6 @@ export default async function BoardModal(props: { params: Promise<{ slug: string
 
   const isGear = slug === 'gear-exchange';
 
-  // 2. Fetch Items - Smart detection of which table to use
   let items: any[] = [];
   try {
     if (isGear) {
@@ -56,9 +55,9 @@ export default async function BoardModal(props: { params: Promise<{ slug: string
 
   return (
     <Modal>
-      {/* 🏛️ HEADER */}
+      {/* HEADER */}
       <div style={{ borderBottom: '4px solid var(--ink)', paddingBottom: '20px', marginBottom: '20px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '15px' }}>
           <div>
             <div style={{ fontSize: '0.8rem', fontFamily: 'IBM Plex Mono', color: 'var(--rust)', fontWeight: 'bold', textTransform: 'uppercase' }}>
               {isGear ? 'Marketplace' : 'Forum Board'}
@@ -67,19 +66,15 @@ export default async function BoardModal(props: { params: Promise<{ slug: string
               {board.name}
             </h1>
           </div>
-          <a href="#new-post-modal" style={{ 
-            background: 'var(--ink)', color: 'white', padding: '10px 20px', 
-            fontFamily: 'Bebas Neue', fontSize: '1.2rem', textDecoration: 'none' 
-          }}>
-            {isGear ? '+ POST ADVERT' : '+ NEW THREAD'}
-          </a>
+          {/* REPLACED: anchor link → CreateThreadModal button */}
+          <CreateThreadModal boardId={board.id} boardSlug={board.slug} />
         </div>
         <p style={{ fontWeight: 'bold', fontSize: '1.1rem', marginTop: '10px', color: '#444' }}>
           {board.description}
         </p>
       </div>
 
-      {/* 📝 LISTING AREA */}
+      {/* LISTING AREA */}
       <div style={{ minHeight: '300px' }}>
         <ul className="thread-list">
           {items.length === 0 ? (
@@ -98,11 +93,9 @@ export default async function BoardModal(props: { params: Promise<{ slug: string
                     {item.title}
                   </Link>
                   <div className="thread-sub">
-                    By <span style={{fontWeight: 'bold'}}>{item.username}</span> · {timeAgo(item.created_at)}
+                    By <span style={{ fontWeight: 'bold' }}>{item.username}</span> · {timeAgo(item.created_at)}
                   </div>
                 </div>
-
-                {/* SHOW PRICE ONLY FOR GEAR */}
                 {isGear ? (
                   <div style={{ textAlign: 'right' }}>
                     <div style={{ color: 'var(--rust)', fontWeight: 'bold', fontSize: '1.4rem', fontFamily: 'Bebas Neue' }}>
@@ -119,20 +112,6 @@ export default async function BoardModal(props: { params: Promise<{ slug: string
             ))
           )}
         </ul>
-      </div>
-
-      {/* ✍️ FORM SECTION */}
-      <div id="new-post-modal" style={{ 
-        marginTop: '40px', 
-        background: 'white', 
-        padding: '25px', 
-        border: '3px solid var(--ink)',
-        boxShadow: '10px 10px 0px var(--aged)' 
-      }}>
-        <h3 style={{ fontFamily: 'Bebas Neue', fontSize: '2rem', marginBottom: '15px' }}>
-          {isGear ? 'Create New Listing' : 'Start a Discussion'}
-        </h3>
-        <CreateThreadForm boardId={board.id} boardSlug={board.slug} />
       </div>
     </Modal>
   );
