@@ -6,25 +6,31 @@ import { sql } from '@/lib/db';
 
 export default async function ArticlesPage() {
   let articles: any[] = [];
+  let dbError: string | null = null;
 
   try {
-    // 💡 THE FIX: Using LEFT JOIN instead of INNER JOIN.
-    // This prevents articles from being hidden if the author_id is missing or invalid.
+    // 1. FIRST ATTEMPT: Try the full query with names
     articles = await sql`
       SELECT a.*, u.username 
       FROM articles a
       LEFT JOIN users u ON a.author_id = u.id
       ORDER BY a.created_at DESC
     `;
-  } catch (e) {
-    console.error("Database Fetch Error:", e);
+  } catch (e: any) {
+    console.warn("Join failed, falling back to simple fetch:", e.message);
+    try {
+      // 2. FALLBACK: If the join fails (missing columns), just get the raw articles
+      articles = await sql`SELECT * FROM articles ORDER BY created_at DESC`;
+    } catch (fallbackError: any) {
+      dbError = fallbackError.message;
+    }
   }
 
   return (
     <div className="page-wrapper" style={{ gridTemplateColumns: '1fr', background: 'var(--paper)', minHeight: '100vh' }}>
       <div className="content-area" style={{ maxWidth: '1000px', margin: '0 auto', padding: '60px 20px' }}>
         
-        {/* PAGE HEADER */}
+        {/* HEADER */}
         <header style={{ borderBottom: '12px solid var(--ink)', paddingBottom: '30px', marginBottom: '60px' }}>
           <h1 style={{ fontFamily: 'Bebas Neue', fontSize: '8rem', margin: 0, lineHeight: '0.8', color: 'var(--ink)' }}>
             SME ARTICLES
@@ -33,6 +39,13 @@ export default async function ArticlesPage() {
             LATEST NEWS · INTERVIEWS · GIG REVIEWS
           </p>
         </header>
+
+        {/* ERROR DIAGNOSTIC (Only shows if BOTH queries fail) */}
+        {dbError && (
+          <div style={{ background: 'var(--rust)', color: 'white', padding: '20px', border: '4px solid var(--ink)', marginBottom: '30px' }}>
+            <p style={{ fontWeight: 'bold' }}>DATABASE ERROR: {dbError}</p>
+          </div>
+        )}
 
         {/* ARTICLES LIST */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
@@ -47,26 +60,19 @@ export default async function ArticlesPage() {
                   background: 'white',
                   border: '4px solid var(--ink)',
                   boxShadow: '10px 10px 0px var(--aged)',
-                  transition: 'transform 0.2s ease'
                 }}>
-                  {/* THUMBNAIL */}
                   {article.image_url && (
                     <div style={{ height: '220px', background: '#111', overflow: 'hidden', border: '2px solid var(--ink)' }}>
-                      <img 
-                        src={article.image_url} 
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-                        alt={article.title} 
-                      />
+                      <img src={article.image_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="" />
                     </div>
                   )}
 
-                  {/* CONTENT PREVIEW */}
                   <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                     <div style={{ fontFamily: 'IBM Plex Mono', fontSize: '0.8rem', fontWeight: 'bold', color: 'var(--rust)', marginBottom: '10px' }}>
-                      {article.category.toUpperCase()} // {new Date(article.created_at).toLocaleDateString()}
+                      {article.category?.toUpperCase() || 'NEWS'} // {new Date(article.created_at).toLocaleDateString()}
                     </div>
                     
-                    <h2 style={{ fontFamily: 'Bebas Neue', fontSize: '3.5rem', margin: '0 0 15px 0', lineHeight: '0.9', color: 'var(--ink)' }}>
+                    <h2 style={{ fontFamily: 'Bebas Neue', fontSize: '3.5rem', margin: '0 0 15px 0', lineHeight: '0.9' }}>
                       {article.title}
                     </h2>
                     
@@ -82,14 +88,8 @@ export default async function ArticlesPage() {
               </a>
             ))
           ) : (
-            /* EMPTY STATE */
-            <div style={{ padding: '80px 40px', textAlign: 'center', border: '4px dashed var(--aged)', background: 'rgba(255,255,255,0.5)' }}>
-              <p style={{ fontFamily: 'IBM Plex Mono', fontSize: '1.2rem', color: '#666' }}>
-                No articles currently published to this branch.
-              </p>
-              <p style={{ fontFamily: 'IBM Plex Mono', fontSize: '0.8rem', marginTop: '10px' }}>
-                Check Neon.tech to ensure your articles are in the "main" branch.
-              </p>
+            <div style={{ padding: '80px 40px', textAlign: 'center', border: '4px dashed var(--aged)' }}>
+              <p style={{ fontFamily: 'IBM Plex Mono' }}>No articles found. If you see them in Neon, ensure your Netlify DATABASE_URL is correct.</p>
             </div>
           )}
         </div>
