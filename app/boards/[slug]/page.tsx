@@ -1,4 +1,6 @@
 export const dynamic = 'force-dynamic';
+export const revalidate = 0; // 👈 Forces the server to fetch fresh data every time
+
 import { sql } from '@/lib/db';
 import Link from 'next/link';
 import CreateThreadForm from '@/components/CreateThreadForm';
@@ -12,20 +14,10 @@ export default async function BoardPage({ params }: { params: Promise<{ slug: st
 
   const isGear = slug === 'gear-exchange';
 
-  // Explicitly fetch from the correct table
+  // Fetch items with a timestamp to prevent any SQL-level caching
   const items = isGear 
-    ? await sql`
-        SELECT g.id, g.title, g.price, g.condition, g.created_at, u.username 
-        FROM gear_listings g 
-        JOIN users u ON g.user_id = u.id 
-        WHERE g.board_id = ${board.id} 
-        ORDER BY g.created_at DESC`
-    : await sql`
-        SELECT t.id, t.title, t.created_at, u.username 
-        FROM threads t 
-        JOIN users u ON t.user_id = u.id 
-        WHERE t.board_id = ${board.id} 
-        ORDER BY t.created_at DESC`;
+    ? await sql`SELECT g.*, u.username FROM gear_listings g JOIN users u ON g.user_id = u.id WHERE g.board_id = ${board.id} ORDER BY g.created_at DESC`
+    : await sql`SELECT t.*, u.username FROM threads t JOIN users u ON t.user_id = u.id WHERE t.board_id = ${board.id} ORDER BY t.created_at DESC`;
 
   return (
     <div className="page-wrapper" style={{ gridTemplateColumns: '1fr' }}>
@@ -36,8 +28,10 @@ export default async function BoardPage({ params }: { params: Promise<{ slug: st
           {items.map((item) => (
             <Link 
               key={item.id} 
+              // 👈 Adding the type=gear ensures the next page knows exactly what to display
               href={`/threads/${item.id}?type=${isGear ? 'gear' : 'thread'}`} 
               style={{ textDecoration: 'none' }}
+              prefetch={false} // 👈 Prevents Next.js from "guessing" the content before you click
             >
               <div style={{ background: 'white', border: '3px solid var(--ink)', padding: '20px', display: 'flex', justifyContent: 'space-between', boxShadow: '6px 6px 0px var(--aged)' }}>
                 <div>
@@ -55,7 +49,7 @@ export default async function BoardPage({ params }: { params: Promise<{ slug: st
           ))}
         </div>
 
-        <div style={{ marginTop: '60px', padding: '40px', background: 'var(--paper)', border: '4px solid var(--ink)' }}>
+        <div style={{ marginTop: '50px', padding: '30px', background: 'var(--paper)', border: '4px solid var(--ink)' }}>
           <CreateThreadForm boardId={board.id} boardSlug={board.slug} />
         </div>
       </div>
