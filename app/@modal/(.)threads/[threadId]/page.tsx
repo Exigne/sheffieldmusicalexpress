@@ -1,4 +1,5 @@
 import { sql } from '@/lib/db';
+import Link from 'next/link';
 import PostReplyForm from '@/components/PostReplyForm';
 import CloseModalButton from '@/components/CloseModalButton'; // <-- Imported the new button
 
@@ -99,10 +100,34 @@ export default async function ThreadModal({ params }: { params: Promise<{ thread
                   }}>
                     {p.username.slice(0, 2).toUpperCase()}
                   </div>
+                  
+                  {/* USERNAME & DM BUTTON BLOCK */}
                   <div>
-                    <strong style={{ fontFamily: 'IBM Plex Mono', fontSize: '0.9rem', display: 'block' }}>
-                      @{p.username.toUpperCase()}
-                    </strong>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
+                      <Link 
+                        href={`/profile/${p.username}`} 
+                        style={{ fontFamily: 'IBM Plex Mono', fontSize: '1rem', color: 'var(--ink)', fontWeight: 'bold', textDecoration: 'none' }}
+                      >
+                        @{p.username.toUpperCase()}
+                      </Link>
+                      
+                      <Link 
+                        href={`/messages?to=${p.username}`} 
+                        style={{ 
+                          fontFamily: 'IBM Plex Mono', 
+                          fontSize: '0.7rem', 
+                          background: 'var(--rust)', 
+                          color: 'white', 
+                          padding: '3px 8px', 
+                          textDecoration: 'none', 
+                          fontWeight: 'bold',
+                          boxShadow: '2px 2px 0px var(--ink)'
+                        }}
+                      >
+                        ✉ MESSAGE
+                      </Link>
+                    </div>
+                    
                     <span style={{ fontSize: '0.7rem', fontFamily: 'IBM Plex Mono', color: '#666' }}>
                       {new Date(p.created_at).toLocaleString()}
                     </span>
