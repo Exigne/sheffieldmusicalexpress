@@ -8,8 +8,7 @@ export default function CreateThreadModal({ boardId, boardSlug }: { boardId: num
 
   const handleSuccess = () => {
     setOpen(false);
-    // Timestamp forces Next.js to make a fresh HTTP request and re-query the DB
-    window.location.href = window.location.pathname + '?t=' + Date.now();
+    window.location.reload();
   };
 
   return (
