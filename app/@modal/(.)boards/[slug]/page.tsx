@@ -144,7 +144,7 @@ export default async function BoardModal(props: { params: Promise<{ slug: string
           Please keep listings relevant to the Sheffield scene.
         </p>
         
-        <CreateThreadForm boardId={board.id} />
+        <CreateThreadForm boardId={board.id} boardSlug={board.slug} />
       </div>
     </Modal>
   );
