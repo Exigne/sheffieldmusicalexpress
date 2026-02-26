@@ -103,14 +103,11 @@ export default async function ThreadModal({ params }: { params: Promise<{ thread
                   {/* USERNAME & DM BUTTON BLOCK */}
                   <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
-                      <Link 
-                        href={`/profile/${p.username}`} 
-                        style={{ fontFamily: 'IBM Plex Mono', fontSize: '1rem', color: 'var(--ink)', fontWeight: 'bold', textDecoration: 'none' }}
-                      >
+                      {/* 👈 Username is now just static text (span), not a Link */}
+                      <span style={{ fontFamily: 'IBM Plex Mono', fontSize: '1rem', color: 'var(--ink)', fontWeight: 'bold' }}>
                         @{p.username.toUpperCase()}
-                      </Link>
+                      </span>
                       
-                      {/* 👈 THE FIX IS HERE: Pointing to /inbox?chat= */}
                       <Link 
                         href={`/inbox?chat=${p.username}`} 
                         style={{ 
