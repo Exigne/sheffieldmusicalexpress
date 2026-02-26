@@ -1,107 +1,100 @@
 "use client";
-
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-export default function CreateThreadForm({ boardId }: { boardId: number }) {
+export default function CreateThreadForm({ boardId, boardSlug }: { boardId: number, boardSlug?: string }) {
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
+  const [price, setPrice] = useState('');
+  const [condition, setCondition] = useState('Used - Good');
+  const [imageUrl, setImageUrl] = useState('');
   const [loading, setLoading] = useState(false);
-  const [username, setUsername] = useState<string | null>(null);
   const router = useRouter();
 
-  // On mount, try to find who is logged in
-  useEffect(() => {
-    // Try to get username from cookies or local storage
-    const getCookie = (name: string) => {
-      const value = `; ${document.cookie}`;
-      const parts = value.split(`; ${name}=`);
-      if (parts.length === 2) return parts.pop()?.split(';').shift();
-    };
-
-    const savedUser = getCookie('username') || localStorage.getItem('username');
-    if (savedUser) setUsername(savedUser);
-  }, []);
+  const isMarketplace = boardSlug === 'gear-exchange';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!username) {
-      alert("You must be logged in to post! Please sign in first.");
-      return;
-    }
-    
     setLoading(true);
 
-    try {
-      const res = await fetch('/api/threads/create', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          title, 
-          body, 
-          boardId,
-          username // We send the username directly since the cookie isn't working
-        }),
-      });
+    const username = localStorage.getItem('sme_user');
 
-      const data = await res.json();
+    const res = await fetch('/api/threads/create', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        title, 
+        body, 
+        boardId, 
+        username,
+        // New fields:
+        price: isMarketplace ? price : null,
+        condition: isMarketplace ? condition : null,
+        imageUrl: isMarketplace ? imageUrl : null
+      }),
+    });
 
-      if (res.ok) {
-        setTitle('');
-        setBody('');
-        router.refresh();
-        router.push(`/threads/${data.id}`);
-      } else {
-        alert(`Error: ${data.error}`);
-      }
-    } catch (err) {
-      alert("Connection error. Please try again.");
-    } finally {
-      setLoading(false);
+    if (res.ok) {
+      router.refresh();
+      setTitle('');
+      setBody('');
+      setPrice('');
+      setImageUrl('');
     }
+    setLoading(false);
   };
 
   return (
     <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-      <input
-        className="form-input"
-        placeholder="Thread Title"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        required
-        style={{ width: '100%', padding: '12px', border: '2px solid var(--ink)' }}
+      <input 
+        placeholder="Listing Title (e.g. Fender Stratocaster 2014)" 
+        value={title} 
+        onChange={e => setTitle(e.target.value)} 
+        required 
+        style={{ padding: '12px', border: '2px solid var(--ink)', fontFamily: 'IBM Plex Mono' }}
       />
-      <textarea
-        className="reply-textarea"
-        // UPDATED: Removed the gear selling text
-        placeholder="What's on your mind?" 
-        rows={5}
-        value={body}
-        onChange={(e) => setBody(e.target.value)}
-        required
-        style={{ width: '100%', padding: '12px', border: '2px solid var(--ink)', fontFamily: 'inherit' }}
-      />
-      <button 
-        type="submit" 
-        className="btn-submit" 
-        disabled={loading}
-        style={{ 
-          background: 'var(--rust)', 
-          color: 'white', 
-          padding: '12px', 
-          fontWeight: 'bold', 
-          border: 'none', 
-          cursor: loading ? 'not-allowed' : 'pointer',
-          textTransform: 'uppercase'
-        }}
-      >
-        {loading ? 'POSTING...' : 'POST DISCUSSION'}
-      </button>
-      {!username && (
-        <p style={{ color: 'var(--rust)', fontSize: '0.8rem', textAlign: 'center' }}>
-          ⚠️ You don't appear to be logged in.
-        </p>
+
+      {/* 🎸 GEAR EXCHANGE ONLY FIELDS */}
+      {isMarketplace && (
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+          <input 
+            placeholder="Price (e.g. £450 or Trade)" 
+            value={price} 
+            onChange={e => setPrice(e.target.value)} 
+            style={{ padding: '12px', border: '2px solid var(--ink)', fontFamily: 'IBM Plex Mono' }}
+          />
+          <select 
+            value={condition} 
+            onChange={e => setCondition(e.target.value)}
+            style={{ padding: '12px', border: '2px solid var(--ink)', fontFamily: 'IBM Plex Mono', background: 'white' }}
+          >
+            <option>Brand New</option>
+            <option>Used - Mint</option>
+            <option>Used - Good</option>
+            <option>Used - Fair</option>
+            <option>Spares/Repair</option>
+          </select>
+          <input 
+            placeholder="Image URL (Imgur link etc.)" 
+            value={imageUrl} 
+            onChange={e => setImageUrl(e.target.value)} 
+            style={{ padding: '12px', border: '2px solid var(--ink)', fontFamily: 'IBM Plex Mono', gridColumn: 'span 2' }}
+          />
+        </div>
       )}
+
+      <textarea 
+        placeholder="Description / Details..." 
+        value={body} 
+        onChange={e => setBody(e.target.value)} 
+        rows={5} 
+        required 
+        style={{ padding: '12px', border: '2px solid var(--ink)', fontFamily: 'Barlow' }}
+      />
+      
+      <button type="submit" disabled={loading} className="btn-submit">
+        {loading ? 'POSTING...' : 'PUBLISH LISTING →'}
+      </button>
     </form>
   );
 }
