@@ -1,5 +1,4 @@
 "use client";
-import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
 export default function Navbar() {
@@ -22,7 +21,7 @@ export default function Navbar() {
       color: 'white', 
       padding: '15px 40px', 
       display: 'flex', 
-      justifyContent: 'center', /* 👈 This centers the links */
+      justifyContent: 'center', /* Centers the links */
       alignItems: 'center',
       borderBottom: '4px solid var(--rust)',
       position: 'sticky',
@@ -32,13 +31,14 @@ export default function Navbar() {
       
       {/* NAVIGATION LINKS */}
       <div style={{ display: 'flex', gap: '35px', alignItems: 'center', fontFamily: 'IBM Plex Mono', fontSize: '1rem', fontWeight: 'bold' }}>
-        <Link href="/" style={{ color: 'white', textDecoration: 'none' }}>DASHBOARD</Link>
-        <Link href="/articles" style={{ color: 'white', textDecoration: 'none' }}>ARTICLES</Link>
+        {/* Changed to 'a' tags to force hard page loads and bypass Netlify caching */}
+        <a href="/" style={{ color: 'white', textDecoration: 'none' }}>DASHBOARD</a>
+        <a href="/articles" style={{ color: 'white', textDecoration: 'none' }}>ARTICLES</a>
         
         {user ? (
           /* LOGGED IN VIEW */
           <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
-            <Link href={`/profile/${user}`} style={{ color: 'var(--rust)', textDecoration: 'none' }}>@{user.toUpperCase()}</Link>
+            <a href={`/profile/${user}`} style={{ color: 'var(--rust)', textDecoration: 'none' }}>@{user.toUpperCase()}</a>
             <button 
               onClick={handleLogout}
               style={{ background: 'none', border: '1px solid white', color: 'white', padding: '5px 12px', cursor: 'pointer', fontSize: '0.8rem', fontFamily: 'IBM Plex Mono', fontWeight: 'bold' }}
@@ -47,12 +47,12 @@ export default function Navbar() {
             </button>
           </div>
         ) : (
-/* LOGGED OUT VIEW */
+          /* LOGGED OUT VIEW */
           <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
             <a href="/login" style={{ color: 'white', textDecoration: 'none', border: '1px solid white', padding: '5px 15px' }}>
               LOGIN
             </a>
-            <Link href="/register" style={{
+            <a href="/register" style={{
               background: 'var(--rust)', 
               color: 'white', 
               textDecoration: 'none', 
@@ -60,7 +60,7 @@ export default function Navbar() {
               border: '1px solid var(--rust)' 
             }}>
               REGISTER
-            </Link>
+            </a>
           </div>
         )}
       </div>
