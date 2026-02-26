@@ -1,20 +1,16 @@
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
-
 import { sql } from '@/lib/db';
 import Link from 'next/link';
-import CreateThreadForm from '@/components/CreateThreadForm';
+import CreateThreadModal from '@/components/CreateThreadModal';
 
 export default async function BoardPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const boardRes = await sql`SELECT * FROM boards WHERE slug = ${slug} LIMIT 1`;
   const board = boardRes[0];
-
   if (!board) return <div className="page-wrapper">Board not found.</div>;
-
   const isGear = slug === 'gear-exchange';
 
-  // Fetch from gear table if marketplace, otherwise standard threads
   const items = isGear 
     ? await sql`
         SELECT g.id, g.title, g.price, g.condition, g.created_at, u.username 
@@ -58,9 +54,11 @@ export default async function BoardPage({ params }: { params: Promise<{ slug: st
           ))}
         </div>
 
-        <div style={{ marginTop: '60px', padding: '40px', background: 'var(--paper)', border: '4px solid var(--ink)' }}>
-          <CreateThreadForm boardId={board.id} boardSlug={board.slug} />
+        {/* CHANGED: was a static form div, now a modal trigger button */}
+        <div style={{ marginTop: '40px' }}>
+          <CreateThreadModal boardId={board.id} boardSlug={board.slug} />
         </div>
+
       </div>
     </div>
   );
