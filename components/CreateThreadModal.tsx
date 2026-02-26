@@ -8,12 +8,12 @@ export default function CreateThreadModal({ boardId, boardSlug }: { boardId: num
 
   const handleSuccess = () => {
     setOpen(false);
-    window.location.reload();
+    // Force a true navigation — bypasses Next.js RSC cache and re-queries the DB
+    window.location.href = window.location.pathname;
   };
 
   return (
     <>
-      {/* TRIGGER BUTTON */}
       <button
         onClick={() => setOpen(true)}
         style={{
@@ -30,7 +30,6 @@ export default function CreateThreadModal({ boardId, boardSlug }: { boardId: num
         {isMarketplace ? '+ LIST AN ITEM' : '+ NEW THREAD'}
       </button>
 
-      {/* MODAL OVERLAY */}
       {open && (
         <div
           onClick={() => setOpen(false)}
@@ -59,7 +58,6 @@ export default function CreateThreadModal({ boardId, boardSlug }: { boardId: num
               position: 'relative',
             }}
           >
-            {/* CLOSE BUTTON */}
             <button
               onClick={() => setOpen(false)}
               style={{
