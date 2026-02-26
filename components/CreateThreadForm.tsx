@@ -48,7 +48,7 @@ export default function CreateThreadForm({ boardId, boardSlug, onSuccess }: {
       if (res.ok) {
         setPosted(true);
         setTimeout(() => {
-          onSuccess?.(); // closes modal & refreshes board — no page navigation
+          onSuccess?.();
         }, 1000);
       } else {
         alert(data.error || "Failed to post. Please try again.");
