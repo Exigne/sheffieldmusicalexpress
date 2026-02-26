@@ -5,8 +5,8 @@ import { sql } from '@/lib/db';
 import Link from 'next/link';
 import CreateThreadModal from '@/components/CreateThreadModal';
 
-export default async function BoardPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
+export default async function BoardPage({ params }: { params: Promise<{ boardSlug: string }> }) {
+  const { boardSlug: slug } = await params;
   const boardRes = await sql`SELECT * FROM boards WHERE slug = ${slug} LIMIT 1`;
   const board = boardRes[0];
   if (!board) return <div className="page-wrapper">Board not found.</div>;
