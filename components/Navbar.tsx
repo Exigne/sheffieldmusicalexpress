@@ -6,7 +6,7 @@ export default function Navbar() {
   const [user, setUser] = useState<string | null>(null);
 
   useEffect(() => {
-    // This checks if the user is logged in
+    // Check if the user is logged in
     const loggedInUser = localStorage.getItem('sme_user');
     setUser(loggedInUser);
   }, []);
@@ -22,20 +22,16 @@ export default function Navbar() {
       color: 'white', 
       padding: '15px 40px', 
       display: 'flex', 
-      justifyContent: 'space-between', 
+      justifyContent: 'center', /* 👈 This centers the links */
       alignItems: 'center',
       borderBottom: '4px solid var(--rust)',
       position: 'sticky',
       top: 0,
       zIndex: 1000
     }}>
-      {/* 1. LOGO */}
-      <Link href="/" style={{ color: 'white', textDecoration: 'none', fontFamily: 'Bebas Neue', fontSize: '2.2rem' }}>
-        SHEFFIELD MUSIC <span style={{color: 'var(--rust)'}}>EXPRESS</span>
-      </Link>
-
-      {/* 2. NAVIGATION LINKS */}
-      <div style={{ display: 'flex', gap: '25px', alignItems: 'center', fontFamily: 'IBM Plex Mono', fontSize: '0.9rem', fontWeight: 'bold' }}>
+      
+      {/* NAVIGATION LINKS */}
+      <div style={{ display: 'flex', gap: '35px', alignItems: 'center', fontFamily: 'IBM Plex Mono', fontSize: '1rem', fontWeight: 'bold' }}>
         <Link href="/" style={{ color: 'white', textDecoration: 'none' }}>DASHBOARD</Link>
         <Link href="/articles" style={{ color: 'white', textDecoration: 'none' }}>ARTICLES</Link>
         
@@ -45,13 +41,13 @@ export default function Navbar() {
             <Link href={`/profile/${user}`} style={{ color: 'var(--rust)', textDecoration: 'none' }}>@{user.toUpperCase()}</Link>
             <button 
               onClick={handleLogout}
-              style={{ background: 'none', border: '1px solid white', color: 'white', padding: '5px 12px', cursor: 'pointer', fontSize: '0.7rem' }}
+              style={{ background: 'none', border: '1px solid white', color: 'white', padding: '5px 12px', cursor: 'pointer', fontSize: '0.8rem', fontFamily: 'IBM Plex Mono', fontWeight: 'bold' }}
             >
               LOGOUT
             </button>
           </div>
         ) : (
-          /* LOGGED OUT VIEW - THE FIX IS HERE */
+          /* LOGGED OUT VIEW */
           <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
             <Link href="/login" style={{ color: 'white', textDecoration: 'none', border: '1px solid white', padding: '5px 15px' }}>
               LOGIN
