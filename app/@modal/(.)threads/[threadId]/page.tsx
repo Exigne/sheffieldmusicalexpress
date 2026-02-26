@@ -1,11 +1,11 @@
 import { sql } from '@/lib/db';
-import Link from 'next/link';
 import PostReplyForm from '@/components/PostReplyForm';
+import CloseModalButton from '@/components/CloseModalButton'; // <-- Imported the new button
 
 export default async function ThreadModal({ params }: { params: Promise<{ threadId: string }> }) {
   const { threadId } = await params;
 
-  // Fetch the thread AND its associated board so we can make a working "Close" button
+  // Fetch the thread AND its associated board
   const threadRes = await sql`
     SELECT t.*, b.slug as board_slug 
     FROM threads t 
@@ -60,19 +60,10 @@ export default async function ThreadModal({ params }: { params: Promise<{ thread
           <div style={{ color: 'white', fontFamily: 'IBM Plex Mono', fontSize: '0.9rem', fontWeight: 'bold' }}>
             VIEWING THREAD
           </div>
-          {/* Close button routes back to the specific board to cleanly dismiss the modal */}
-          <Link 
-            href={`/boards/${thread.board_slug}`} 
-            style={{ 
-              color: 'var(--rust)', 
-              fontFamily: 'Bebas Neue', 
-              fontSize: '2rem', 
-              textDecoration: 'none',
-              lineHeight: '1'
-            }}
-          >
-            X CLOSE
-          </Link>
+          
+          {/* True back-navigation to cleanly dismiss the intercepted modal */}
+          <CloseModalButton />
+          
         </div>
 
         {/* MODAL SCROLLABLE CONTENT */}
