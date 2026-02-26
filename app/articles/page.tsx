@@ -1,13 +1,14 @@
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
+export const fetchCache = 'force-no-store'; // 👈 This absolutely kills the Next.js cache
 
 import { sql } from '@/lib/db';
 import Link from 'next/link';
 
 export default async function ArticlesPage() {
-  // Fetch all articles from Neon.tech
   let articles: any[] = [];
   try {
+    // Specifically pulls from the 'articles' table in Neon
     articles = await sql`
       SELECT a.*, u.username 
       FROM articles a
@@ -22,7 +23,6 @@ export default async function ArticlesPage() {
     <div className="page-wrapper" style={{ gridTemplateColumns: '1fr', background: 'var(--paper)', minHeight: '100vh' }}>
       <div className="content-area" style={{ maxWidth: '1000px', margin: '0 auto', padding: '60px 20px' }}>
         
-        {/* 📰 SECTION HEADER */}
         <header style={{ borderBottom: '12px solid var(--ink)', paddingBottom: '30px', marginBottom: '60px' }}>
           <h1 style={{ fontFamily: 'Bebas Neue', fontSize: '8rem', margin: 0, lineHeight: '0.8' }}>SME ARTICLES</h1>
           <p style={{ fontSize: '1.2rem', fontFamily: 'IBM Plex Mono', fontWeight: 'bold', color: 'var(--rust)', marginTop: '10px' }}>
@@ -30,7 +30,6 @@ export default async function ArticlesPage() {
           </p>
         </header>
 
-        {/* 📑 ARTICLE LIST */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
           {articles.length > 0 ? (
             articles.map((article) => (
@@ -58,7 +57,7 @@ export default async function ArticlesPage() {
                       {article.title}
                     </h2>
                     <p style={{ fontFamily: 'Barlow', fontSize: '1.1rem', color: '#444', lineHeight: '1.5' }}>
-                      {article.content.slice(0, 200)}...
+                      {article.content ? article.content.substring(0, 200) : ''}...
                     </p>
                     <div style={{ marginTop: '20px', fontFamily: 'IBM Plex Mono', fontSize: '0.8rem', fontWeight: 'bold' }}>
                       READ FULL ARTICLE →
@@ -69,7 +68,7 @@ export default async function ArticlesPage() {
             ))
           ) : (
             <div style={{ padding: '60px', textAlign: 'center', border: '3px dashed var(--aged)' }}>
-              <p style={{ fontFamily: 'IBM Plex Mono' }}>No articles published yet.</p>
+              <p style={{ fontFamily: 'IBM Plex Mono' }}>No articles published yet. Use the MOD panel to post one.</p>
             </div>
           )}
         </div>
