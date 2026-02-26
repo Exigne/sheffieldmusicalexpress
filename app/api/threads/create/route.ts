@@ -1,27 +1,94 @@
-import { sql } from '@/lib/db';
-import { NextResponse } from 'next/server';
+"use client";
+import { useState } from 'react';
+import CreateThreadForm from './CreateThreadForm';
 
-export async function POST(req: Request) {
-  try {
-    const { title, body, boardId, boardSlug, username, price, condition, imageUrl } = await req.json();
+export default function CreateThreadModal({ boardId, boardSlug }: { boardId: number, boardSlug: string }) {
+  const [open, setOpen] = useState(false);
+  const isMarketplace = boardSlug === 'gear-exchange';
 
-    const userRes = await sql`SELECT id FROM users WHERE username = ${username} LIMIT 1`;
-    const userId = userRes[0].id;
+  const handleSuccess = () => {
+    setOpen(false);
+    // Cache-bust the current URL to force Netlify to serve fresh data
+    const url = new URL(window.location.href);
+    url.searchParams.set('t', Date.now().toString());
+    window.location.href = url.toString();
+  };
 
-    if (boardSlug === 'gear-exchange') {
-      const res = await sql`
-        INSERT INTO gear_listings (title, description, price, condition, image_url, user_id, board_id)
-        VALUES (${title}, ${body}, ${price}, ${condition}, ${imageUrl}, ${userId}, ${boardId})
-        RETURNING id
-      `;
-      return NextResponse.json({ id: res[0].id, type: 'gear' });
-    }
+  return (
+    <>
+      <button
+        onClick={() => setOpen(true)}
+        style={{
+          background: 'var(--ink)',
+          color: 'white',
+          padding: '15px 30px',
+          fontFamily: 'Bebas Neue',
+          fontSize: '1.8rem',
+          border: 'none',
+          cursor: 'pointer',
+          boxShadow: '6px 6px 0px var(--rust)',
+        }}
+      >
+        {isMarketplace ? '+ LIST AN ITEM' : '+ NEW THREAD'}
+      </button>
 
-    const threadRes = await sql`INSERT INTO threads (title, board_id, user_id) VALUES (${title}, ${boardId}, ${userId}) RETURNING id`;
-    await sql`INSERT INTO posts (body, thread_id, user_id) VALUES (${body}, ${threadRes[0].id}, ${userId})`;
-    
-    return NextResponse.json({ id: threadRes[0].id, type: 'thread' });
-  } catch (err) {
-    return NextResponse.json({ error: 'Database error' }, { status: 500 });
-  }
+      {open && (
+        <div
+          onClick={() => setOpen(false)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.75)',
+            zIndex: 1000,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '20px',
+          }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{
+              background: 'var(--paper)',
+              border: '4px solid var(--ink)',
+              boxShadow: '12px 12px 0px var(--rust)',
+              padding: '40px',
+              width: '100%',
+              maxWidth: '700px',
+              maxHeight: '90vh',
+              overflowY: 'auto',
+              position: 'relative',
+            }}
+          >
+            <button
+              onClick={() => setOpen(false)}
+              style={{
+                position: 'absolute',
+                top: '15px',
+                right: '20px',
+                background: 'none',
+                border: 'none',
+                fontFamily: 'Bebas Neue',
+                fontSize: '2rem',
+                cursor: 'pointer',
+                color: 'var(--ink)',
+              }}
+            >
+              ✕
+            </button>
+
+            <h2 style={{ fontFamily: 'Bebas Neue', fontSize: '3rem', marginTop: 0, marginBottom: '30px' }}>
+              {isMarketplace ? 'LIST YOUR GEAR' : 'START A THREAD'}
+            </h2>
+
+            <CreateThreadForm
+              boardId={boardId}
+              boardSlug={boardSlug}
+              onSuccess={handleSuccess}
+            />
+          </div>
+        </div>
+      )}
+    </>
+  );
 }
