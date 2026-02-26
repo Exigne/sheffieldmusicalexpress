@@ -5,15 +5,14 @@ import CreateThreadForm from '@/components/CreateThreadForm';
 
 export default async function BoardPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  
   const boardRes = await sql`SELECT * FROM boards WHERE slug = ${slug} LIMIT 1`;
   const board = boardRes[0];
 
-  if (!board) return <div className="page-wrapper">Board not found.</div>;
+  if (!board) return <div>Board not found.</div>;
 
   const isGear = slug === 'gear-exchange';
 
-  // THE FIX: Fetch from gear_listings if it's the gear board
+  // Explicitly fetch from the correct table
   const items = isGear 
     ? await sql`
         SELECT g.id, g.title, g.price, g.condition, g.created_at, u.username 
@@ -31,59 +30,32 @@ export default async function BoardPage({ params }: { params: Promise<{ slug: st
   return (
     <div className="page-wrapper" style={{ gridTemplateColumns: '1fr' }}>
       <div className="content-area" style={{ maxWidth: '1000px', margin: '0 auto' }}>
-        
-        <nav className="breadcrumb">
-          <Link href="/">Home</Link>
-          <span className="breadcrumb-sep">›</span>
-          <span>{board.name}</span>
-        </nav>
-
-        <h1 style={{ fontFamily: 'Bebas Neue', fontSize: '5rem', marginBottom: '30px' }}>{board.name}</h1>
+        <h1 style={{ fontFamily: 'Bebas Neue', fontSize: '5rem' }}>{board.name}</h1>
         
         <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-          {items.length === 0 ? (
-            <div style={{ padding: '40px', textAlign: 'center', border: '2px dashed var(--aged)' }}>
-              No listings yet. Be the first!
-            </div>
-          ) : (
-            items.map((item) => (
-              <Link 
-                key={item.id} 
-                href={`/threads/${item.id}?type=${isGear ? 'gear' : 'thread'}`} 
-                style={{ textDecoration: 'none', color: 'inherit' }}
-              >
-                <div style={{ 
-                  background: 'white', 
-                  border: '3px solid var(--ink)', 
-                  padding: '20px', 
-                  display: 'flex', 
-                  justifyContent: 'space-between', 
-                  alignItems: 'center',
-                  boxShadow: '6px 6px 0px var(--aged)' 
-                }}>
-                  <div>
-                    <h3 style={{ margin: 0, fontFamily: 'Bebas Neue', fontSize: '2rem' }}>{item.title}</h3>
-                    <div style={{ fontSize: '0.8rem', fontFamily: 'IBM Plex Mono' }}>Posted by {item.username}</div>
-                  </div>
-                  
-                  {isGear && (
-                    <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontWeight: 'bold', color: 'var(--rust)', fontSize: '1.8rem', fontFamily: 'Bebas Neue' }}>
-                        {item.price || 'TBC'}
-                      </div>
-                      <div style={{ fontSize: '0.7rem', textTransform: 'uppercase', fontWeight: 'bold' }}>
-                        {item.condition}
-                      </div>
-                    </div>
-                  )}
+          {items.map((item) => (
+            <Link 
+              key={item.id} 
+              href={`/threads/${item.id}?type=${isGear ? 'gear' : 'thread'}`} 
+              style={{ textDecoration: 'none' }}
+            >
+              <div style={{ background: 'white', border: '3px solid var(--ink)', padding: '20px', display: 'flex', justifyContent: 'space-between', boxShadow: '6px 6px 0px var(--aged)' }}>
+                <div>
+                  <h3 style={{ margin: 0, fontFamily: 'Bebas Neue', fontSize: '2rem' }}>{item.title}</h3>
+                  <div style={{ fontSize: '0.8rem', fontFamily: 'IBM Plex Mono' }}>Posted by {item.username}</div>
                 </div>
-              </Link>
-            ))
-          )}
+                {isGear && (
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ color: 'var(--rust)', fontWeight: 'bold', fontSize: '1.8rem', fontFamily: 'Bebas Neue' }}>{item.price}</div>
+                    <div style={{ fontSize: '0.7rem', textTransform: 'uppercase', fontWeight: 'bold' }}>{item.condition}</div>
+                  </div>
+                )}
+              </div>
+            </Link>
+          ))}
         </div>
 
         <div style={{ marginTop: '60px', padding: '40px', background: 'var(--paper)', border: '4px solid var(--ink)' }}>
-          <h2 style={{ fontFamily: 'Bebas Neue', fontSize: '2.5rem' }}>{isGear ? 'Create Gear Listing' : 'Post New Thread'}</h2>
           <CreateThreadForm boardId={board.id} boardSlug={board.slug} />
         </div>
       </div>
