@@ -3,11 +3,9 @@ export const revalidate = 0;
 
 import { sql } from '@/lib/db';
 import Link from 'next/link';
-// We will create a specialized Article form in the next step
 import CreateArticleForm from '@/components/CreateArticleForm';
 
 export default async function ArticlesPage() {
-  // 1. Fetch all articles from the new table
   let articles: any[] = [];
   try {
     articles = await sql`
@@ -24,7 +22,6 @@ export default async function ArticlesPage() {
     <div className="page-wrapper" style={{ gridTemplateColumns: '1fr', background: 'var(--paper)', minHeight: '100vh' }}>
       <div className="content-area" style={{ maxWidth: '1000px', margin: '0 auto', padding: '60px 20px' }}>
         
-        {/* 📰 SECTION HEADER */}
         <header style={{ borderBottom: '12px solid var(--ink)', paddingBottom: '30px', marginBottom: '60px' }}>
           <h1 style={{ fontFamily: 'Bebas Neue', fontSize: '8rem', margin: 0, lineHeight: '0.8' }}>SME ARTICLES</h1>
           <p style={{ fontSize: '1.2rem', fontFamily: 'IBM Plex Mono', fontWeight: 'bold', color: 'var(--rust)', marginTop: '10px' }}>
@@ -32,18 +29,17 @@ export default async function ArticlesPage() {
           </p>
         </header>
 
-        {/* 📑 ARTICLE LIST */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
           {articles.length > 0 ? (
             articles.map((article) => (
               <Link 
                 key={article.id} 
-                href={`/articles/${article.id}`} 
+                href={`/articles/${article.id}`} // 👈 Ensuring this points to [id]
                 style={{ textDecoration: 'none', color: 'inherit' }}
               >
                 <div style={{ 
                   display: 'grid', 
-                  gridTemplateColumns: article.image_url ? '250px 1fr' : '1fr', 
+                  gridTemplateColumns: article.image_url ? '280px 1fr' : '1fr', 
                   gap: '30px',
                   padding: '30px',
                   background: 'white',
@@ -57,14 +53,7 @@ export default async function ArticlesPage() {
                     </div>
                   )}
                   <div>
-                    <div style={{ 
-                      fontFamily: 'IBM Plex Mono', 
-                      fontSize: '0.75rem', 
-                      fontWeight: 'bold', 
-                      color: 'var(--rust)', 
-                      textTransform: 'uppercase',
-                      marginBottom: '10px'
-                    }}>
+                    <div style={{ fontFamily: 'IBM Plex Mono', fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--rust)', marginBottom: '10px' }}>
                       {article.category} // {new Date(article.created_at).toLocaleDateString()}
                     </div>
                     <h2 style={{ fontFamily: 'Bebas Neue', fontSize: '3.5rem', margin: '0 0 15px 0', lineHeight: '0.9' }}>
@@ -87,12 +76,10 @@ export default async function ArticlesPage() {
           )}
         </div>
 
-        {/* ✍️ EDITOR SECTION (Hidden unless someone wants to post) */}
         <div style={{ marginTop: '100px', padding: '60px', background: 'white', border: '6px solid var(--ink)', boxShadow: '20px 20px 0px var(--aged)' }}>
           <h2 style={{ fontFamily: 'Bebas Neue', fontSize: '3rem', marginBottom: '30px' }}>POST NEW ARTICLE</h2>
           <CreateArticleForm />
         </div>
-
       </div>
     </div>
   );
