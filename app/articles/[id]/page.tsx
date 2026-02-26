@@ -1,5 +1,6 @@
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
+export const fetchCache = 'force-no-store'; // 👈 Added this to kill the cache here too!
 
 import { sql } from '@/lib/db';
 import Link from 'next/link';
