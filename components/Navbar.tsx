@@ -31,9 +31,12 @@ export default function Navbar() {
       
       {/* NAVIGATION LINKS */}
       <div style={{ display: 'flex', gap: '35px', alignItems: 'center', fontFamily: 'IBM Plex Mono', fontSize: '1rem', fontWeight: 'bold' }}>
-        {/* Changed to 'a' tags to force hard page loads and bypass Netlify caching */}
+        {/* Using 'a' tags to force hard page loads and bypass Netlify caching */}
         <a href="/" style={{ color: 'white', textDecoration: 'none' }}>DASHBOARD</a>
         <a href="/articles" style={{ color: 'white', textDecoration: 'none' }}>ARTICLES</a>
+        
+        {/* NEW MARKETPLACE LINK */}
+        <a href="/marketplace" style={{ color: 'white', textDecoration: 'none' }}>MARKETPLACE</a>
         
         {user ? (
           /* LOGGED IN VIEW */
