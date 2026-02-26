@@ -8,88 +8,65 @@ export default function CreateThreadForm({ boardId, boardSlug }: { boardId: numb
   const [condition, setCondition] = useState('Used - Good');
   const [imageUrl, setImageUrl] = useState('');
   const [loading, setLoading] = useState(false);
-  const [posted, setPosted] = useState(false);
 
   const isMarketplace = boardSlug === 'gear-exchange';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-
     const username = localStorage.getItem('sme_user');
-    if (!username) {
-      alert("Please log in to post.");
-      setLoading(false);
-      return;
-    }
+    
+    const res = await fetch('/api/threads/create', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title, body, boardId, boardSlug, username, price, condition, imageUrl }),
+    });
 
-    try {
-      const res = await fetch('/api/threads/create', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          title, body, boardId, boardSlug, username,
-          price: isMarketplace ? price : null,
-          condition: isMarketplace ? condition : null,
-          imageUrl: isMarketplace ? imageUrl : null
-        }),
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        setPosted(true);
-        // THE HARD REDIRECT: Bypass Next.js cache so the listing shows up instantly
-        const targetUrl = data.type === 'gear' 
-          ? `/threads/${data.id}?type=gear` 
-          : `/threads/${data.id}`;
-        
-        setTimeout(() => {
-          window.location.href = targetUrl;
-        }, 500);
-      } else {
-        alert(data.error || "Failed to post.");
-        setLoading(false);
-      }
-    } catch (err) {
-      alert("Connection error.");
+    const data = await res.json();
+    if (res.ok) {
+      // FORCE REDIRECT to the thread page with type gear
+      window.location.href = data.type === 'gear' 
+        ? `/threads/${data.id}?type=gear` 
+        : `/threads/${data.id}`;
+    } else {
+      alert("Error: " + data.error);
       setLoading(false);
     }
   };
 
-  if (posted) {
-    return (
-      <div style={{ padding: '40px', textAlign: 'center', background: 'var(--paper)', border: '3px solid var(--ink)' }}>
-        <h2 style={{ fontFamily: 'Bebas Neue', fontSize: '2.5rem', color: 'var(--rust)' }}>Listing Published!</h2>
-        <p style={{ fontFamily: 'IBM Plex Mono' }}>Redirecting you to your advert...</p>
-      </div>
-    );
-  }
-
   return (
     <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
       <div className="form-group">
-        <label style={{ fontFamily: 'IBM Plex Mono', fontSize: '0.8rem', fontWeight: 'bold' }}>{isMarketplace ? 'GEAR ITEM NAME' : 'TITLE'}</label>
-        <input placeholder="Name..." value={title} onChange={e => setTitle(e.target.value)} required style={{ width: '100%', padding: '12px', border: '3px solid var(--ink)', fontFamily: 'Barlow', fontSize: '1.2rem' }} />
+        <label style={{ fontFamily: 'IBM Plex Mono', fontSize: '0.8rem', fontWeight: 'bold' }}>{isMarketplace ? 'GEAR ITEM NAME' : 'TOPIC TITLE'}</label>
+        <input placeholder="Name..." value={title} onChange={e => setTitle(e.target.value)} required style={{ width: '100%', padding: '15px', border: '3px solid var(--ink)', fontFamily: 'Bebas Neue', fontSize: '1.8rem' }} />
       </div>
 
       {isMarketplace && (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', padding: '25px', background: '#f8f8f8', border: '2px solid var(--ink)', boxShadow: '6px 6px 0px var(--rust)' }}>
-          <input placeholder="Price" value={price} onChange={e => setPrice(e.target.value)} required={isMarketplace} style={{ padding: '10px', border: '2px solid var(--ink)' }} />
-          <select value={condition} onChange={e => setCondition(e.target.value)} style={{ padding: '10px', border: '2px solid var(--ink)', background: 'white' }}>
-            <option>Brand New</option><option>Used - Mint</option><option>Used - Good</option><option>Used - Fair</option><option>Broken / Spares</option>
-          </select>
-          <input placeholder="Image URL" value={imageUrl} onChange={e => setImageUrl(e.target.value)} style={{ gridColumn: 'span 2', padding: '10px', border: '2px solid var(--ink)' }} />
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', padding: '30px', background: '#f8f8f8', border: '2px solid var(--ink)', boxShadow: '8px 8px 0px var(--rust)' }}>
+          <div className="form-group">
+            <label style={{ fontFamily: 'IBM Plex Mono', fontSize: '0.7rem', fontWeight: 'bold' }}>PRICE</label>
+            <input placeholder="£0.00" value={price} onChange={e => setPrice(e.target.value)} required={isMarketplace} style={{ width: '100%', padding: '12px', border: '2px solid var(--ink)' }} />
+          </div>
+          <div className="form-group">
+            <label style={{ fontFamily: 'IBM Plex Mono', fontSize: '0.7rem', fontWeight: 'bold' }}>CONDITION</label>
+            <select value={condition} onChange={e => setCondition(e.target.value)} style={{ width: '100%', padding: '12px', border: '2px solid var(--ink)', background: 'white' }}>
+              <option>Brand New</option><option>Used - Mint</option><option>Used - Good</option><option>Used - Fair</option><option>Spares / Repairs</option>
+            </select>
+          </div>
+          <div className="form-group" style={{ gridColumn: 'span 2' }}>
+            <label style={{ fontFamily: 'IBM Plex Mono', fontSize: '0.7rem', fontWeight: 'bold' }}>IMAGE URL (IMGUR LINK)</label>
+            <input placeholder="https://i.imgur.com/..." value={imageUrl} onChange={e => setImageUrl(e.target.value)} style={{ width: '100%', padding: '12px', border: '2px solid var(--ink)' }} />
+          </div>
         </div>
       )}
 
       <div className="form-group">
-        <label style={{ fontFamily: 'IBM Plex Mono', fontSize: '0.8rem', fontWeight: 'bold' }}>{isMarketplace ? 'DESCRIPTION' : 'MESSAGE'}</label>
-        <textarea placeholder="Details..." value={body} onChange={e => setBody(e.target.value)} rows={6} required style={{ width: '100%', padding: '12px', border: '3px solid var(--ink)', fontFamily: 'Barlow' }} />
+        <label style={{ fontFamily: 'IBM Plex Mono', fontSize: '0.8rem', fontWeight: 'bold' }}>{isMarketplace ? 'FULL DETAILS' : 'MESSAGE'}</label>
+        <textarea placeholder="Write here..." value={body} onChange={e => setBody(e.target.value)} rows={8} required style={{ width: '100%', padding: '15px', border: '3px solid var(--ink)', fontFamily: 'Barlow', fontSize: '1.1rem' }} />
       </div>
       
-      <button type="submit" disabled={loading} style={{ background: 'var(--ink)', color: 'white', padding: '18px', fontFamily: 'Bebas Neue', fontSize: '1.8rem', border: 'none', boxShadow: '6px 6px 0px var(--rust)', cursor: 'pointer' }}>
-        {loading ? 'POSTING...' : 'PUBLISH →'}
+      <button type="submit" disabled={loading} style={{ background: 'var(--ink)', color: 'white', padding: '20px', fontFamily: 'Bebas Neue', fontSize: '2rem', border: 'none', boxShadow: '6px 6px 0px var(--rust)', cursor: 'pointer' }}>
+        {loading ? 'POSTING...' : 'PUBLISH NOW →'}
       </button>
     </form>
   );
