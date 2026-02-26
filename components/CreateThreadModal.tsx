@@ -1,16 +1,14 @@
 "use client";
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import CreateThreadForm from './CreateThreadForm';
 
 export default function CreateThreadModal({ boardId, boardSlug }: { boardId: number, boardSlug: string }) {
   const [open, setOpen] = useState(false);
-  const router = useRouter();
   const isMarketplace = boardSlug === 'gear-exchange';
 
   const handleSuccess = () => {
     setOpen(false);
-    router.refresh(); // re-fetches the thread list in place — no navigation
+    window.location.reload();
   };
 
   return (
@@ -48,7 +46,7 @@ export default function CreateThreadModal({ boardId, boardSlug }: { boardId: num
           }}
         >
           <div
-            onClick={e => e.stopPropagation()} // prevent closing when clicking inside
+            onClick={e => e.stopPropagation()}
             style={{
               background: 'var(--paper)',
               border: '4px solid var(--ink)',
