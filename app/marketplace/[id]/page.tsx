@@ -1,34 +1,57 @@
 export const dynamic = 'force-dynamic';
 import { sql } from '@/lib/db';
 import { notFound } from 'next/navigation';
+import MarketplaceActions from '@/components/MarketplaceActions';
+import CommentForm from '@/components/CommentForm';
 
 export default async function MarketplaceItemPage({ params }: { params: any }) {
   const resolvedParams = params instanceof Promise ? await params : params;
   const id = resolvedParams?.id;
 
-  // 1. Fetch Item and Comments
-  const itemRes = await sql`SELECT m.*, u.username FROM marketplace m LEFT JOIN users u ON m.seller_id = u.id WHERE m.id = ${id} LIMIT 1`;
+  // 1. Fetch Item (with seller username)
+  const itemRes = await sql`
+    SELECT m.*, u.username 
+    FROM marketplace m 
+    LEFT JOIN users u ON m.seller_id = u.id 
+    WHERE m.id = ${id} 
+    LIMIT 1
+  `;
   const item = itemRes[0];
 
   if (!item) return notFound();
 
-  const comments = await sql`SELECT * FROM marketplace_comments WHERE item_id = ${id} ORDER BY created_at DESC`;
+  // 2. Fetch Comments
+  const comments = await sql`
+    SELECT * FROM marketplace_comments 
+    WHERE item_id = ${id} 
+    ORDER BY created_at DESC
+  `;
 
   return (
     <div style={{ background: 'var(--paper)', minHeight: '100vh', padding: '60px 20px' }}>
       <div style={{ maxWidth: '900px', margin: '0 auto' }}>
         
-        <a href="/marketplace" style={{ fontFamily: 'IBM Plex Mono', color: 'var(--rust)', textDecoration: 'none', fontWeight: 'bold' }}>← BACK TO MARKETPLACE</a>
+        <a href="/marketplace" style={{ fontFamily: 'IBM Plex Mono', color: 'var(--rust)', textDecoration: 'none', fontWeight: 'bold' }}>
+          ← BACK TO MARKETPLACE
+        </a>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '50px', marginTop: '40px' }}>
           
           {/* LEFT: IMAGE */}
           <div style={{ position: 'relative' }}>
             <div style={{ border: '6px solid var(--ink)', boxShadow: '15px 15px 0px var(--aged)', background: 'white' }}>
-              <img src={item.image_url} style={{ width: '100%', display: 'block', filter: item.is_sold ? 'grayscale(100%)' : 'none' }} />
+              <img 
+                src={item.image_url} 
+                style={{ width: '100%', display: 'block', filter: item.is_sold ? 'grayscale(100%)' : 'none' }} 
+                alt={item.title}
+              />
             </div>
             {item.is_sold && (
-              <div style={{ position: 'absolute', top: '40%', left: '50%', transform: 'translate(-50%, -50%) rotate(-15deg)', background: 'var(--rust)', color: 'white', padding: '20px 40px', fontFamily: 'Bebas Neue', fontSize: '5rem', border: '5px solid var(--ink)', zIndex: 20 }}>
+              <div style={{ 
+                position: 'absolute', top: '40%', left: '50%', transform: 'translate(-50%, -50%) rotate(-15deg)', 
+                background: 'var(--rust)', color: 'white', padding: '20px 40px', 
+                fontFamily: 'Bebas Neue', fontSize: '5rem', border: '5px solid var(--ink)', zIndex: 20 
+              }}>
                 SOLD
               </div>
             )}
@@ -46,31 +69,48 @@ export default async function MarketplaceItemPage({ params }: { params: any }) {
               {item.description}
             </p>
 
-            {/* ACTION BUTTONS (Logic for 'Mark as Sold' would go here) */}
+            {/* ACTION AREA: Contact Seller or Mark as Sold */}
             <div style={{ marginTop: '40px', borderTop: '4px solid var(--ink)', paddingTop: '30px' }}>
-               <a href={`mailto:?subject=Inquiry about ${item.title}`} style={{ background: 'var(--ink)', color: 'white', padding: '15px 30px', textDecoration: 'none', fontFamily: 'Bebas Neue', fontSize: '1.5rem', display: 'inline-block' }}>
-                 CONTACT SELLER
-               </a>
+              {!item.is_sold ? (
+                <>
+                  <a 
+                    href={`mailto:?subject=Inquiry about ${item.title}`} 
+                    style={{ background: 'var(--ink)', color: 'white', padding: '15px 30px', textDecoration: 'none', fontFamily: 'Bebas Neue', fontSize: '1.5rem', display: 'inline-block' }}
+                  >
+                    CONTACT SELLER
+                  </a>
+                  
+                  {/* SELLER ONLY ACTIONS */}
+                  <MarketplaceActions itemId={item.id} sellerName={item.username} />
+                </>
+              ) : (
+                <div style={{ fontFamily: 'Bebas Neue', fontSize: '2rem', color: 'var(--rust)' }}>
+                  THIS ITEM HAS BEEN COLLECTED.
+                </div>
+              )}
             </div>
           </div>
         </div>
 
         {/* COMMENTS SECTION */}
         <section style={{ marginTop: '80px', borderTop: '10px solid var(--ink)', paddingTop: '40px' }}>
-          <h2 style={{ fontFamily: 'Bebas Neue', fontSize: '3rem' }}>QUESTIONS & COMMENTS</h2>
+          <h2 style={{ fontFamily: 'Bebas Neue', fontSize: '3.5rem' }}>QUESTIONS & COMMENTS</h2>
           
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginTop: '30px' }}>
+          {/* POST A COMMENT FORM */}
+          <CommentForm itemId={item.id} />
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginTop: '40px' }}>
             {comments.length > 0 ? (
               comments.map((c: any) => (
-                <div key={c.id} style={{ background: 'white', border: '3px solid var(--ink)', padding: '20px' }}>
+                <div key={c.id} style={{ background: 'white', border: '3px solid var(--ink)', padding: '20px', boxShadow: '5px 5px 0px var(--aged)' }}>
                   <div style={{ fontFamily: 'IBM Plex Mono', fontWeight: 'bold', fontSize: '0.8rem', color: 'var(--rust)', marginBottom: '5px' }}>
                     @{c.username.toUpperCase()} // {new Date(c.created_at).toLocaleDateString()}
                   </div>
-                  <p style={{ margin: 0, fontFamily: 'Barlow' }}>{c.comment}</p>
+                  <p style={{ margin: 0, fontFamily: 'Barlow', fontSize: '1.1rem' }}>{c.comment}</p>
                 </div>
               ))
             ) : (
-              <p style={{ fontFamily: 'IBM Plex Mono', color: '#666' }}>No questions yet. Be the first!</p>
+              <p style={{ fontFamily: 'IBM Plex Mono', color: '#666' }}>No questions yet. Be the first to ask!</p>
             )}
           </div>
         </section>
