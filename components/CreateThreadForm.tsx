@@ -1,7 +1,11 @@
 "use client";
 import { useState } from 'react';
 
-export default function CreateThreadForm({ boardId, boardSlug }: { boardId: number, boardSlug: string }) {
+export default function CreateThreadForm({ boardId, boardSlug, onSuccess }: { 
+  boardId: number, 
+  boardSlug: string,
+  onSuccess?: () => void
+}) {
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
   const [price, setPrice] = useState('');
@@ -10,14 +14,12 @@ export default function CreateThreadForm({ boardId, boardSlug }: { boardId: numb
   const [loading, setLoading] = useState(false);
   const [posted, setPosted] = useState(false);
 
-  // Determine if we are in the Marketplace flow
   const isMarketplace = boardSlug === 'gear-exchange';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
-    // Retrieve username from local storage
     const username = localStorage.getItem('sme_user');
     if (!username) {
       alert("Please log in to post.");
@@ -45,18 +47,9 @@ export default function CreateThreadForm({ boardId, boardSlug }: { boardId: numb
 
       if (res.ok) {
         setPosted(true);
-        
-        // THE HARD REDIRECT FIX:
-        // Instead of router.push, we use window.location.href to force 
-        // a full page reload. This ensures the database and browser are in sync.
-        const targetUrl = data.type === 'gear' 
-          ? `/threads/${data.id}?type=gear` 
-          : `/threads/${data.id}`;
-        
-        // Brief delay to let the database finish writing, then redirect
         setTimeout(() => {
-          window.location.href = targetUrl;
-        }, 800);
+          onSuccess?.(); // closes modal & refreshes board — no page navigation
+        }, 1000);
       } else {
         alert(data.error || "Failed to post. Please try again.");
         setLoading(false);
@@ -78,7 +71,7 @@ export default function CreateThreadForm({ boardId, boardSlug }: { boardId: numb
       }}>
         <h2 style={{ fontFamily: 'Bebas Neue', fontSize: '3.5rem', color: 'var(--rust)', margin: 0 }}>PUBLISHED!</h2>
         <p style={{ fontFamily: 'IBM Plex Mono', fontWeight: 'bold', marginTop: '10px' }}>
-          Redirecting you to your {isMarketplace ? 'advert' : 'thread'}...
+          {isMarketplace ? 'Advert posted!' : 'Thread posted!'} Closing...
         </p>
       </div>
     );
@@ -108,7 +101,7 @@ export default function CreateThreadForm({ boardId, boardSlug }: { boardId: numb
         />
       </div>
 
-      {/* 2. MARKETPLACE FIELDS (Only visible in Gear Exchange) */}
+      {/* 2. MARKETPLACE FIELDS */}
       {isMarketplace && (
         <div style={{ 
           display: 'grid', 
