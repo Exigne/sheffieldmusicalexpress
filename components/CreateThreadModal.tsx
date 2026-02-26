@@ -8,8 +8,8 @@ export default function CreateThreadModal({ boardId, boardSlug }: { boardId: num
 
   const handleSuccess = () => {
     setOpen(false);
-    // Force a true navigation — bypasses Next.js RSC cache and re-queries the DB
-    window.location.href = window.location.pathname;
+    // Timestamp forces Next.js to make a fresh HTTP request and re-query the DB
+    window.location.href = window.location.pathname + '?t=' + Date.now();
   };
 
   return (
