@@ -54,6 +54,10 @@ export default function Navbar() {
       <div style={{ display: 'flex', gap: '35px', alignItems: 'center', fontFamily: 'IBM Plex Mono', fontSize: '1rem', fontWeight: 'bold' }}>
         <a href="/" style={{ color: 'white', textDecoration: 'none' }}>DASHBOARD</a>
         <a href="/articles" style={{ color: 'white', textDecoration: 'none' }}>ARTICLES</a>
+        
+        {/* 🎸 NEW GIG GUIDE LINK HERE */}
+        <a href="/gigs" style={{ color: 'white', textDecoration: 'none' }}>GIG GUIDE</a>
+
         <a href="/marketplace" style={{ color: 'white', textDecoration: 'none' }}>MARKETPLACE</a>
         
         {user ? (
