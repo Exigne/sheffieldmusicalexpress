@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
 export async function GET(req: Request) {
   try {
     // We are using the public test key, but looking for any event with the keyword "Sheffield"
-    const apiKey = process.env.SKIDDLE_API_KEY || '008f1e60ad66af94dd01bc3b3d1787c8'; 
+    const apiKey = process.env.SKIDDLE_API_KEY || '84f9ff622ae0c4b3ffb7397bb3d83b16'; 
     const url = `https://www.skiddle.com/api/v1/events/search/?api_key=${apiKey}&keyword=Sheffield&limit=10`;
 
     // 1. Fetch data from Skiddle
