@@ -15,18 +15,42 @@ export default async function MarketplacePage() {
     <div style={{ background: 'var(--paper)', minHeight: '100vh', padding: '60px 20px' }}>
       <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
         
-        <header style={{ borderBottom: '12px solid var(--ink)', paddingBottom: '30px', marginBottom: '60px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+        {/* ADDED flexWrap AND gap HERE SO IT STACKS ON PHONES */}
+        <header style={{ 
+          borderBottom: '12px solid var(--ink)', 
+          paddingBottom: '30px', 
+          marginBottom: '60px', 
+          display: 'flex', 
+          flexWrap: 'wrap', 
+          gap: '20px', 
+          justifyContent: 'space-between', 
+          alignItems: 'flex-end' 
+        }}>
           <div>
-            <h1 style={{ fontFamily: 'Bebas Neue', fontSize: '7rem', margin: 0, lineHeight: '0.8' }}>GEAR EXCHANGE</h1>
-            <p style={{ fontFamily: 'IBM Plex Mono', fontWeight: 'bold', color: 'var(--rust)', marginTop: '10px' }}>BUY · SELL · TRADE LOCAL SHEFFIELD KIT</p>
+            {/* ADDED clamp() FONT SIZE HERE */}
+            <h1 style={{ fontFamily: 'Bebas Neue', fontSize: 'clamp(4rem, 12vw, 7rem)', margin: 0, lineHeight: '0.8' }}>
+              GEAR EXCHANGE
+            </h1>
+            <p style={{ fontFamily: 'IBM Plex Mono', fontWeight: 'bold', color: 'var(--rust)', marginTop: '10px' }}>
+              BUY · SELL · TRADE LOCAL SHEFFIELD KIT
+            </p>
           </div>
-          <a href="/marketplace/post" style={{ background: 'var(--ink)', color: 'white', padding: '15px 25px', fontFamily: 'Bebas Neue', fontSize: '1.5rem', textDecoration: 'none', boxShadow: '8px 8px 0px var(--rust)' }}>
+          <a href="/marketplace/post" style={{ 
+            background: 'var(--ink)', 
+            color: 'white', 
+            padding: '15px 25px', 
+            fontFamily: 'Bebas Neue', 
+            fontSize: '1.5rem', 
+            textDecoration: 'none', 
+            boxShadow: '8px 8px 0px var(--rust)',
+            whiteSpace: 'nowrap' // Keeps the button text on one line
+          }}>
             + POST GEAR
           </a>
         </header>
 
         {items.length > 0 ? (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '40px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '40px' }}>
             {items.map((item) => (
               <a href={`/marketplace/${item.id}`} key={item.id} style={{ textDecoration: 'none', color: 'inherit', position: 'relative' }}>
                 <div style={{ background: 'white', border: '4px solid var(--ink)', boxShadow: '10px 10px 0px var(--aged)', overflow: 'hidden' }}>
