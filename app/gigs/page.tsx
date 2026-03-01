@@ -17,7 +17,8 @@ export default async function GigGuidePage() {
         
         {/* HEAVY HEADER */}
         <header style={{ borderBottom: '12px solid var(--ink)', paddingBottom: '20px', marginBottom: '60px' }}>
-          <h1 style={{ fontFamily: 'Bebas Neue', fontSize: '6rem', margin: 0, lineHeight: '0.8', color: 'var(--ink)' }}>
+          {/* NOTICE THE clamp() FONT SIZE HERE */}
+          <h1 style={{ fontFamily: 'Bebas Neue', fontSize: 'clamp(4rem, 10vw, 6rem)', margin: 0, lineHeight: '0.8', color: 'var(--ink)' }}>
             GIG GUIDE
           </h1>
           <p style={{ fontFamily: 'IBM Plex Mono', fontWeight: 'bold', color: 'var(--rust)', marginTop: '10px', fontSize: '1.2rem' }}>
@@ -42,6 +43,7 @@ export default async function GigGuidePage() {
               return (
                 <div 
                   key={gig.id} 
+                  className="mobile-gig-card"
                   style={{ 
                     display: 'flex', 
                     flexDirection: 'row', 
@@ -53,7 +55,7 @@ export default async function GigGuidePage() {
                   }}
                 >
                   {/* DATE BLOCK (Left side) */}
-                  <div style={{ 
+                  <div className="mobile-date-block" style={{ 
                     background: 'var(--rust)', 
                     color: 'white', 
                     padding: '20px', 
@@ -74,7 +76,8 @@ export default async function GigGuidePage() {
                     <div style={{ fontFamily: 'IBM Plex Mono', fontWeight: 'bold', color: 'var(--rust)', marginBottom: '5px', fontSize: '0.9rem' }}>
                       📍 {gig.venue.toUpperCase()}
                     </div>
-                    <h2 style={{ fontFamily: 'Bebas Neue', fontSize: '3.5rem', margin: '0 0 10px 0', lineHeight: '1', color: 'var(--ink)' }}>
+                    {/* NOTICE THE clamp() FONT SIZE HERE */}
+                    <h2 style={{ fontFamily: 'Bebas Neue', fontSize: 'clamp(2.5rem, 6vw, 3.5rem)', margin: '0 0 10px 0', lineHeight: '1', color: 'var(--ink)' }}>
                       {gig.title}
                     </h2>
                     <p style={{ fontFamily: 'Barlow', fontSize: '1.1rem', color: '#444', margin: '0 0 15px 0', maxWidth: '600px', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
@@ -86,7 +89,7 @@ export default async function GigGuidePage() {
                   </div>
 
                   {/* ACTION BLOCK (Right side) */}
-                  <div style={{ 
+                  <div className="mobile-action-block" style={{ 
                     padding: '25px', 
                     borderLeft: '6px solid var(--ink)', 
                     display: 'flex', 
