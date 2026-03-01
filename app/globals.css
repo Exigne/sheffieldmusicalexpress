@@ -492,6 +492,16 @@ body {
   .post-card { grid-template-columns: 1fr; }
   .post-author { border-right: none; border-bottom: 1px solid var(--aged); flex-direction: row; }
 
+  /* Article mobile layout fix */
+  .mobile-article-card {
+    grid-template-columns: 1fr !important; /* Forces the image to sit ON TOP of the text */
+    padding: 15px !important; /* Slightly tighter padding for phones */
+  }
+
+  .mobile-article-image {
+    height: 180px !important; /* Makes the image slightly less tall on mobile */
+  }
+
   /* 📱 NEW MOBILE-ONLY OVERRIDES */
   .mobile-nav {
     flex-direction: column !important;
