@@ -38,7 +38,6 @@ export default function InboxPage() {
       });
   }, [router]);
 
-  // 💡 THIS IS THE UPDATED USE-EFFECT
   useEffect(() => {
     if (!user || !activeContact) return;
     
@@ -103,13 +102,15 @@ export default function InboxPage() {
         
         {/* HEAVY BRUTALIST HEADER */}
         <header style={{ borderBottom: '12px solid var(--ink)', paddingBottom: '20px', marginBottom: '40px' }}>
-          <h1 style={{ fontFamily: 'Bebas Neue', fontSize: '6rem', margin: 0, lineHeight: '0.8' }}>PRIVATE INBOX</h1>
+          {/* ADDED clamp() HERE */}
+          <h1 style={{ fontFamily: 'Bebas Neue', fontSize: 'clamp(4rem, 12vw, 6rem)', margin: 0, lineHeight: '0.8' }}>PRIVATE INBOX</h1>
           <p style={{ fontFamily: 'IBM Plex Mono', fontWeight: 'bold', color: 'var(--rust)', marginTop: '10px' }}>
             GEAR INQUIRIES & DIRECT MESSAGES
           </p>
         </header>
 
-        <div style={{ 
+        {/* ADDED mobile-inbox-grid CLASS HERE */}
+        <div className="mobile-inbox-grid" style={{ 
           display: 'grid', 
           gridTemplateColumns: '300px 1fr', 
           background: 'white', 
@@ -118,15 +119,15 @@ export default function InboxPage() {
           minHeight: '70vh'
         }}>
           
-          {/* SIDEBAR: CONTACTS */}
-          <div style={{ borderRight: '6px solid var(--ink)', display: 'flex', flexDirection: 'column', background: '#f9f9f9' }}>
+          {/* SIDEBAR: CONTACTS - Added mobile-inbox-sidebar class */}
+          <div className="mobile-inbox-sidebar" style={{ borderRight: '6px solid var(--ink)', display: 'flex', flexDirection: 'column', background: '#f9f9f9' }}>
             <div style={{ padding: '20px', borderBottom: '3px solid var(--ink)' }}>
               <form onSubmit={(e) => { e.preventDefault(); if(newContactName) setActiveContact(newContactName); setNewContactName(""); }} style={{ display: 'flex', gap: '5px' }}>
                 <input 
                   placeholder="NEW CHAT..." 
                   value={newContactName}
                   onChange={e => setNewContactName(e.target.value)}
-                  style={{ flexGrow: 1, padding: '10px', border: '2px solid var(--ink)', fontFamily: 'IBM Plex Mono', fontSize: '0.8rem' }}
+                  style={{ flexGrow: 1, padding: '10px', border: '2px solid var(--ink)', fontFamily: 'IBM Plex Mono', fontSize: '0.8rem', minWidth: 0 }}
                 />
                 <button style={{ background: 'var(--ink)', color: 'white', border: 'none', padding: '0 15px', fontFamily: 'Bebas Neue' }}>GO</button>
               </form>
@@ -189,20 +190,21 @@ export default function InboxPage() {
                   <div ref={messagesEndRef} />
                 </div>
 
-                <form onSubmit={handleSendMessage} style={{ padding: '20px', borderTop: '3px solid var(--ink)', background: 'white', display: 'flex', gap: '15px' }}>
+                {/* ADDED flexWrap: 'wrap' to the form to handle tight spaces gracefully */}
+                <form onSubmit={handleSendMessage} style={{ padding: '20px', borderTop: '3px solid var(--ink)', background: 'white', display: 'flex', flexWrap: 'wrap', gap: '15px' }}>
                   <input 
                     value={newMessage}
                     onChange={e => setNewMessage(e.target.value)}
                     placeholder="WRITE MESSAGE..."
-                    style={{ flexGrow: 1, padding: '15px', border: '3px solid var(--ink)', fontFamily: 'Barlow', fontSize: '1.1rem' }}
+                    style={{ flexGrow: 1, padding: '15px', border: '3px solid var(--ink)', fontFamily: 'Barlow', fontSize: '1.1rem', minWidth: '150px' }}
                   />
-                  <button style={{ background: 'var(--rust)', color: 'white', border: 'none', padding: '0 40px', fontFamily: 'Bebas Neue', fontSize: '1.5rem', cursor: 'pointer' }}>SEND</button>
+                  <button style={{ background: 'var(--rust)', color: 'white', border: 'none', padding: '15px 30px', fontFamily: 'Bebas Neue', fontSize: '1.5rem', cursor: 'pointer', flexGrow: 1, flexBasis: '100px' }}>SEND</button>
                 </form>
               </>
             ) : (
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexGrow: 1, flexDirection: 'column', opacity: 0.3 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexGrow: 1, flexDirection: 'column', opacity: 0.3, padding: '40px' }}>
                 <span style={{ fontSize: '5rem' }}>✉️</span>
-                <p style={{ fontFamily: 'Bebas Neue', fontSize: '2rem' }}>SELECT A CONVERSATION</p>
+                <p style={{ fontFamily: 'Bebas Neue', fontSize: '2rem', textAlign: 'center' }}>SELECT A CONVERSATION</p>
               </div>
             )}
           </div>
