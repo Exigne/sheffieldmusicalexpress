@@ -458,6 +458,8 @@ body {
   display: block;
 }
 
+.stat-number.gold { color: var(--gold); }
+
 .stat-label {
   font-family: 'IBM Plex Mono', monospace;
   font-size: 0.6rem;
@@ -492,39 +494,7 @@ body {
   .post-card { grid-template-columns: 1fr; }
   .post-author { border-right: none; border-bottom: 1px solid var(--aged); flex-direction: row; }
 
-  /* Inbox mobile layout fix */
-  .mobile-inbox-grid {
-    grid-template-columns: 1fr !important;
-  }
-  
-  .mobile-inbox-sidebar {
-    border-right: none !important;
-    border-bottom: 6px solid var(--ink) !important;
-    max-height: 250px; /* Stops the contact list from taking up the whole phone screen */
-    overflow-y: auto;
-  }
-
-  /* Profile mobile layout fix */
-  .mobile-profile-grid {
-    grid-template-columns: 1fr !important;
-  }
-  
-  .mobile-profile-header {
-    flex-direction: column !important;
-    text-align: center !important;
-  }
-
-  /* Article mobile layout fix */
-  .mobile-article-card {
-    grid-template-columns: 1fr !important; /* Forces the image to sit ON TOP of the text */
-    padding: 15px !important; /* Slightly tighter padding for phones */
-  }
-
-  .mobile-article-image {
-    height: 180px !important; /* Makes the image slightly less tall on mobile */
-  }
-
-  /* 📱 NEW MOBILE-ONLY OVERRIDES */
+  /* Navigation mobile layout fix */
   .mobile-nav {
     flex-direction: column !important;
     padding: 15px 10px !important;
@@ -538,6 +508,7 @@ body {
     font-size: 0.9rem !important;
   }
 
+  /* Gig Guide mobile layout fix */
   .mobile-gig-card {
     flex-direction: column !important;
   }
@@ -558,25 +529,53 @@ body {
   /* Dashboard mobile layout fix */
   .mobile-dashboard-grid {
     grid-template-columns: 1fr !important;
+  }
 
-    /* =========================================
-   ✉️ MODAL INBOX MOBILE TOGGLE
-   ========================================= */
-@media (max-width: 768px) {
-  /* Hide sidebar if a chat is active */
+  /* Inbox mobile layout fix */
+  .mobile-inbox-grid {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .mobile-inbox-sidebar {
+    border-right: none !important;
+    border-bottom: 6px solid var(--ink) !important;
+    max-height: 250px; 
+    overflow-y: auto;
+  }
+
+  /* Profile mobile layout fix */
+  .mobile-profile-grid {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .mobile-profile-header {
+    flex-direction: column !important;
+    text-align: center !important;
+  }
+
+  /* Article mobile layout fix */
+  .mobile-article-card {
+    grid-template-columns: 1fr !important;
+    padding: 15px !important;
+  }
+
+  .mobile-article-image {
+    height: 180px !important;
+  }
+
+  /* Modal Inbox Toggles */
   .modal-sidebar.active-chat { display: none !important; }
-  /* Hide chat window if NO chat is active */
   .modal-chat.inactive-chat { display: none !important; }
   
-  /* Make sidebar take full width when visible */
-  .modal-sidebar { width: 100% !important; border-right: none !important; flex: 1 1 100% !important; }
+  .modal-sidebar { 
+    width: 100% !important; 
+    border-right: none !important; 
+    flex: 1 1 100% !important; 
+  }
   
-  /* Show the back button on mobile */
   .mobile-back-btn { display: inline-block !important; }
 }
 
 @media (min-width: 769px) {
-  /* Hide the back button on desktop */
   .mobile-back-btn { display: none !important; }
-  }
 }
