@@ -558,5 +558,25 @@ body {
   /* Dashboard mobile layout fix */
   .mobile-dashboard-grid {
     grid-template-columns: 1fr !important;
+
+    /* =========================================
+   ✉️ MODAL INBOX MOBILE TOGGLE
+   ========================================= */
+@media (max-width: 768px) {
+  /* Hide sidebar if a chat is active */
+  .modal-sidebar.active-chat { display: none !important; }
+  /* Hide chat window if NO chat is active */
+  .modal-chat.inactive-chat { display: none !important; }
+  
+  /* Make sidebar take full width when visible */
+  .modal-sidebar { width: 100% !important; border-right: none !important; flex: 1 1 100% !important; }
+  
+  /* Show the back button on mobile */
+  .mobile-back-btn { display: inline-block !important; }
+}
+
+@media (min-width: 769px) {
+  /* Hide the back button on desktop */
+  .mobile-back-btn { display: none !important; }
   }
 }
