@@ -88,21 +88,30 @@ export default function InboxPopOut() {
 
   return (
     <Modal>
-      <div style={{ padding: '0', height: '70vh', display: 'flex', flexDirection: 'column' }}>
+      {/* Increased the modal height slightly for mobile breathing room */}
+      <div style={{ padding: '0', height: '75vh', display: 'flex', flexDirection: 'column' }}>
         
         {/* Header */}
         <div style={{ padding: '15px 20px', borderBottom: '2px solid var(--rust)', background: 'var(--paper-dark)' }}>
           <h2 style={{ fontFamily: 'Playfair Display', fontSize: '1.8rem', margin: 0 }}>Private Inbox</h2>
         </div>
 
-        {/* Layout */}
-        <div style={{ display: 'grid', gridTemplateColumns: '200px 1fr', flexGrow: 1, overflow: 'hidden' }}>
+        {/* FLUID LAYOUT CONTAINER (Replaced Grid with FlexWrap) */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', flexGrow: 1, overflow: 'hidden' }}>
           
-          {/* Sidebar */}
-          <div style={{ borderRight: '1px solid var(--aged)', display: 'flex', flexDirection: 'column', background: 'var(--paper)' }}>
+          {/* SIDEBAR */}
+          <div style={{ 
+            flex: '1 1 150px', /* Allow it to shrink to 150px before wrapping */
+            borderRight: '1px solid var(--aged)', 
+            borderBottom: '1px solid var(--aged)', /* For when it stacks */
+            display: 'flex', 
+            flexDirection: 'column', 
+            background: 'var(--paper)',
+            maxHeight: '35vh' /* Prevents contacts from eating the whole modal when stacked */
+          }}>
             <div style={{ padding: '10px', borderBottom: '1px solid var(--aged)', background: '#fdfdfc' }}>
               <form onSubmit={handleStartNewChat} style={{ display: 'flex', gap: '5px' }}>
-                <input type="text" placeholder="Username..." className="form-input" style={{ padding: '6px', fontSize: '0.8rem' }} value={newContactName} onChange={(e) => setNewContactName(e.target.value)} />
+                <input type="text" placeholder="Username..." className="form-input" style={{ flexGrow: 1, padding: '6px', fontSize: '0.8rem', minWidth: 0 }} value={newContactName} onChange={(e) => setNewContactName(e.target.value)} />
                 <button type="submit" className="btn-submit" style={{ padding: '6px', fontSize: '0.8rem' }}>Chat</button>
               </form>
             </div>
@@ -115,19 +124,37 @@ export default function InboxPopOut() {
             </div>
           </div>
 
-          {/* Chat Area */}
-          <div style={{ display: 'flex', flexDirection: 'column', background: '#fdfdfc' }}>
+          {/* CHAT AREA */}
+          <div style={{ 
+            flex: '2 1 250px', /* Demands more space, triggers wrap if space is less than 250px */
+            display: 'flex', 
+            flexDirection: 'column', 
+            background: '#fdfdfc',
+            minWidth: 0, /* Prevents blowout */
+            height: '100%' 
+          }}>
             {activeContact ? (
               <>
                 <div style={{ padding: '12px 20px', borderBottom: '1px solid var(--aged)', background: 'var(--paper)', fontWeight: 'bold' }}>
                   Chatting with <span style={{ color: 'var(--rust)' }}>{activeContact}</span>
                 </div>
+                
                 <div style={{ flexGrow: 1, padding: '15px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   {messages.map(msg => {
                     const isMe = msg.sender_username === user;
                     return (
                       <div key={msg.id} style={{ display: 'flex', justifyContent: isMe ? 'flex-end' : 'flex-start' }}>
-                        <div style={{ maxWidth: '80%', padding: '8px 12px', borderRadius: '12px', fontSize: '0.9rem', background: isMe ? 'var(--ink)' : 'var(--aged)', color: isMe ? 'var(--paper)' : 'var(--ink)', borderBottomRightRadius: isMe ? '2px' : '12px', borderBottomLeftRadius: isMe ? '12px' : '2px' }}>
+                        <div style={{ 
+                          maxWidth: '90%', 
+                          padding: '8px 12px', 
+                          borderRadius: '12px', 
+                          fontSize: '0.9rem', 
+                          background: isMe ? 'var(--ink)' : 'var(--aged)', 
+                          color: isMe ? 'var(--paper)' : 'var(--ink)', 
+                          borderBottomRightRadius: isMe ? '2px' : '12px', 
+                          borderBottomLeftRadius: isMe ? '12px' : '2px',
+                          wordBreak: 'break-word' /* Crucial for small screens */
+                        }}>
                           {msg.content}
                         </div>
                       </div>
@@ -135,15 +162,27 @@ export default function InboxPopOut() {
                   })}
                   <div ref={messagesEndRef} />
                 </div>
+                
+                {/* FLUID FORM INPUT */}
                 <div style={{ padding: '10px', borderTop: '1px solid var(--aged)', background: 'var(--paper)' }}>
-                  <form onSubmit={handleSendMessage} style={{ display: 'flex', gap: '10px' }}>
-                    <input type="text" className="form-input" placeholder="Type a message..." value={newMessage} onChange={(e) => setNewMessage(e.target.value)} style={{ flexGrow: 1 }} autoComplete="off" />
-                    <button type="submit" className="btn-submit" disabled={!newMessage.trim()}>Send</button>
+                  <form onSubmit={handleSendMessage} style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
+                    <input 
+                      type="text" 
+                      className="form-input" 
+                      placeholder="Type a message..." 
+                      value={newMessage} 
+                      onChange={(e) => setNewMessage(e.target.value)} 
+                      style={{ flex: '1 1 120px', minWidth: 0 }} 
+                      autoComplete="off" 
+                    />
+                    <button type="submit" className="btn-submit" disabled={!newMessage.trim()} style={{ flex: '0 1 auto' }}>Send</button>
                   </form>
                 </div>
               </>
             ) : (
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#999' }}>Select a conversation to begin.</div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#999', padding: '20px', textAlign: 'center' }}>
+                Select a conversation to begin.
+              </div>
             )}
           </div>
         </div>
