@@ -32,7 +32,8 @@ export default async function ArticlesPage() {
         
         {/* HEADER */}
         <header style={{ borderBottom: '12px solid var(--ink)', paddingBottom: '30px', marginBottom: '60px' }}>
-          <h1 style={{ fontFamily: 'Bebas Neue', fontSize: '8rem', margin: 0, lineHeight: '0.8', color: 'var(--ink)' }}>
+          {/* NOTICE THE clamp() FONT SIZE HERE */}
+          <h1 style={{ fontFamily: 'Bebas Neue', fontSize: 'clamp(4rem, 15vw, 8rem)', margin: 0, lineHeight: '0.8', color: 'var(--ink)' }}>
             SME ARTICLES
           </h1>
           <p style={{ fontSize: '1.2rem', fontFamily: 'IBM Plex Mono', fontWeight: 'bold', color: 'var(--rust)', marginTop: '10px' }}>
@@ -40,7 +41,7 @@ export default async function ArticlesPage() {
           </p>
         </header>
 
-        {/* ERROR DIAGNOSTIC (Only shows if BOTH queries fail) */}
+        {/* ERROR DIAGNOSTIC */}
         {dbError && (
           <div style={{ background: 'var(--rust)', color: 'white', padding: '20px', border: '4px solid var(--ink)', marginBottom: '30px' }}>
             <p style={{ fontWeight: 'bold' }}>DATABASE ERROR: {dbError}</p>
@@ -52,17 +53,20 @@ export default async function ArticlesPage() {
           {articles.length > 0 ? (
             articles.map((article) => (
               <a key={article.id} href={`/articles/${article.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                <div style={{ 
-                  display: 'grid', 
-                  gridTemplateColumns: article.image_url ? '300px 1fr' : '1fr', 
-                  gap: '30px',
-                  padding: '30px',
-                  background: 'white',
-                  border: '4px solid var(--ink)',
-                  boxShadow: '10px 10px 0px var(--aged)',
-                }}>
+                <div 
+                  className="mobile-article-card" /* ADDED THIS CLASS */
+                  style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: article.image_url ? '300px 1fr' : '1fr', 
+                    gap: '30px',
+                    padding: '30px',
+                    background: 'white',
+                    border: '4px solid var(--ink)',
+                    boxShadow: '10px 10px 0px var(--aged)',
+                  }}>
+                  
                   {article.image_url && (
-                    <div style={{ height: '220px', background: '#111', overflow: 'hidden', border: '2px solid var(--ink)' }}>
+                    <div className="mobile-article-image" style={{ height: '220px', background: '#111', overflow: 'hidden', border: '2px solid var(--ink)' }}>
                       <img src={article.image_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="" />
                     </div>
                   )}
@@ -72,7 +76,8 @@ export default async function ArticlesPage() {
                       {article.category?.toUpperCase() || 'NEWS'} // {new Date(article.created_at).toLocaleDateString()}
                     </div>
                     
-                    <h2 style={{ fontFamily: 'Bebas Neue', fontSize: '3.5rem', margin: '0 0 15px 0', lineHeight: '0.9' }}>
+                    {/* ADDED clamp() TO ARTICLE TITLE */}
+                    <h2 style={{ fontFamily: 'Bebas Neue', fontSize: 'clamp(2.5rem, 8vw, 3.5rem)', margin: '0 0 15px 0', lineHeight: '0.9' }}>
                       {article.title}
                     </h2>
                     
