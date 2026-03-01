@@ -522,4 +522,9 @@ body {
     border-left: none !important;
     border-top: 6px solid var(--ink) !important;
   }
+
+  /* Dashboard mobile layout fix */
+  .mobile-dashboard-grid {
+    grid-template-columns: 1fr !important;
+  }
 }
