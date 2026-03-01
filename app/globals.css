@@ -491,4 +491,35 @@ body {
   .masthead-top { flex-direction: column; gap: 4px; text-align: center; }
   .post-card { grid-template-columns: 1fr; }
   .post-author { border-right: none; border-bottom: 1px solid var(--aged); flex-direction: row; }
+
+  /* 📱 NEW MOBILE-ONLY OVERRIDES */
+  .mobile-nav {
+    flex-direction: column !important;
+    padding: 15px 10px !important;
+    gap: 15px !important;
+  }
+  
+  .mobile-nav-links {
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    gap: 15px !important;
+    font-size: 0.9rem !important;
+  }
+
+  .mobile-gig-card {
+    flex-direction: column !important;
+  }
+
+  .mobile-date-block {
+    width: 100% !important;
+    border-right: none !important;
+    border-bottom: 6px solid var(--ink) !important;
+    padding: 15px !important;
+  }
+
+  .mobile-action-block {
+    width: 100% !important;
+    border-left: none !important;
+    border-top: 6px solid var(--ink) !important;
+  }
 }
