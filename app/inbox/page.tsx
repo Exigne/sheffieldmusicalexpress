@@ -102,25 +102,33 @@ export default function InboxPage() {
         
         {/* HEAVY BRUTALIST HEADER */}
         <header style={{ borderBottom: '12px solid var(--ink)', paddingBottom: '20px', marginBottom: '40px' }}>
-          {/* ADDED clamp() HERE */}
           <h1 style={{ fontFamily: 'Bebas Neue', fontSize: 'clamp(4rem, 12vw, 6rem)', margin: 0, lineHeight: '0.8' }}>PRIVATE INBOX</h1>
           <p style={{ fontFamily: 'IBM Plex Mono', fontWeight: 'bold', color: 'var(--rust)', marginTop: '10px' }}>
             GEAR INQUIRIES & DIRECT MESSAGES
           </p>
         </header>
 
-        {/* ADDED mobile-inbox-grid CLASS HERE */}
-        <div className="mobile-inbox-grid" style={{ 
-          display: 'grid', 
-          gridTemplateColumns: '300px 1fr', 
+        {/* THE FLUID INBOX CONTAINER */}
+        <div style={{ 
+          display: 'flex', 
+          flexWrap: 'wrap', /* This is the magic word that makes it stack on mobile */
           background: 'white', 
           border: '6px solid var(--ink)', 
           boxShadow: '15px 15px 0px var(--aged)',
           minHeight: '70vh'
         }}>
           
-          {/* SIDEBAR: CONTACTS - Added mobile-inbox-sidebar class */}
-          <div className="mobile-inbox-sidebar" style={{ borderRight: '6px solid var(--ink)', display: 'flex', flexDirection: 'column', background: '#f9f9f9' }}>
+          {/* SIDEBAR: CONTACTS */}
+          <div style={{ 
+            flex: '1 1 250px', /* Take up 1 part of space, but never shrink below 250px */
+            borderRight: '6px solid var(--ink)', 
+            borderBottom: '6px solid var(--ink)', /* Adds a border when stacked on mobile */
+            display: 'flex', 
+            flexDirection: 'column', 
+            background: '#f9f9f9',
+            maxHeight: '300px', /* Keeps the contacts from taking over the whole phone screen */
+            overflowY: 'auto'
+          }}>
             <div style={{ padding: '20px', borderBottom: '3px solid var(--ink)' }}>
               <form onSubmit={(e) => { e.preventDefault(); if(newContactName) setActiveContact(newContactName); setNewContactName(""); }} style={{ display: 'flex', gap: '5px' }}>
                 <input 
@@ -133,7 +141,7 @@ export default function InboxPage() {
               </form>
             </div>
 
-            <div style={{ overflowY: 'auto' }}>
+            <div>
               {contacts.map(contact => (
                 <div 
                   key={contact} 
@@ -156,7 +164,12 @@ export default function InboxPage() {
           </div>
 
           {/* CHAT WINDOW */}
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <div style={{ 
+            flex: '2 1 300px', /* Take up 2 parts of space, never shrink below 300px */
+            display: 'flex', 
+            flexDirection: 'column',
+            minWidth: 0 /* Prevents flexbox from blowing out the width */
+          }}>
             {activeContact ? (
               <>
                 <div style={{ padding: '15px 25px', borderBottom: '3px solid var(--ink)', background: 'white' }}>
@@ -164,11 +177,11 @@ export default function InboxPage() {
                   <span style={{ fontFamily: 'Bebas Neue', fontSize: '2rem' }}>{activeContact.toUpperCase()}</span>
                 </div>
 
-                <div style={{ flexGrow: 1, padding: '30px', overflowY: 'auto', maxHeight: '500px', display: 'flex', flexDirection: 'column', gap: '15px', background: 'var(--paper)' }}>
+                <div style={{ flexGrow: 1, padding: '30px', overflowY: 'auto', maxHeight: '400px', display: 'flex', flexDirection: 'column', gap: '15px', background: 'var(--paper)' }}>
                   {messages.map((msg, i) => {
                     const isMe = msg.sender_username === user;
                     return (
-                      <div key={i} style={{ alignSelf: isMe ? 'flex-end' : 'flex-start', maxWidth: '80%' }}>
+                      <div key={i} style={{ alignSelf: isMe ? 'flex-end' : 'flex-start', maxWidth: '90%' }}>
                         <div style={{ 
                           background: isMe ? 'var(--ink)' : 'white', 
                           color: isMe ? 'white' : 'var(--ink)',
@@ -177,7 +190,8 @@ export default function InboxPage() {
                           boxShadow: isMe ? '4px 4px 0px var(--rust)' : '4px 4px 0px var(--aged)',
                           fontFamily: 'Barlow',
                           fontSize: '1.1rem',
-                          lineHeight: '1.4'
+                          lineHeight: '1.4',
+                          wordBreak: 'break-word' /* Stops long words from breaking the chat bubble */
                         }}>
                           {msg.content}
                         </div>
@@ -190,15 +204,15 @@ export default function InboxPage() {
                   <div ref={messagesEndRef} />
                 </div>
 
-                {/* ADDED flexWrap: 'wrap' to the form to handle tight spaces gracefully */}
-                <form onSubmit={handleSendMessage} style={{ padding: '20px', borderTop: '3px solid var(--ink)', background: 'white', display: 'flex', flexWrap: 'wrap', gap: '15px' }}>
+                {/* FLUID FORM LAYOUT */}
+                <form onSubmit={handleSendMessage} style={{ padding: '20px', borderTop: '3px solid var(--ink)', background: 'white', display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
                   <input 
                     value={newMessage}
                     onChange={e => setNewMessage(e.target.value)}
                     placeholder="WRITE MESSAGE..."
-                    style={{ flexGrow: 1, padding: '15px', border: '3px solid var(--ink)', fontFamily: 'Barlow', fontSize: '1.1rem', minWidth: '150px' }}
+                    style={{ flex: '1 1 200px', padding: '15px', border: '3px solid var(--ink)', fontFamily: 'Barlow', fontSize: '1.1rem', minWidth: 0 }}
                   />
-                  <button style={{ background: 'var(--rust)', color: 'white', border: 'none', padding: '15px 30px', fontFamily: 'Bebas Neue', fontSize: '1.5rem', cursor: 'pointer', flexGrow: 1, flexBasis: '100px' }}>SEND</button>
+                  <button style={{ flex: '1 1 100px', background: 'var(--rust)', color: 'white', border: 'none', padding: '15px', fontFamily: 'Bebas Neue', fontSize: '1.5rem', cursor: 'pointer' }}>SEND</button>
                 </form>
               </>
             ) : (
@@ -209,6 +223,7 @@ export default function InboxPage() {
             )}
           </div>
         </div>
+
       </div>
     </div>
   );
