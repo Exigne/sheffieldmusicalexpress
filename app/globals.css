@@ -492,6 +492,16 @@ body {
   .post-card { grid-template-columns: 1fr; }
   .post-author { border-right: none; border-bottom: 1px solid var(--aged); flex-direction: row; }
 
+  /* Profile mobile layout fix */
+  .mobile-profile-grid {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .mobile-profile-header {
+    flex-direction: column !important;
+    text-align: center !important;
+  }
+
   /* Article mobile layout fix */
   .mobile-article-card {
     grid-template-columns: 1fr !important; /* Forces the image to sit ON TOP of the text */
