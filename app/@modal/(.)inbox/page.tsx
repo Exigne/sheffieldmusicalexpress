@@ -88,7 +88,6 @@ export default function InboxPopOut() {
 
   return (
     <Modal>
-      {/* Increased the modal height slightly for mobile breathing room */}
       <div style={{ padding: '0', height: '75vh', display: 'flex', flexDirection: 'column' }}>
         
         {/* Header */}
@@ -96,18 +95,16 @@ export default function InboxPopOut() {
           <h2 style={{ fontFamily: 'Playfair Display', fontSize: '1.8rem', margin: 0 }}>Private Inbox</h2>
         </div>
 
-        {/* FLUID LAYOUT CONTAINER (Replaced Grid with FlexWrap) */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', flexGrow: 1, overflow: 'hidden' }}>
+        {/* Standard Flex Container */}
+        <div style={{ display: 'flex', flexGrow: 1, overflow: 'hidden' }}>
           
           {/* SIDEBAR */}
-          <div style={{ 
-            flex: '1 1 150px', /* Allow it to shrink to 150px before wrapping */
+          <div className={`modal-sidebar ${activeContact ? 'active-chat' : ''}`} style={{ 
+            flex: '0 0 200px', 
             borderRight: '1px solid var(--aged)', 
-            borderBottom: '1px solid var(--aged)', /* For when it stacks */
             display: 'flex', 
             flexDirection: 'column', 
-            background: 'var(--paper)',
-            maxHeight: '35vh' /* Prevents contacts from eating the whole modal when stacked */
+            background: 'var(--paper)'
           }}>
             <div style={{ padding: '10px', borderBottom: '1px solid var(--aged)', background: '#fdfdfc' }}>
               <form onSubmit={handleStartNewChat} style={{ display: 'flex', gap: '5px' }}>
@@ -125,18 +122,27 @@ export default function InboxPopOut() {
           </div>
 
           {/* CHAT AREA */}
-          <div style={{ 
-            flex: '2 1 250px', /* Demands more space, triggers wrap if space is less than 250px */
+          <div className={`modal-chat ${!activeContact ? 'inactive-chat' : ''}`} style={{ 
+            flexGrow: 1, 
             display: 'flex', 
             flexDirection: 'column', 
             background: '#fdfdfc',
-            minWidth: 0, /* Prevents blowout */
-            height: '100%' 
+            minWidth: 0
           }}>
-            {activeContact ? (
+            {activeContact && (
               <>
-                <div style={{ padding: '12px 20px', borderBottom: '1px solid var(--aged)', background: 'var(--paper)', fontWeight: 'bold' }}>
-                  Chatting with <span style={{ color: 'var(--rust)' }}>{activeContact}</span>
+                <div style={{ padding: '12px 20px', borderBottom: '1px solid var(--aged)', background: 'var(--paper)', display: 'flex', alignItems: 'center' }}>
+                  {/* NEW MOBILE BACK BUTTON */}
+                  <button 
+                    className="mobile-back-btn" 
+                    onClick={() => setActiveContact(null)} 
+                    style={{ background: 'var(--ink)', color: 'white', border: 'none', padding: '4px 10px', fontFamily: 'IBM Plex Mono', fontSize: '0.8rem', marginRight: '15px', cursor: 'pointer' }}
+                  >
+                    ← BACK
+                  </button>
+                  <div style={{ fontWeight: 'bold' }}>
+                    Chatting with <span style={{ color: 'var(--rust)' }}>{activeContact}</span>
+                  </div>
                 </div>
                 
                 <div style={{ flexGrow: 1, padding: '15px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -153,7 +159,7 @@ export default function InboxPopOut() {
                           color: isMe ? 'var(--paper)' : 'var(--ink)', 
                           borderBottomRightRadius: isMe ? '2px' : '12px', 
                           borderBottomLeftRadius: isMe ? '12px' : '2px',
-                          wordBreak: 'break-word' /* Crucial for small screens */
+                          wordBreak: 'break-word' 
                         }}>
                           {msg.content}
                         </div>
@@ -163,26 +169,21 @@ export default function InboxPopOut() {
                   <div ref={messagesEndRef} />
                 </div>
                 
-                {/* FLUID FORM INPUT */}
                 <div style={{ padding: '10px', borderTop: '1px solid var(--aged)', background: 'var(--paper)' }}>
-                  <form onSubmit={handleSendMessage} style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
+                  <form onSubmit={handleSendMessage} style={{ display: 'flex', gap: '10px' }}>
                     <input 
                       type="text" 
                       className="form-input" 
                       placeholder="Type a message..." 
                       value={newMessage} 
                       onChange={(e) => setNewMessage(e.target.value)} 
-                      style={{ flex: '1 1 120px', minWidth: 0 }} 
+                      style={{ flexGrow: 1, minWidth: 0 }} 
                       autoComplete="off" 
                     />
-                    <button type="submit" className="btn-submit" disabled={!newMessage.trim()} style={{ flex: '0 1 auto' }}>Send</button>
+                    <button type="submit" className="btn-submit" disabled={!newMessage.trim()}>Send</button>
                   </form>
                 </div>
               </>
-            ) : (
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#999', padding: '20px', textAlign: 'center' }}>
-                Select a conversation to begin.
-              </div>
             )}
           </div>
         </div>
