@@ -70,11 +70,12 @@ export default async function UserProfilePage({ params }: { params: Promise<{ us
         </nav>
 
         {/* PROFILE HEADER WITH NEW MESSAGE BUTTON */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '20px', background: 'var(--paper)', border: '1px solid var(--ink)', padding: '30px', marginBottom: '40px', borderBottom: '4px solid var(--rust)' }}>
+        {/* Added mobile-profile-header class and flexWrap: 'wrap' */}
+        <div className="mobile-profile-header" style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '20px', background: 'var(--paper)', border: '1px solid var(--ink)', padding: '30px', marginBottom: '40px', borderBottom: '4px solid var(--rust)' }}>
           <div style={{ width: '80px', height: '80px', background: 'var(--ink)', color: 'var(--bright-gold)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', fontWeight: 'bold', fontFamily: 'Playfair Display', flexShrink: 0 }}>
             {user.avatar_initials || user.username.slice(0, 2).toUpperCase()}
           </div>
-          <div style={{ flexGrow: 1 }}>
+          <div style={{ flexGrow: 1, minWidth: '200px' }}>
             <h1 style={{ fontFamily: 'Playfair Display', fontSize: '2.5rem', margin: '0 0 5px 0' }}>{user.username}</h1>
             <div style={{ fontSize: '0.9rem', color: '#666', fontFamily: 'IBM Plex Mono', marginBottom: '10px' }}>
               Member since {new Date(user.created_at).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })}
@@ -86,17 +87,18 @@ export default async function UserProfilePage({ params }: { params: Promise<{ us
           </div>
           
           {/* <-- THE NEW DIRECT MESSAGE BUTTON --> */}
-          <div>
+          <div style={{ flexShrink: 0 }}>
             <Link href={`/inbox?chat=${user.username}`} className="btn-submit" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none', background: 'var(--rust)', color: 'white' }}>
               ✉️ Message
             </Link>
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px' }}>
+        {/* Added mobile-profile-grid class to collapse columns on mobile */}
+        <div className="mobile-profile-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px' }}>
           
           {/* LEFT COLUMN: THREADS STARTED */}
-          <div>
+          <div style={{ width: '100%' }}>
             <h2 className="section-label" style={{ marginBottom: '15px' }}>Threads Started</h2>
             {threads.length === 0 ? (
               <div style={{ padding: '20px', background: 'var(--paper)', border: '1px solid var(--aged)', color: '#666', fontSize: '0.9rem' }}>
@@ -123,7 +125,7 @@ export default async function UserProfilePage({ params }: { params: Promise<{ us
           </div>
 
           {/* RIGHT COLUMN: RECENT REPLIES */}
-          <div>
+          <div style={{ width: '100%' }}>
             <h2 className="section-label" style={{ marginBottom: '15px' }}>Recent Replies</h2>
             {replies.length === 0 ? (
               <div style={{ padding: '20px', background: 'var(--paper)', border: '1px solid var(--aged)', color: '#666', fontSize: '0.9rem' }}>
