@@ -37,7 +37,7 @@ export default function Navbar() {
   };
 
   return (
-    <nav style={{ 
+    <nav className="mobile-nav" style={{ 
       background: 'var(--ink)', 
       color: 'white', 
       padding: '15px 40px', 
@@ -50,8 +50,8 @@ export default function Navbar() {
       zIndex: 1000
     }}>
       
-      {/* NAVIGATION LINKS */}
-      <div style={{ display: 'flex', gap: '35px', alignItems: 'center', fontFamily: 'IBM Plex Mono', fontSize: '1rem', fontWeight: 'bold' }}>
+      {/* NAVIGATION LINKS - Notice the added className here */}
+      <div className="mobile-nav-links" style={{ display: 'flex', gap: '35px', alignItems: 'center', fontFamily: 'IBM Plex Mono', fontSize: '1rem', fontWeight: 'bold' }}>
         <a href="/" style={{ color: 'white', textDecoration: 'none' }}>DASHBOARD</a>
         <a href="/articles" style={{ color: 'white', textDecoration: 'none' }}>ARTICLES</a>
         
