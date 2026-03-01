@@ -9,13 +9,15 @@ export default async function HomePage() {
       <div className="content-area" style={{ maxWidth: '1200px', margin: '0 auto', padding: '40px 20px' }}>
         
         <header style={{ marginBottom: '60px' }}>
-          <h1 style={{ fontFamily: 'Bebas Neue', fontSize: '6rem', lineHeight: '0.8', margin: 0 }}>THE HUB</h1>
+          {/* NOTICE THE clamp() FONT SIZE HERE */}
+          <h1 style={{ fontFamily: 'Bebas Neue', fontSize: 'clamp(4rem, 15vw, 6rem)', lineHeight: '0.8', margin: 0 }}>THE HUB</h1>
           <p style={{ fontFamily: 'IBM Plex Mono', fontWeight: 'bold', fontSize: '1.1rem', color: 'var(--rust)', marginTop: '10px' }}>
             SHEFFIELD'S CENTRAL MUSIC DIRECTORY & COMMUNITY
           </p>
         </header>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr', gap: '50px', alignItems: 'start' }}>
+        {/* NOTICE THE NEW mobile-dashboard-grid CLASS HERE */}
+        <div className="mobile-dashboard-grid" style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr', gap: '50px', alignItems: 'start' }}>
           
           {/* COMMUNITY BOARDS */}
           <div>
@@ -44,7 +46,8 @@ export default async function HomePage() {
               textAlign: 'center',
               border: '2px solid var(--rust)'
             }}>
-              <h2 style={{ fontFamily: 'Bebas Neue', fontSize: '4.5rem', margin: 0, lineHeight: '0.9' }}>SME<br/>ARTICLES</h2>
+              {/* NOTICE THE clamp() FONT SIZE HERE */}
+              <h2 style={{ fontFamily: 'Bebas Neue', fontSize: 'clamp(3.5rem, 12vw, 4.5rem)', margin: 0, lineHeight: '0.9' }}>SME<br/>ARTICLES</h2>
               <div style={{ height: '4px', background: 'var(--rust)', width: '60px', margin: '30px auto' }}></div>
               <p style={{ fontFamily: 'IBM Plex Mono', fontSize: '0.9rem', marginBottom: '40px', color: '#ccc' }}>
                 Interviews, gig reviews, and the latest news from the Sheffield music scene.
