@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 
-// --- SYNTHESIS ENGINE (Generates sounds mathematically, no files needed!) ---
+// --- SYNTHESIS ENGINE ---
 const createAudioContext = () => new (window.AudioContext || (window as any).webkitAudioContext)();
 
 const playKick = (ctx: AudioContext, time: number) => {
@@ -22,7 +22,6 @@ const playSnare = (ctx: AudioContext, time: number) => {
   const osc = ctx.createOscillator();
   const gain = ctx.createGain();
   const filter = ctx.createBiquadFilter();
-  // Noise buffer for the "snap"
   const noiseSize = ctx.sampleRate * 0.5;
   const noiseBuffer = ctx.createBuffer(1, noiseSize, ctx.sampleRate);
   const output = noiseBuffer.getChannelData(0);
@@ -93,17 +92,22 @@ const playPerc = (ctx: AudioContext, time: number) => {
 
 // --- COMPONENT ---
 export default function DrumMachine() {
+  const [user, setUser] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [bpm, setBpm] = useState(120);
   const [currentStep, setCurrentStep] = useState(0);
   
+  // Save/Load State
+  const [beatName, setBeatName] = useState("");
+  const [savedBeats, setSavedBeats] = useState<any[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
+
   // Audio Context Ref
   const audioCtxRef = useRef<AudioContext | null>(null);
   const nextNoteTimeRef = useRef(0);
   const currentStepRef = useRef(0);
   const timerIDRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Default Track Setup
   const [tracks, setTracks] = useState([
     { id: 'kick', name: 'KICK', color: 'var(--rust)', steps: Array(16).fill(false), muted: false },
     { id: 'snare', name: 'SNARE', color: 'var(--ink)', steps: Array(16).fill(false), muted: false },
@@ -111,16 +115,31 @@ export default function DrumMachine() {
     { id: 'perc', name: 'PERC', color: 'var(--steel)', steps: Array(16).fill(false), muted: false }
   ]);
 
-  // Use refs for the scheduler to read latest state without re-rendering loops
   const tracksRef = useRef(tracks);
   useEffect(() => { tracksRef.current = tracks; }, [tracks]);
 
-  // Scheduler Logic (Web Audio API scheduling for tight timing)
-  const scheduleNote = useCallback((stepNumber: number, time: number) => {
-    // Update the visual UI
-    setCurrentStep(stepNumber);
+  // Auth & Fetch Saved Beats
+  useEffect(() => {
+    const loggedInUser = localStorage.getItem('sme_user');
+    setUser(loggedInUser);
+    if (loggedInUser) {
+      fetchUserBeats(loggedInUser);
+    }
+  }, []);
 
-    // Play the sounds
+  const fetchUserBeats = async (username: string) => {
+    try {
+      const res = await fetch(`/api/beats?username=${username}`);
+      const data = await res.json();
+      if (Array.isArray(data)) setSavedBeats(data);
+    } catch (e) {
+      console.error("Failed to load beats");
+    }
+  };
+
+  // Scheduler Logic
+  const scheduleNote = useCallback((stepNumber: number, time: number) => {
+    setCurrentStep(stepNumber);
     if (!audioCtxRef.current) return;
     const ctx = audioCtxRef.current;
     
@@ -141,10 +160,8 @@ export default function DrumMachine() {
 
     while (nextNoteTimeRef.current < audioCtxRef.current.currentTime + scheduleAheadTime) {
       scheduleNote(currentStepRef.current, nextNoteTimeRef.current);
-      
-      // Advance time and step
       const secondsPerBeat = 60.0 / bpm;
-      nextNoteTimeRef.current += 0.25 * secondsPerBeat; // 16th notes
+      nextNoteTimeRef.current += 0.25 * secondsPerBeat;
       currentStepRef.current = (currentStepRef.current + 1) % 16;
     }
     timerIDRef.current = setTimeout(scheduler, lookahead);
@@ -165,14 +182,13 @@ export default function DrumMachine() {
     return () => { if (timerIDRef.current) clearTimeout(timerIDRef.current); };
   }, [isPlaying, scheduler]);
 
-  // Toggle a step on or off
+  // Interactions
   const toggleStep = (trackIndex: number, stepIndex: number) => {
     const newTracks = [...tracks];
     newTracks[trackIndex].steps[stepIndex] = !newTracks[trackIndex].steps[stepIndex];
     setTracks(newTracks);
   };
 
-  // Toggle Mute
   const toggleMute = (trackIndex: number) => {
     const newTracks = [...tracks];
     newTracks[trackIndex].muted = !newTracks[trackIndex].muted;
@@ -183,7 +199,6 @@ export default function DrumMachine() {
     setTracks(tracks.map(t => ({ ...t, steps: Array(16).fill(false) })));
   };
 
-  // A classic house beat to get them started
   const loadPreset = () => {
     setTracks([
       { ...tracks[0], steps: [true, false, false, false, true, false, false, false, true, false, false, false, true, false, false, false] },
@@ -191,6 +206,44 @@ export default function DrumMachine() {
       { ...tracks[2], steps: [false, false, true, false, false, false, true, false, false, false, true, false, false, false, true, false] },
       { ...tracks[3], steps: [false, false, false, false, false, false, false, true, false, true, false, false, false, false, false, false] }
     ]);
+    setBpm(125);
+  };
+
+  // Save / Load Handlers
+  const handleSaveBeat = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user || !beatName.trim()) return;
+    setIsSaving(true);
+
+    try {
+      await fetch('/api/beats', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: user,
+          name: beatName,
+          bpm: bpm,
+          tracks: tracks
+        })
+      });
+      setBeatName("");
+      fetchUserBeats(user); // Refresh the list!
+    } catch (err) {
+      alert("Failed to save beat.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleLoadBeat = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const beatId = e.target.value;
+    if (!beatId) return;
+    
+    const selectedBeat = savedBeats.find(b => b.id.toString() === beatId);
+    if (selectedBeat) {
+      setBpm(selectedBeat.bpm);
+      setTracks(selectedBeat.tracks);
+    }
   };
 
   return (
@@ -208,7 +261,6 @@ export default function DrumMachine() {
             </p>
           </div>
           
-          {/* TRANSPORT CONTROLS */}
           <div style={{ display: 'flex', gap: '15px', alignItems: 'center', background: 'white', padding: '15px', border: '4px solid var(--ink)', boxShadow: '8px 8px 0px var(--aged)' }}>
             <button 
               onClick={() => setIsPlaying(!isPlaying)}
@@ -227,51 +279,72 @@ export default function DrumMachine() {
           </div>
         </header>
 
-        {/* CONTROLS */}
-        <div style={{ display: 'flex', gap: '15px', marginBottom: '30px' }}>
-          <button onClick={loadPreset} className="btn-submit" style={{ fontSize: '1rem', padding: '8px 15px' }}>LOAD PRESET BEAT</button>
-          <button onClick={clearAll} style={{ background: 'white', border: '2px solid var(--ink)', fontFamily: 'Bebas Neue', fontSize: '1.2rem', padding: '8px 15px', cursor: 'pointer' }}>CLEAR GRID</button>
+        {/* CONTROLS & SAVE MODULE */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', marginBottom: '30px', alignItems: 'center', background: 'white', padding: '20px', border: '4px solid var(--ink)' }}>
+          
+          {/* Basic Controls */}
+          <div style={{ display: 'flex', gap: '10px', borderRight: '2px dashed var(--aged)', paddingRight: '20px' }}>
+            <button onClick={loadPreset} className="btn-submit" style={{ fontSize: '1rem', padding: '8px 15px' }}>PRESET</button>
+            <button onClick={clearAll} style={{ background: 'white', border: '2px solid var(--ink)', fontFamily: 'Bebas Neue', fontSize: '1.2rem', padding: '8px 15px', cursor: 'pointer' }}>CLEAR</button>
+          </div>
+
+          {/* User Save/Load Module */}
+          <div style={{ flexGrow: 1, display: 'flex', flexWrap: 'wrap', gap: '15px', alignItems: 'center' }}>
+            {user ? (
+              <>
+                <form onSubmit={handleSaveBeat} style={{ display: 'flex', gap: '5px' }}>
+                  <input 
+                    type="text" 
+                    placeholder="NAME YOUR BEAT..." 
+                    value={beatName} 
+                    onChange={e => setBeatName(e.target.value)}
+                    style={{ padding: '8px', border: '2px solid var(--ink)', fontFamily: 'IBM Plex Mono', fontSize: '0.8rem' }}
+                    required
+                  />
+                  <button type="submit" disabled={isSaving} style={{ background: 'var(--ink)', color: 'white', border: 'none', padding: '0 15px', fontFamily: 'Bebas Neue', cursor: 'pointer' }}>
+                    {isSaving ? '...' : 'SAVE'}
+                  </button>
+                </form>
+
+                {savedBeats.length > 0 && (
+                  <select 
+                    onChange={handleLoadBeat} 
+                    style={{ padding: '8px', border: '2px solid var(--ink)', fontFamily: 'IBM Plex Mono', fontSize: '0.8rem', background: 'var(--paper)', cursor: 'pointer' }}
+                  >
+                    <option value="">-- LOAD SAVED BEAT --</option>
+                    {savedBeats.map(beat => (
+                      <option key={beat.id} value={beat.id}>{beat.name} ({beat.bpm} BPM)</option>
+                    ))}
+                  </select>
+                )}
+              </>
+            ) : (
+              <div style={{ fontFamily: 'IBM Plex Mono', fontSize: '0.8rem', color: 'var(--rust)', fontWeight: 'bold' }}>
+                LOGIN TO SAVE YOUR BEATS
+              </div>
+            )}
+          </div>
         </div>
 
         {/* THE SEQUENCER GRID */}
-        <div style={{ 
-          background: 'white', 
-          border: '6px solid var(--ink)', 
-          boxShadow: '15px 15px 0px var(--aged)', 
-          padding: '20px',
-          overflowX: 'auto' /* Crucial for mobile! Lets users scroll the 16 steps horizontally */
-        }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', minWidth: '800px' /* Forces the grid to stay wide */ }}>
+        <div style={{ background: 'white', border: '6px solid var(--ink)', boxShadow: '15px 15px 0px var(--aged)', padding: '20px', overflowX: 'auto' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', minWidth: '800px' }}>
             
-            {/* PLAYHEAD INDICATOR ROW */}
+            {/* PLAYHEAD */}
             <div style={{ display: 'flex', paddingLeft: '140px', gap: '8px', marginBottom: '10px' }}>
               {Array(16).fill(null).map((_, i) => (
-                <div key={i} style={{ 
-                  flex: 1, height: '10px', 
-                  background: isPlaying && currentStep === i ? 'var(--rust)' : 'transparent',
-                  transition: 'background 0.05s'
-                }} />
+                <div key={i} style={{ flex: 1, height: '10px', background: isPlaying && currentStep === i ? 'var(--rust)' : 'transparent', transition: 'background 0.05s' }} />
               ))}
             </div>
 
             {/* TRACK ROWS */}
             {tracks.map((track, trackIndex) => (
               <div key={track.id} style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
-                
-                {/* TRACK HEADER */}
                 <div style={{ width: '120px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--ink)', color: 'white', padding: '10px', flexShrink: 0 }}>
-                  <span style={{ fontFamily: 'Bebas Neue', fontSize: '1.5rem', letterSpacing: '2px', color: track.muted ? 'var(--muted)' : 'white' }}>
-                    {track.name}
-                  </span>
-                  <button 
-                    onClick={() => toggleMute(trackIndex)}
-                    style={{ background: track.muted ? 'var(--rust)' : 'transparent', color: 'white', border: '1px solid white', fontSize: '0.6rem', padding: '3px 6px', cursor: 'pointer', fontFamily: 'IBM Plex Mono' }}
-                  >
-                    {track.muted ? 'M' : 'ON'}
-                  </button>
+                  <span style={{ fontFamily: 'Bebas Neue', fontSize: '1.5rem', letterSpacing: '2px', color: track.muted ? 'var(--muted)' : 'white' }}>{track.name}</span>
+                  <button onClick={() => toggleMute(trackIndex)} style={{ background: track.muted ? 'var(--rust)' : 'transparent', color: 'white', border: '1px solid white', fontSize: '0.6rem', padding: '3px 6px', cursor: 'pointer', fontFamily: 'IBM Plex Mono' }}>{track.muted ? 'M' : 'ON'}</button>
                 </div>
 
-                {/* 16 STEPS */}
                 <div style={{ display: 'flex', gap: '8px', flexGrow: 1 }}>
                   {track.steps.map((isActive, stepIndex) => {
                     const isCurrent = isPlaying && currentStep === stepIndex;
@@ -279,17 +352,7 @@ export default function DrumMachine() {
                       <button
                         key={stepIndex}
                         onClick={() => toggleStep(trackIndex, stepIndex)}
-                        style={{
-                          flex: 1,
-                          aspectRatio: '1/1.2', /* Rectangular pads like an 808 */
-                          background: isActive ? track.color : 'var(--paper)',
-                          border: `3px solid ${isCurrent ? 'var(--ink)' : 'var(--aged)'}`,
-                          boxShadow: isActive ? `3px 3px 0px var(--ink)` : 'none',
-                          transform: isCurrent ? 'scale(1.05)' : 'scale(1)',
-                          cursor: 'pointer',
-                          transition: 'transform 0.05s, border 0.05s',
-                          opacity: track.muted ? 0.3 : 1
-                        }}
+                        style={{ flex: 1, aspectRatio: '1/1.2', background: isActive ? track.color : 'var(--paper)', border: `3px solid ${isCurrent ? 'var(--ink)' : 'var(--aged)'}`, boxShadow: isActive ? `3px 3px 0px var(--ink)` : 'none', transform: isCurrent ? 'scale(1.05)' : 'scale(1)', cursor: 'pointer', transition: 'transform 0.05s, border 0.05s', opacity: track.muted ? 0.3 : 1 }}
                       />
                     );
                   })}
