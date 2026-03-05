@@ -29,7 +29,7 @@ export default function ContactPage() {
               fontFamily: 'IBM Plex Mono, monospace',
               fontSize: '1.1rem'
             }}>
-              matt@sheffieldmusicexpress.co.uk
+              sheffieldmusicexpress@mail.co.uk
             </div>
             <p style={{ fontSize: '0.8rem', marginTop: '15px', color: 'var(--muted)' }}>
               Please allow 24-48 hours for a response from our volunteer mod team.
